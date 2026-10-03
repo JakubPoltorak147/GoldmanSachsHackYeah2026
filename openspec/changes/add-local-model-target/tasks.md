@@ -1,19 +1,19 @@
 # Tasks
 
-Planning only. Apply approval is **absent**. The user instruction “Create one new OpenSpec change: add-local-model-target” also explicitly says “Do not implement yet.” Before any implementation, review proposal/design/deltas/tasks and record a subsequent explicit approval here with its exact instruction and scope. Artifact readiness is not implementation completion.
+Apply approved on 2026-10-03 by the user instruction: “I explicitly approve this OpenSpec for implementation. Implement exactly the approved proposal/design/specs/tasks.” Scope is these artifacts only, preserving all named enforcement, audit, privacy and echo guarantees. All design non-goals remain excluded; no Ollama installation/model download, archive, push or new change is authorized. Required deterministic verification and fresh correctness/security PASS reviews remain completion gates.
 
 Owner: primary applying agent/developer, responsible for implementation, integration, verification and commits. Dependencies: archived extension surface and deterministic pack at `136f483`; consume without redesign. New adapter/tests/smoke ownership and shared composition/API/dependency/docs hotspots are listed in design.md; serialize shared edits. Do not modify security core, controls, policy/catalog, AGENTS.md or historical fixture JSON. If approved assumptions prove wrong, stop affected work and update artifacts before resuming.
 
 ## 1. Bounded adapter and transport
 
-- [ ] 1.1 Obtain and record explicit apply scope approval before code changes; verify its reference here covers these artifacts and excludes all listed non-goals.
-- [ ] 1.2 Promote existing HTTPX 0.28 dependency from dev-only to runtime and update poetry.lock; verify Poetry dependency consistency and adapter import without an Ollama SDK/server.
-- [ ] 1.3 Add frozen settings/loader in app/control_layer/ollama_target.py with exact design defaults, grammar/ranges and fixed invalid_target_configuration startup errors; add tests/unit/test_ollama_target.py covering accepted overrides, empty/invalid/nonfinite/bool bounds, loopback restrictions and no value/cause leakage; verify targeted unit tests.
-- [ ] 1.4 Implement existing TargetAdapter contract with one non-streaming fixed-model generate POST, invocation-local client/parser buffers, disabled proxies/redirects/retries and explicit connect/read/write/pool timeouts; verify unit tests assert exact approved prompt JSON, fixed model, one call and closed resources on success/failure.
-- [ ] 1.5 Enforce raw response byte cap before JSON parsing, identity encoding, strict completed text/scalar validation and character cap; verify unit tests for exact/over limits, missing/chunked/incorrect length, compressed body rejection, malformed UTF-8/JSON, duplicate keys/constants, invalid shapes/completion, empty text and ignored metadata.
-- [ ] 1.6 Sanitize all client/response errors with existing TargetError and suppressed chaining without content logs; verify prompt/output-bearing exceptions and 3xx/400/404/429/500 responses yield fixed failures with no retry/fallback or captured log leakage.
-- [ ] 1.7 Document adapter configuration, I/O inactivity versus wall-clock timeout, no guaranteed cancellation, loopback/cloud-disabled runtime preparation and uninspected output in README; verify defaults/ranges align with settings tests and no lifecycle/download automation is added.
-- [ ] 1.8 Verify this group's targeted tests and repository lint/format, record passing task-group evidence in docs/worklog.md and commit exactly once with an English Conventional Commit; do not commit partial/failing work.
+- [x] 1.1 Obtain and record explicit apply scope approval before code changes; verify its reference here covers these artifacts and excludes all listed non-goals.
+- [x] 1.2 Promote existing HTTPX 0.28 dependency from dev-only to runtime and update poetry.lock; verify Poetry dependency consistency and adapter import without an Ollama SDK/server.
+- [x] 1.3 Add frozen settings/loader in app/control_layer/ollama_target.py with exact design defaults, grammar/ranges and fixed invalid_target_configuration startup errors; add tests/unit/test_ollama_target.py covering accepted overrides, empty/invalid/nonfinite/bool bounds, loopback restrictions and no value/cause leakage; verify targeted unit tests.
+- [x] 1.4 Implement existing TargetAdapter contract with one non-streaming fixed-model generate POST, invocation-local client/parser buffers, disabled proxies/redirects/retries and explicit connect/read/write/pool timeouts; verify unit tests assert exact approved prompt JSON, fixed model, one call and closed resources on success/failure.
+- [x] 1.5 Enforce raw response byte cap before JSON parsing, identity encoding, strict completed text/scalar validation and character cap; verify unit tests for exact/over limits, missing/chunked/incorrect length, compressed body rejection, malformed UTF-8/JSON, duplicate keys/constants, invalid shapes/completion, empty text and ignored metadata.
+- [x] 1.6 Sanitize all client/response errors with existing TargetError and suppressed chaining without content logs; verify prompt/output-bearing exceptions and 3xx/400/404/429/500 responses yield fixed failures with no retry/fallback or captured log leakage.
+- [x] 1.7 Document adapter configuration, I/O inactivity versus wall-clock timeout, no guaranteed cancellation, loopback/cloud-disabled runtime preparation and uninspected output in README; verify defaults/ranges align with settings tests and no lifecycle/download automation is added.
+- [x] 1.8 Verify this group's targeted tests and repository lint/format, record passing task-group evidence in docs/worklog.md and commit exactly once with an English Conventional Commit; do not commit partial/failing work.
 
 ## 2. Public registration and governed local interaction
 
@@ -38,3 +38,5 @@ Owner: primary applying agent/developer, responsible for implementation, integra
 - [ ] 4.2 Delegate fresh specification/correctness review and fresh security/bypass review to agents that did not implement; require concrete file-referenced findings/reproducers and PASS/FAIL, record evidence in docs/worklog.md and reference it here. Proposal review does not satisfy this implementation gate.
 - [ ] 4.3 Fix confirmed findings only within approved scope, first add reproducing regressions, rerun affected required checks and request fresh independent reviews until both PASS; verify final review evidence references the final code state.
 - [ ] 4.4 Record final verification/review references here and completed evidence in docs/worklog.md; commit this completed integration group exactly once after required PASS. Do not declare complete or archive before these gates. Archiving requires a later user request; never push without explicit instruction.
+
+Group 1 evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-1-bounded-adapter).

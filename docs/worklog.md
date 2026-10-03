@@ -818,3 +818,19 @@ dependency changes.
 move, synchronized current specs and completion/worklog evidence. Subject:
 `chore: archive deterministic security controls`; resolve its hash from the commit
 containing this entry. No push or other feature is included.
+
+### 2026-10-03 — Local model target group 1: bounded adapter
+
+User explicitly approved exact `add-local-model-target` artifacts for apply, with
+no installation/download, architecture redesign, archive or push. Approval scope
+is recorded in tasks.md. Added frozen settings, local-only bounded HTTPX adapter,
+strict response validation and sanitized failures, plus configuration documentation.
+
+Verification: `poetry run pytest tests/unit/test_ollama_target.py -q` — 126 PASS;
+`poetry check` — PASS; adapter import without SDK/server — PASS;
+`poetry run ruff check .` — PASS; `poetry run ruff format --check .` — 36 files PASS;
+`git diff --check` — PASS. No runtime required. PyPI was unreachable both restricted
+and after approved escalation, so existing locked versions/hashes were retained;
+HTTPX, httpcore, certifi and their existing transitive dependencies now belong to
+main, with Poetry's computed content hash and successful consistency check.
+One task-group commit: `feat: add bounded local Ollama adapter`.

@@ -267,3 +267,51 @@ can escape. No Unicode normalization, reconstruction or general jailbreak/supply
 protection is claimed. No findings is not a certificate of safe content. Explicit
 ALLOW may return original sensitive content from echo, but audit/errors never
 include detected values, submitted content, signature literals, spans or raw exceptions.
+
+## Local model adapter configuration
+
+`ollama_target.py` implements the existing synchronous target contract using runtime
+HTTPX 0.28, without an Ollama SDK. Settings are frozen until restart and are outside
+security policy; the policy digest is unchanged.
+
+| Environment variable (`CONTROL_LAYER_OLLAMA_` prefix) | Default | Accepted values |
+| --- | --- | --- |
+| `BASE_URL` | `http://127.0.0.1:11434` | HTTP literal `127.0.0.1` or `[::1]`, explicit port 1–65535, optional trailing slash only |
+| `MODEL` | `qwen2.5:0.5b` | 1–128 ASCII characters, `[a-z0-9][a-z0-9._-]*:[a-z0-9][a-z0-9._-]*`, no `cloud` in tag |
+| `CONNECT_TIMEOUT_SECONDS` | `2` | Finite decimal 0.1–10 |
+| `RESPONSE_TIMEOUT_SECONDS` | `60` | Finite decimal 0.1–120 (read inactivity) |
+| `MAX_RESPONSE_BYTES` | `65536` | Decimal integer 1024–1048576 |
+| `MAX_OUTPUT_CHARACTERS` | `16384` | Decimal integer 1–65536 Unicode scalars |
+
+Empty, malformed or out-of-range settings fail startup with fixed
+`invalid_target_configuration`. URLs cannot contain credentials, hostnames, other
+paths, whitespace, query or fragment. Explicit injected registries bypass this
+loader. No startup network probe, model load, executable check or download occurs.
+
+Each eligible invocation opens and closes its own client and response, sends one
+`POST /api/generate` with only configured `model`, exact approved `prompt` and
+`stream: false`, and returns only completed scalar text. Proxies, redirects and
+retries are disabled. Raw identity-encoded bytes are bounded before strict JSON
+parsing; oversize output is rejected rather than truncated. Runtime absence,
+missing model, timeout, status and parsing failures become sanitized `target_failed`.
+
+Connect/write/pool timeouts use the connection bound; read uses the inactivity
+bound. These are I/O operation limits, not a wall-clock deadline. A peer delivering
+chunks within each timeout may take longer. Client closure does not guarantee
+runtime generation cancellation. Per-call buffers/clients support synchronous
+thread-pool concurrency; model load, hardware and queueing determine latency, which
+can occupy worker threads for seconds or timeout-scale durations.
+
+Operators separately provision a trusted local Ollama daemon and model. Run the
+daemon with `OLLAMA_NO_CLOUD=1 OLLAMA_HOST=127.0.0.1:11434 ollama serve` to disable
+cloud features and bind loopback. Container deployments must publish on loopback;
+remote/container hostnames are unsupported. This application cannot attest or
+control separately administered daemon logging/retention. No installation or model
+lifecycle automation is provided. Runtime templates/context limits may transform
+or truncate inference internally; the submitted prompt field remains exact.
+
+Generated output is untrusted and **not security-inspected**. It may repeat sensitive
+input or contain unsafe text. Input approval does not certify output safety. One
+fixed operator model is a deployment restriction; centralized model authorization,
+semantic controls, budgets, output DLP and reporting remain deferred. Audit evaluation
+duration excludes generation time; eligibility audit does not claim execution success.
