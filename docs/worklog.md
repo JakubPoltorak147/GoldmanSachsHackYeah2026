@@ -1,4 +1,4 @@
-# Worklog
+git# Worklog
 
 Chronological record of completed project work.
 
@@ -290,3 +290,36 @@ verified against Git history:
   `feat: establish immutable policy and decision core`.
 - Group 2: `6d732f565a2057d5460f8263b02f83d18eebc021`,
   `feat: add audit-gated local interaction execution`.
+
+### 2026-10-03 — Document the implemented system and approved assumptions
+
+**OpenSpec change:** `none` (documentation follow-up to the completed foundation).
+
+**Built**
+
+Added `docs/system-summary.md` explaining the implemented request flow, startup
+policy, the three approved assumptions, detector/audit boundaries, and the
+relationship between this foundation and broader product goals. Links point to
+existing implementation and approval records; no requirements or runtime changed.
+
+**Verification**
+
+PASS: inspected the summary against architecture, API, default policy, approved
+change artifacts and recorded worklog evidence. Checked all five HTTP statuses,
+explicit bounded-detector and audit limitations, referenced path existence,
+final newline and absence of trailing whitespace. Staged whitespace checked before
+commit. Product tests were not rerun for this documentation-only task; the summary
+explicitly attributes the 173-test result to prior recorded verification.
+
+**Independent review**
+
+Not required: this is a documentation-only summary outside product implementation,
+with no new behavior, requirements, policy, or enforcement changes.
+
+**Deviations:** None.
+
+**Commit**
+
+`docs: summarize control layer and approved assumptions`
+
+Resolve the hash of the commit containing this entry from Git history.
