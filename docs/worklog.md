@@ -1,5 +1,81 @@
 git# Worklog
 
+### 2026-10-03 — Extension-point task 1.1 baseline verified
+
+**Scope:** The user instructed “To domknijmy krok 1.1”. Completed only the
+pre-change baseline for `generalize-control-layer-extension-points`. Task 1.2
+and runtime implementation have not started. The blocked entry below remains
+historical; this entry supersedes its current baseline status.
+
+**Revision/isolation:** HEAD `97d2c1504b4426450fde5b58e61d4e5a100bbc18`
+(`chore: archive control layer foundation baseline`), branch `main`, unchanged
+through capture. Before and after capture, Git showed no tracked or untracked
+product changes in `app/`, `tests/`, `config/`, `pyproject.toml`, `poetry.lock`,
+`README.md`, `docs/architecture.md`, or `openspec/specs/`. No overlapping product
+changes required isolation. Preserved existing modified `AGENTS.md`,
+`docs/project-context.md`, `docs/worklog.md`, and untracked `docs/collaboration.md`,
+`docs/reference/`, `docs/requirements/`, the summary and approved change directory.
+This step changes only baseline evidence, this worklog, the summary and task 1.1
+tracking. Establish the planned implementation branch/worktree before runtime
+edits; the unchanged product baseline was captured on `main`.
+
+**Environment:** Python 3.12.15, Poetry 2.5.1. Installation from the existing
+lockfile succeeded outside the sandbox with
+`POETRY_CACHE_DIR=/tmp/control-layer-poetry-cache poetry install`. Sandbox
+DNS/network restrictions and an unwritable default cache blocked earlier attempts.
+Outside the sandbox, verbose Poetry logs showed PyPI HTTP 200 followed by
+`PermissionError(13, 'Permission denied')`; `/home/node/.cache` belonged to
+`nobody:nogroup`. Writable cache resolved installation. No dependency updates
+or repository environment configuration changes. HTTP tests/capture also ran
+outside the sandbox; the restricted integration run hung and was interrupted,
+not counted as PASS.
+
+**Required verification:** All eight commands were rerun during capture and
+exited 0. Exact arguments, stdout/stderr, versions, UTC capture time and initial
+Git status are retained in
+[baseline-verification.json](../openspec/changes/generalize-control-layer-extension-points/evidence/baseline-verification.json).
+
+- PASS: `poetry check`.
+- PASS: `poetry run ruff check .`.
+- PASS: `poetry run ruff format --check .` (14 files).
+- PASS: `poetry run pytest tests/unit` (133 passed).
+- PASS: `poetry run pytest tests/integration` (40 passed).
+- PASS: `openspec validate --all --strict` (5 items).
+- PASS: `openspec validate --archived --strict` (1 archive).
+- PASS: `git diff --check` with command-local `-c safe.directory` for the
+  workspace ownership mismatch; no persistent Git configuration changes.
+
+**Compatibility:** Default policy ID `foundation-default`; canonical digest
+`5416596669594e811989eb6cfba7311737e80922f2fb4c2171837038aa427ec4`.
+The verification artifact also includes the SHA-256 of the unchanged policy file.
+[baseline-openapi.json](../openspec/changes/generalize-control-layer-extension-points/evidence/baseline-openapi.json)
+is the full unmodified `create_app().openapi()` document with request/response
+schemas. Finding-code items are currently constrained to `pii.email`; compare
+against this document rather than assume a particular enum representation.
+[baseline-http.json](../openspec/changes/generalize-control-layer-extension-points/evidence/baseline-http.json)
+contains 13 synthetic local cases: no-findings ALLOW, default REDACT, email
+ALLOW/BLOCK using temporary policy copies, invalid/unsupported/malformed input,
+evaluation/audit/target/unexpected failures, 404 and 405. Recorded statuses,
+bodies and target-call counts were asserted. The spy delegates successful calls
+to the real local echo and verifies audit-before-dispatch. Default policy was
+never edited. Only response UUID values are normalized after UUID validation;
+exact forwarded text and null omission are preserved. Failure cases use explicit
+local injection. No external target or commercial service is involved.
+
+**Tracking:** Task 1.1 checked; tasks 1.2–1.16 remain unchecked. Baseline-evidence
+review returned PASS; full refactor correctness/security reviews remain pending
+at task 1.15. No commit: the single task-group commit is
+required only at task 1.16 after the whole group passes. No archive or push.
+
+**Independent baseline review:** Fresh read-only reviewer `baseline_review`
+returned **PASS**, with no findings. Confirmed completeness of all eight command
+records and 13 HTTP examples, exact equality of the complete OpenAPI snapshot,
+canonical policy digest and policy-file hash with the current product, unchanged
+product paths at the recorded HEAD, and coherent 1/16 tracking/preserved edits.
+This reviews task 1.1 evidence only; it does not satisfy the future task 1.15
+implementation correctness/security review gate.
+
+
 Chronological record of completed project work.
 
 This is not a backlog and not a planning document.
@@ -373,3 +449,73 @@ zero active changes, and staged scope/whitespace with no runtime or user edits.
 `chore: archive control layer foundation baseline`
 
 Resolve the hash of the commit containing this entry from Git history.
+
+### 2026-10-03 — Generalize control-layer extension points
+
+**OpenSpec change:** `generalize-control-layer-extension-points`, tasks 1.2–1.16.
+The user authorized resume and instructed “1.1 is done. Start from 1.2. I guarantee
+you it is all ok.” Used the recorded successful baseline; earlier exit-127 results
+remain historical environment failures, not product failures. Implementation branch:
+`change/generalize-control-layer-extension-points`.
+
+**Built**
+
+- Immutable copied control/finding registrations with strict bounded metadata,
+  globally unique codes and stable order; exact immutable target bindings with
+  reserved safe `unresolved` operational identity.
+- Registry-bound startup policy retaining exact evaluator registrations and explicit
+  enablement/mappings. Actual-producer validation and central span redaction preserve
+  foundation semantics. Service retains one target binding through audit/dispatch.
+- Explicit production composition and uniform test registry injection. Production
+  still contains only email and local echo. HTTP finding codes accept validated
+  strings while public requests continue admitting only local echo.
+- README and implemented architecture document contracts, policy rollout obligations,
+  client schema compatibility and future ownership boundaries. Flat modules retained.
+
+**Verification and compatibility**
+
+Baseline at `97d2c1504b4426450fde5b58e61d4e5a100bbc18`: all eight baseline
+commands passed, with 133 unit and 40 integration tests; see the baseline entry
+and committed change evidence. Default policy digest remains
+`5416596669594e811989eb6cfba7311737e80922f2fb4c2171837038aa427ec4`, and policy
+file SHA-256 remains
+`9dd0abf869bb4bb7733c63406344807c8f22ab7d20a87bf368ebae5dae0e2995`.
+
+Final PASS: `poetry check`, `poetry run ruff check .`,
+`poetry run ruff format --check .`, `poetry run pytest tests/unit` (237 tests),
+`poetry run pytest tests/integration` (63 tests),
+`openspec validate generalize-control-layer-extension-points --strict`,
+`openspec validate --all --strict`, and `git diff --check`.
+Exact commands/results are in
+[final verification](../openspec/changes/generalize-control-layer-extension-points/evidence/final-verification.json).
+
+All 13 recorded baseline HTTP cases match exactly after UUID normalization,
+including result omission, status/error envelopes, forwarding content and call/audit
+counts. Complete OpenAPI comparison changes only finding-code item removal of
+`const: pii.email`. Email detector implementation/expectations, default policy,
+dependencies and current specs are unchanged. Restricted HTTP tests hung as recorded
+in the baseline; the run was interrupted and rerun successfully outside the sandbox.
+The TestClient deprecation warning did not affect results; dependencies stayed fixed.
+
+**Independent review**
+
+Fresh read-only `extension_correctness_review`: **PASS**, no findings. Independently
+reran 237 unit tests and two schema/strict-response tests; reviewed complete evidence.
+Fresh read-only `extension_security_review`: **PASS**, no findings. Independently
+reran 237 unit and 63 integration tests, eight prompt/policy override/repeated-request
+probes and 1,000 randomized redaction overlap/adjacency probes. Neither reviewer
+implemented or modified files. See
+[review evidence](../openspec/changes/generalize-control-layer-extension-points/evidence/independent-reviews.md).
+
+**Scope and commit**
+
+Preserved unrelated modified AGENTS.md/project-context/worklog content and untracked
+collaboration, summary, reference and requirements documents. The commit includes
+only owned implementation/tests, README/architecture, this change and its evidence,
+and baseline/final worklog evidence. No local environment files, archive, push,
+new change or deferred capability.
+
+`refactor: generalize control layer extension points`
+
+Resolve the hash of the single task-group commit containing this entry from Git
+history. All tasks and required final reviews passed before that commit.

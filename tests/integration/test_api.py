@@ -8,8 +8,15 @@ import pytest
 
 from app.control_layer.api import create_app
 from app.control_layer.audit import JsonLinesAuditSink
+from app.control_layer.composition import default_controls
 from app.control_layer.domain import Finding, PolicyError, Span
-from app.control_layer.targets import TargetResult
+from app.control_layer.registry import ControlRegistration, ControlRegistry
+from app.control_layer.targets import (
+    RegisteredTarget,
+    TargetDefinition,
+    TargetRegistry,
+    TargetResult,
+)
 
 
 class SpyTarget:
@@ -61,8 +68,18 @@ def setup_app(
     app = create_app(
         policy_path=path,
         audit_sink=sink or JsonLinesAuditSink(stream),
-        target=target,
-        controls=None if control is None else (control,),
+        target_registry=TargetRegistry(
+            (RegisteredTarget(TargetDefinition("local-echo"), target),)
+        ),
+        control_registry=None
+        if control is None
+        else ControlRegistry(
+            (
+                ControlRegistration(
+                    default_controls().registrations[0].definition, control
+                ),
+            )
+        ),
     )
     return app, target, stream
 
@@ -279,7 +296,12 @@ def test_environment_selects_block_policy_at_startup(tmp_path, monkeypatch):
     monkeypatch.setenv("CONTROL_LAYER_POLICY", str(path))
     stream = io.StringIO()
     target = SpyTarget(stream)
-    app = create_app(audit_sink=JsonLinesAuditSink(stream), target=target)
+    app = create_app(
+        audit_sink=JsonLinesAuditSink(stream),
+        target_registry=TargetRegistry(
+            (RegisteredTarget(TargetDefinition("local-echo"), target),)
+        ),
+    )
     response = request(app, json=payload("alice@example.com"))
     assert response.status_code == 403
     assert response.json()["action"] == "BLOCK"
@@ -294,7 +316,12 @@ def test_missing_environment_policy_prevents_startup(tmp_path, monkeypatch):
     monkeypatch.setenv("CONTROL_LAYER_POLICY", str(tmp_path / "missing.yaml"))
     stream = io.StringIO()
     target = SpyTarget(stream)
-    app = create_app(audit_sink=JsonLinesAuditSink(stream), target=target)
+    app = create_app(
+        audit_sink=JsonLinesAuditSink(stream),
+        target_registry=TargetRegistry(
+            (RegisteredTarget(TargetDefinition("local-echo"), target),)
+        ),
+    )
     with pytest.raises(PolicyError):
         request(app, json=payload("alice@example.com"))
     assert target.calls == []

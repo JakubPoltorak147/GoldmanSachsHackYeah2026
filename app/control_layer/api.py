@@ -14,10 +14,12 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from starlette.exceptions import HTTPException
 
 from app.control_layer.audit import AuditSink, JsonLinesAuditSink
-from app.control_layer.domain import Action, Control, Interaction
+from app.control_layer.composition import default_controls, default_targets
+from app.control_layer.domain import Action, Interaction
 from app.control_layer.policy import load_policy
+from app.control_layer.registry import ControlRegistry
 from app.control_layer.service import InteractionService
-from app.control_layer.targets import LocalEchoTarget, TargetAdapter
+from app.control_layer.targets import TargetRegistry
 
 
 class InteractionRequest(BaseModel):
@@ -46,7 +48,7 @@ class DecisionResponse(BaseModel):
     interaction_id: UUID
     action: Action
     reason_code: Literal["no_findings", "policy_resolved"]
-    finding_codes: list[Literal["pii.email"]]
+    finding_codes: list[str]
     result: EchoResult | None = None
 
 
@@ -76,21 +78,21 @@ def create_app(
     *,
     policy_path: str | Path | None = None,
     audit_sink: AuditSink | None = None,
-    target: TargetAdapter | None = None,
-    controls: tuple[Control, ...] | None = None,
+    target_registry: TargetRegistry | None = None,
+    control_registry: ControlRegistry | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(application: FastAPI):
         policy = load_policy(
             policy_path
             if policy_path is not None
-            else os.environ.get("CONTROL_LAYER_POLICY", "config/policy.yaml")
+            else os.environ.get("CONTROL_LAYER_POLICY", "config/policy.yaml"),
+            default_controls() if control_registry is None else control_registry,
         )
         application.state.service = InteractionService(
             policy,
             audit_sink if audit_sink is not None else JsonLinesAuditSink(sys.stdout),
-            target if target is not None else LocalEchoTarget(),
-            controls,
+            default_targets() if target_registry is None else target_registry,
         )
         yield
 

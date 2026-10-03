@@ -1,17 +1,27 @@
 import hashlib
 import io
 import json
+import tempfile
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import replace
+from pathlib import Path
 from threading import Lock
 
 import pytest
 
 from app.control_layer.audit import JsonLinesAuditSink
+from app.control_layer.composition import default_controls
 from app.control_layer.domain import Action, Finding, Interaction, Span
-from app.control_layer.policy import ControlPolicy, load_policy
+from app.control_layer.policy import load_policy
+from app.control_layer.registry import ControlRegistration, ControlRegistry
 from app.control_layer.service import InteractionService
-from app.control_layer.targets import LocalEchoTarget, TargetResult
+from app.control_layer.targets import (
+    LocalEchoTarget,
+    RegisteredTarget,
+    TargetDefinition,
+    TargetRegistry,
+    TargetResult,
+)
 
 
 class SpyTarget:
@@ -47,15 +57,26 @@ class FakeControl:
 
 
 def make_service(action=Action.REDACT, enabled=True, control=None, target_fail=False):
-    original = load_policy("config/policy.yaml")
-    policy = replace(
-        original,
-        controls=(ControlPolicy("email-address", enabled, (("pii.email", action),)),),
-    )
+    registry = default_controls()
+    if control is not None:
+        registry = ControlRegistry(
+            (ControlRegistration(registry.registrations[0].definition, control),)
+        )
+    with tempfile.TemporaryDirectory() as directory:
+        path = Path(directory) / "policy.yaml"
+        path.write_text(
+            "version: 1\npolicy_id: test\ncontrols:\n  email-address:\n"
+            f"    enabled: {str(enabled).lower()}\n    findings:\n"
+            f"      pii.email: {action.value}\n"
+        )
+        policy = load_policy(path, registry)
     stream = io.StringIO()
     target = SpyTarget(stream, fail=target_fail)
-    controls = None if control is None else (control,)
-    service = InteractionService(policy, JsonLinesAuditSink(stream), target, controls)
+    service = InteractionService(
+        policy,
+        JsonLinesAuditSink(stream),
+        TargetRegistry((RegisteredTarget(TargetDefinition("local-echo"), target),)),
+    )
     return service, target, stream
 
 
@@ -261,7 +282,7 @@ def test_control_exception_is_sanitized_with_safe_operational_event():
 def test_inconsistent_policy_mapping_stops_dispatch(mappings):
     service, target, stream = make_service()
     service.policy = replace(
-        service.policy, controls=(ControlPolicy("email-address", True, mappings),)
+        service.policy, entries=(replace(service.policy.entries[0], mappings=mappings),)
     )
     outcome = service.evaluate(Interaction.create("local-echo", "alice@example.com"))
     assert outcome.error_code == "evaluation_failed"
