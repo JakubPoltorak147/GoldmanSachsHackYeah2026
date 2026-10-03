@@ -28,9 +28,9 @@ Owner: primary applying agent/developer, responsible for implementation, integra
 
 ## 3. Optional real-runtime demonstration
 
-- [ ] 3.1 Add scripts/smoke_local_model.py outside normal discovery, using existing HTTP test-client boundary and in-memory audit against a separately provisioned real runtime; verify it tests model text success, echo, blocked dispatch and pre-dispatch evidence without exact wording, raw content output, downloads or setup automation.
-- [ ] 3.2 Document explicit smoke command, Ollama local-only startup and preprovisioned qwen2.5:0.5b prerequisite in README; verify smoke is excluded from normal pytest and missing prerequisites yield fixed nonzero failure. Run when available and record runtime/model/hardware/latency, otherwise record NOT RUN and reason; optional execution is not a required normal-suite gate.
-- [ ] 3.3 Verify script lint/format and deterministic tests of its failure/privacy/result-check behavior without a real server; record task-group evidence and commit exactly once after passing checks.
+- [x] 3.1 Add scripts/smoke_local_model.py outside normal discovery, using existing HTTP test-client boundary and in-memory audit against a separately provisioned real runtime; verify it tests model text success, echo, blocked dispatch and pre-dispatch evidence without exact wording, raw content output, downloads or setup automation.
+- [x] 3.2 Document explicit smoke command, Ollama local-only startup and preprovisioned qwen2.5:0.5b prerequisite in README; verify smoke is excluded from normal pytest and missing prerequisites yield fixed nonzero failure. Run when available and record runtime/model/hardware/latency, otherwise record NOT RUN and reason; optional execution is not a required normal-suite gate.
+- [x] 3.3 Verify script lint/format and deterministic tests of its failure/privacy/result-check behavior without a real server; record task-group evidence and commit exactly once after passing checks.
 
 ## 4. Integration verification and independent review
 
@@ -42,3 +42,5 @@ Owner: primary applying agent/developer, responsible for implementation, integra
 Group 1 evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-1-bounded-adapter).
 
 Group 2 evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-2-governed-gateway).
+
+Group 3 and optional NOT RUN evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-3-optional-smoke).

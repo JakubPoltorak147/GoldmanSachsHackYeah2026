@@ -328,3 +328,24 @@ input or contain unsafe text. Input approval does not certify output safety. One
 fixed operator model is a deployment restriction; centralized model authorization,
 semantic controls, budgets, output DLP and reporting remain deferred. Audit evaluation
 duration excludes generation time; eligibility audit does not claim execution success.
+
+## Optional real Ollama smoke
+
+Normal pytest discovery never runs real inference. Separately provision Ollama and
+`qwen2.5:0.5b` before this check; the smoke never installs, downloads or pulls. With
+an already provisioned daemon started locally using
+`OLLAMA_NO_CLOUD=1 OLLAMA_HOST=127.0.0.1:11434 ollama serve`, explicitly run:
+
+```sh
+poetry run python scripts/smoke_local_model.py
+```
+
+The script uses the HTTP test-client boundary and an in-memory audit sink. It checks
+completed model scalar text and pre-dispatch evidence, unchanged echo and blocked
+zero-call dispatch. It prints only status/action/length, elapsed time and check
+outcomes, without prompt/output text or exact-wording assertions. Missing runtime,
+missing model, invalid configuration or failed verification yields fixed sanitized
+nonzero failure. Record runtime version, configured model tag, hardware and observed
+latency when executed; otherwise record NOT RUN with the missing prerequisite.
+The optional run is outside the required verification gate. Deterministic tests of
+script checks inject fake targets and require no real runtime.

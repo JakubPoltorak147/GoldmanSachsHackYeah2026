@@ -853,3 +853,21 @@ remains. Initial targeted run had one fixture expecting an unsupported `os.syste
 literal to block (64 PASS, 1 FAIL); corrected it to the approved catalog literal,
 without changing detection. Full suites then passed.
 One group commit: `feat: integrate governed local model target`.
+
+### 2026-10-03 — Local model target group 3: optional smoke
+
+Added `scripts/smoke_local_model.py` outside pytest discovery. Explicit execution
+uses TestClient/in-memory audit and observed retained adapters to check model scalar
+text success, pre-dispatch evidence, echo and BLOCK zero-call dispatch. Only fixed
+outcomes/length/elapsed time are printed. Missing prerequisites return sanitized
+nonzero failure, never setup/download/fallback. README documents preparation/command.
+
+Verification: `poetry run pytest tests/unit/test_smoke_local_model.py -q` — 12 PASS
+using deterministic targets, no Ollama. Ruff check/format — PASS (39 files);
+`git diff --check` — PASS. Initial malformed-surrogate fixture failed while HTTPX
+constructed JSON, before the script check (11 PASS, 1 FAIL); encoding a literal
+JSON escape corrected the fixture and all checks passed.
+Optional real Ollama smoke: **NOT RUN**. `command -v ollama` found no executable;
+connection to default loopback port 11434 was refused. No runtime/model installation
+or download. Runtime version/model/hardware/inference latency: unavailable/not measured.
+One group commit: `test: add optional local model smoke`.
