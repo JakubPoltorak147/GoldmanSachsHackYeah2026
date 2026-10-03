@@ -16,12 +16,12 @@
 
 ## 2. Audited execution path
 
-- [ ] 2.1 Implement the synchronous orchestration service, TargetAdapter boundary, local echo adapter, and injectable target spy; verify service tests prove ALLOW forwards original content once, REDACT forwards only transformed content once, and BLOCK makes zero calls.
-- [ ] 2.2 Implement an allowlisted AuditEvent serializer and synchronous JSON-lines sink, emitted before eligible dispatch; verify service tests inspect safe fields including explicit control enablement, event ordering, concurrent complete-line emission, sink poisoning after partial writes both with exceptions and short counts, and absence of input content, matched values, hashes, spans, snippets, and exception text.
-- [ ] 2.3 Implement fail-closed operational paths for control exceptions, invalid findings or spans, inconsistent policy resolution, and audit failure, separate from policy BLOCK; verify service tests assert zero target calls, sanitized operational outcomes, and no synthetic Finding for each case.
-- [ ] 2.4 Handle target failure after a successfully emitted decision event; verify service tests show the event does not claim target success and no raw exception reaches the result.
-- [ ] 2.5 Update `docs/architecture.md` to the execution path now implemented; verify `poetry run ruff check .`, `poetry run ruff format --check .`, `poetry run pytest tests/unit`, and `git diff --check` pass.
-- [ ] 2.6 Obtain fresh independent correctness and security/bypass reviews of group 2 with `PASS`, resolve findings, add its verified entry to `docs/worklog.md`, and create exactly one Conventional Commit for group 2; verify the worklog evidence and commit subject against Git history.
+- [x] 2.1 Implement the synchronous orchestration service, TargetAdapter boundary, local echo adapter, and injectable target spy; verify service tests prove ALLOW forwards original content once, REDACT forwards only transformed content once, and BLOCK makes zero calls.
+- [x] 2.2 Implement an allowlisted AuditEvent serializer and synchronous JSON-lines sink, emitted before eligible dispatch; verify service tests inspect safe fields including explicit control enablement, event ordering, concurrent complete-line emission, sink poisoning after partial writes both with exceptions and short counts, and absence of input content, matched values, hashes, spans, snippets, and exception text.
+- [x] 2.3 Implement fail-closed operational paths for control exceptions, invalid findings or spans, inconsistent policy resolution, and audit failure, separate from policy BLOCK; verify service tests assert zero target calls, sanitized operational outcomes, and no synthetic Finding for each case.
+- [x] 2.4 Handle target failure after a successfully emitted decision event; verify service tests show the event does not claim target success and no raw exception reaches the result.
+- [x] 2.5 Update `docs/architecture.md` to the execution path now implemented; verify `poetry run ruff check .`, `poetry run ruff format --check .`, `poetry run pytest tests/unit`, and `git diff --check` pass.
+- [x] 2.6 Obtain fresh independent correctness and security/bypass reviews of group 2 with `PASS`, resolve findings, add its verified entry to `docs/worklog.md`, and create exactly one Conventional Commit for group 2; verify the worklog evidence and commit subject against Git history.
 
 ## 3. HTTP boundary and project verification
 
@@ -35,3 +35,5 @@
 ## Evidence
 
 - Group 1: [worklog](../../../docs/worklog.md#2026-10-03--group-1-runtime-and-decision-core); final verification and fresh correctness/security reviews PASS. Commit subject: `feat: establish immutable policy and decision core` (resolve hash from Git history).
+
+- Group 2: [worklog](../../../docs/worklog.md#2026-10-03--group-2-audited-execution-path); 133 unit tests and fresh correctness/security reviews PASS. Commit subject: `feat: add audit-gated local interaction execution` (resolve hash from Git history).

@@ -183,3 +183,41 @@ independently verified 103 tests and 210 candidate probes. No unresolved finding
 `feat: establish immutable policy and decision core`
 
 Resolve the hash of the commit containing this entry from Git history.
+
+
+### 2026-10-03 — Group 2: audited execution path
+
+**OpenSpec change:** `establish-control-layer-foundation`, tasks 2.1–2.6.
+
+**Built**
+
+Added synchronous service orchestration, injectable TargetAdapter and local echo,
+allowlisted decision/operational events, and a locked JSON-lines sink with exact
+write-count and flush acceptance. Evaluation/audit failures stop dispatch with
+sanitized operational outcomes; target failure preserves its prior decision event.
+Updated architecture to the execution path now implemented.
+
+**Deviations:** None.
+
+**Verification**
+
+PASS: `poetry run ruff check .`, `poetry run ruff format --check .`,
+`poetry run pytest tests/unit` (133 passed, including 30 service tests), and
+`git diff --check`. Manual local echo demonstrated transformed content and safe
+pre-dispatch audit. Tests include 40 concurrent records, throwing partial writes,
+short write counts, flush failure and permanent poisoning, disabled control status,
+invalid findings/spans/mappings, audit failure and target failure.
+
+**Independent review**
+
+Fresh `group2_correctness`: PASS; independently reran 30 service tests.
+Fresh `group2_security`: PASS; inspected approved artifacts, code and test coverage
+without rerunning tests. Neither reviewer implemented the group; no findings.
+The delegated test author `group2_tests` was not a reviewer.
+
+**Commit**
+
+`feat: add audit-gated local interaction execution`
+
+Resolve the hash of this entry's commit from Git history. Group 1 commit verified:
+`5a6ed3a2100275e1d6728791f5ff773d99d8d8c3`.
