@@ -221,3 +221,72 @@ The delegated test author `group2_tests` was not a reviewer.
 
 Resolve the hash of this entry's commit from Git history. Group 1 commit verified:
 `5a6ed3a2100275e1d6728791f5ff773d99d8d8c3`.
+
+
+### 2026-10-03 — Group 3: HTTP boundary and final verification
+
+**OpenSpec change:** `establish-control-layer-foundation`, tasks 3.1–3.6.
+
+**Built**
+
+Added the strict FastAPI factory and POST `/v1/interactions`, server-owned IDs,
+fixed local echo target, 1–16,384-character scalar text validation, safe response
+DTOs and the approved 200/403/422/503/502 mapping. Startup loads the administrator's
+policy selection before accepting requests. Validation, malformed JSON/UTF-8,
+operational errors and target failures produce sanitized HTTP outcomes. Added
+httpx integration tests and README install, policy-selection, run and test commands.
+Updated architecture to describe only the final implemented runtime and boundaries.
+
+**Deviations:** None. No additional application dependencies or infrastructure.
+The API and integration test authors worked in separate files and did not review
+or commit their implementation. The user requested additional agents and later
+restored normal pace; all verification and review gates were preserved.
+
+**Verification**
+
+- PASS: `poetry env use python3.12`, `poetry install`, and `poetry check` using
+  the bootstrapped Python 3.12.15 on PATH; no dependency updates were required.
+- PASS: `poetry run ruff check .` and `poetry run ruff format --check .`
+  (14 Python files).
+- PASS: `poetry run pytest tests/unit` (133 passed).
+- PASS: `poetry run pytest tests/integration` (40 passed). Includes exact scalar
+  preservation, Unicode character limits, invalid shapes/types/extras/identity,
+  malformed JSON with sensitive text, invalid UTF-8, lone surrogates, valid surrogate
+  pairs, all policy/operational/target status mappings, zero calls on closed paths,
+  audit ordering, disabled control, environment policy selection and startup failure.
+- PASS: `openspec validate establish-control-layer-foundation --strict`.
+- PASS: `git diff --check`; staged whitespace was checked before committing.
+- PASS: actual local Uvicorn factory startup with `--no-access-log`, HTTP request
+  and shutdown. Echo returned `Contact <[REDACTED]>`; stdout contained one parseable
+  flushed decision line and no submitted address. README commands were inspected
+  against this behavior. No external commercial service was used.
+
+**Independent review — group 3 and complete change**
+
+Fresh `final_correctness`: PASS. Independently ran all 173 tests, Ruff lint/format
+and whitespace checks; inspected all artifacts, modules, configuration and docs.
+Fresh `final_security`: PASS. Independently ran all 173 tests and adversarial HTTP
+probes for policy-override instructions, malformed/deeply nested JSON, surrogates,
+request-selected policy fields and audit content exclusion. No concrete findings.
+Both reviewers were independent of implementation; no unresolved findings remain.
+
+**Final state**
+
+All approved task groups are implemented and verified. Architecture describes the
+implemented application only. The detector remains deliberately bounded ASCII
+email-address detection, not general email or PII protection. Audit is flushed
+stdout decision recording; durable retention and target-completion records remain
+out of scope. Ready to archive after final Git/task-record confirmation. Neither
+archive nor push is authorized or performed.
+
+**Commit**
+
+`feat: expose validated policy-governed interaction API`
+
+Resolve this entry's commit hash from Git history. Earlier task-group commits
+verified against Git history:
+
+- Group 1: `5a6ed3a2100275e1d6728791f5ff773d99d8d8c3`,
+  `feat: establish immutable policy and decision core`.
+- Group 2: `6d732f565a2057d5460f8263b02f83d18eebc021`,
+  `feat: add audit-gated local interaction execution`.

@@ -25,15 +25,17 @@
 
 ## 3. HTTP boundary and project verification
 
-- [ ] 3.1 Implement the FastAPI application and `POST /v1/interactions` with strict request/response models, the fixed echo target, and the 16,384-character content limit; verify httpx tests cover valid input, the exact limit, over-limit content, missing/unknown fields, wrong types, empty content, malformed JSON with sensitive text, lone surrogate escapes, unsupported target, and caller-asserted identity.
-- [ ] 3.2 Implement safe HTTP mapping for ALLOW, REDACT, policy BLOCK, internal evaluation/audit failure, and target failure; verify httpx tests assert the selected status codes, absence of sensitive values and exception text, zero target calls for all closed paths, and pre-dispatch audit ordering.
-- [ ] 3.3 Add README installation, policy-selection, run, and test instructions; update `docs/architecture.md` to describe only the final implemented architecture. Verify documented commands and inspect the docs against the running local echo behavior.
-- [ ] 3.4 Run final `poetry run ruff check .`, `poetry run ruff format --check .`, `poetry run pytest tests/unit`, `poetry run pytest tests/integration`, OpenSpec validation, and `git diff --check`; verify all pass with no external commercial service.
-- [ ] 3.5 Obtain fresh independent specification/correctness and security/bypass reviews of the complete change with explicit `PASS`; fix confirmed findings, rerun affected verification, and request fresh review until both return `PASS`.
-- [ ] 3.6 Add group 3 and final verification/review evidence to `docs/worklog.md`, reference that evidence here, and create exactly one Conventional Commit for group 3; verify the worklog evidence, this task record, and commit subject against Git history before declaring completion or archiving.
+- [x] 3.1 Implement the FastAPI application and `POST /v1/interactions` with strict request/response models, the fixed echo target, and the 16,384-character content limit; verify httpx tests cover valid input, the exact limit, over-limit content, missing/unknown fields, wrong types, empty content, malformed JSON with sensitive text, lone surrogate escapes, unsupported target, and caller-asserted identity.
+- [x] 3.2 Implement safe HTTP mapping for ALLOW, REDACT, policy BLOCK, internal evaluation/audit failure, and target failure; verify httpx tests assert the selected status codes, absence of sensitive values and exception text, zero target calls for all closed paths, and pre-dispatch audit ordering.
+- [x] 3.3 Add README installation, policy-selection, run, and test instructions; update `docs/architecture.md` to describe only the final implemented architecture. Verify documented commands and inspect the docs against the running local echo behavior.
+- [x] 3.4 Run final `poetry run ruff check .`, `poetry run ruff format --check .`, `poetry run pytest tests/unit`, `poetry run pytest tests/integration`, OpenSpec validation, and `git diff --check`; verify all pass with no external commercial service.
+- [x] 3.5 Obtain fresh independent specification/correctness and security/bypass reviews of the complete change with explicit `PASS`; fix confirmed findings, rerun affected verification, and request fresh review until both return `PASS`.
+- [x] 3.6 Add group 3 and final verification/review evidence to `docs/worklog.md`, reference that evidence here, and create exactly one Conventional Commit for group 3; verify the worklog evidence, this task record, and commit subject against Git history before declaring completion or archiving.
 
 ## Evidence
 
 - Group 1: [worklog](../../../docs/worklog.md#2026-10-03--group-1-runtime-and-decision-core); final verification and fresh correctness/security reviews PASS. Commit subject: `feat: establish immutable policy and decision core` (resolve hash from Git history).
 
 - Group 2: [worklog](../../../docs/worklog.md#2026-10-03--group-2-audited-execution-path); 133 unit tests and fresh correctness/security reviews PASS. Commit subject: `feat: add audit-gated local interaction execution` (resolve hash from Git history).
+
+- Group 3 and final gate: [worklog](../../../docs/worklog.md#2026-10-03--group-3-http-boundary-and-final-verification); 133 unit + 40 integration tests, Ruff, Poetry, strict OpenSpec validation, real local Uvicorn smoke and whitespace PASS. Fresh independent complete-change reviews `final_correctness` and `final_security`: PASS. Commit subject: `feat: expose validated policy-governed interaction API` (resolve hash from Git history). All required verification/review gates passed; do not archive or push in this apply session.

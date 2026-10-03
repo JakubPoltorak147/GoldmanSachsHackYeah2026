@@ -4,7 +4,7 @@
 
 The runtime is Python 3.12+ with Poetry in non-package mode. The implemented
 modules under `app/control_layer/` provide a synchronous core and audited
-execution service. HTTP serving is not implemented yet.
+execution service behind a strict FastAPI HTTP boundary.
 
 - `domain.py`: frozen Interaction, Span, Finding, FindingResolution and Decision
   dataclasses, Action enum, Control protocol, and separate operational errors.
@@ -54,4 +54,28 @@ A decision event records eligibility, without claiming target completion.
 The sink serializes a complete JSON line, then writes and flushes under a lock.
 Exceptions, short writes and flush failures poison the sink permanently; subsequent
 requests cannot dispatch behind a damaged stream. There is no durable retention.
-The HTTP application and stdout sink wiring remain for group 3.
+The HTTP application wires one stdout sink for its lifespan.
+
+
+## HTTP boundary and startup
+
+`api.py` exposes `create_app` and POST `/v1/interactions`. Its lifespan loads the
+administrator-selected `CONTROL_LAYER_POLICY` file (default `config/policy.yaml`)
+before accepting requests and creates the service with a stdout sink and local
+echo target. Invalid startup policy raises sanitized PolicyError; no fallback exists.
+Policy is fixed until restart. Test injection preserves the same startup loader.
+
+Strict Pydantic request DTOs forbid extras, coercion, unsupported targets, empty
+or over-16,384-character strings, and lone surrogates. JSON-decoded text reaches
+Interaction.create unchanged with a new server UUID. Response DTOs expose only
+safe codes and the eligible target result. Validation, body parsing and unexpected
+errors have fixed sanitized handlers; exception/body details are never serialized.
+The endpoint maps forwarding to 200, policy BLOCK to 403, invalid input to 422,
+evaluation/audit failure to 503, and target failure to 502.
+
+The synchronous endpoint runs through FastAPI's thread pool. A shared sink lock
+keeps per-request records complete under concurrency without promising request
+ordering. Uvicorn is documented with access logs disabled. There is no response
+inspection, remote target, verified identity, reload, durable audit, database or UI.
+Integration tests use httpx at the HTTP boundary; security logic remains covered
+by deterministic unit tests. README contains installation, policy and run commands.
