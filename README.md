@@ -3,7 +3,7 @@
 A local AI Control Layer foundation: strict startup policy, bounded ASCII
 email/labelled-SSN and bounded credential/known-attack detection, central
 ALLOW / REDACT / BLOCK decisions, and audited
-forwarding to a fixed local echo target. No external provider or paid API is needed.
+forwarding to local echo or an operator-configured loopback Ollama text model. No external provider or paid API is needed.
 
 ## Install
 
@@ -73,7 +73,7 @@ any configured mapping is still validated. Audit events expose explicit enableme
 
 ## Extension contracts and compatibility
 
-`composition.py` explicitly registers the six deterministic controls and local echo in production.
+`composition.py` explicitly registers the six deterministic controls and both local echo/local Ollama in production.
 `ControlRegistry` holds ordered, frozen `ControlRegistration` objects pairing an
 immutable `ControlDefinition` and its `FindingDefinition` catalogue with an
 evaluator. Control IDs use `[a-z][a-z0-9_-]{0,63}` and globally unique finding
@@ -98,8 +98,8 @@ replacement with `[REDACTED]`; controls supply no transformation callbacks.
 bindings. Exact resolution invokes no adapter and has no URL interpretation or
 fallback. The service retains one binding from before evaluation through audit
 and dispatch; unknown internal targets fail with safe audit ID `unresolved`, which
-cannot be registered. Registration does not grant public access: HTTP still accepts
-only `local-echo`.
+cannot be registered. Registration does not grant public access: HTTP accepts
+only `local-echo` and `local-ollama`.
 
 Tests can pass `control_registry`, `target_registry`, `audit_sink` and `policy_path`
 to `create_app`. Both defaults and injections use the same startup binder; invalid
@@ -109,7 +109,8 @@ are internal contracts rather than a public SDK.
 
 Response `finding_codes` is now a strict list of strings from validated findings,
 preserving order and repeated codes. OpenAPI removes its former `pii.email` item
-constant; generated clients may require regeneration. Default values, all other
+constant; the target selector now has a two-value enum. Generated clients may
+require regeneration. Default values, all other
 schemas, response envelopes and status mappings remain unchanged.
 The deterministic pack expands default policy configuration and changes its digest;
 the historical email-only digest remains supported with an explicit email-only
@@ -136,10 +137,22 @@ zero target calls. HTTP statuses are 200 for forwarded decisions, 403 for policy
 BLOCK, 422 for invalid requests, 503 for evaluation/audit failure, and 502 for target
 failure. Operational errors carry no synthetic finding or policy BLOCK.
 
-Requests require exactly `target_id` and `content`. Only `local-echo` is accepted.
+Requests require exactly `target_id` and `content`. Only `local-echo` and `local-ollama` are accepted.
 Content must be 1–16,384 Python characters after JSON decoding, with no lone
 surrogates. Identity fields, extras, coercible wrong types and malformed JSON are
 rejected with fixed errors that do not reflect submitted values.
+
+A separately provisioned local model can be selected with the same envelope:
+
+```sh
+curl -sS http://127.0.0.1:8000/v1/interactions \
+  -H 'Content-Type: application/json' \
+  -d '{"target_id":"local-ollama","content":"Describe a sunrise in one sentence."}'
+```
+
+Both targets remain registered with valid settings even when no runtime is running.
+An eligible model call then fails with sanitized 502 after audit; echo still works.
+The historical `EchoResult` OpenAPI name represents either content-only text result.
 
 ## Detector and audit limits
 

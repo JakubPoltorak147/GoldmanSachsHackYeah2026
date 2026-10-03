@@ -17,14 +17,14 @@ Owner: primary applying agent/developer, responsible for implementation, integra
 
 ## 2. Public registration and governed local interaction
 
-- [ ] 2.1 Register local-ollama alongside local-echo in composition and widen only the explicit public target selector in API; verify updated tests/unit/test_targets.py and test_security_pack.py assert both registrations with unchanged six controls, no network at assembly/startup, unchanged echo and no settings load for explicit registry injection.
-- [ ] 2.2 Add tests/integration/test_local_model_target.py with a deterministic threaded loopback fake runtime and real client; verify success, refused/reset connection, absent runtime, missing model, delayed headers/body timeout, malformed responses, unexpected statuses and oversized body/output, with resource cleanup and no real runtime dependency.
-- [ ] 2.3 Verify full gateway/security-pack ALLOW original, REDACT centrally transformed, BLOCK and evaluation/audit failure zero runtime calls, per-request audit-before-dispatch, retained binding identity and exactly one successful HTTP request; add regressions first for any discovered bypass.
-- [ ] 2.4 Verify unknown public IDs remain sanitized 422/no audit, unknown internal IDs and allowed public ID missing from injected registry use unresolved safe 503/zero calls, arbitrary injected destinations remain private, and prompt/model/URL strings cannot establish trusted audit identity.
-- [ ] 2.5 Add prompt/output-bearing error/audit/log privacy and concurrent distinct-prompt tests using event/barrier synchronization; verify response association, no shared request/parser state, per-request audit ordering and unchanged poisoned-sink behavior.
-- [ ] 2.6 Update full OpenAPI comparison in tests/integration/test_extensions.py to permit only the additional target enum difference; preserve EchoResult/schema fields/statuses and historical fixture JSON, document the difference in tests/fixtures/README.md; verify recorded echo HTTP fixtures and existing deterministic-control tests remain passing.
-- [ ] 2.7 Update README request examples and implemented architecture/system-summary/challenge traceability to reflect actual integrated behavior and honest remaining gaps; verify documentation states no output inspection, no full model authorization/budgets/reporting, unchanged policy digest and sync thread safety/latency limitations.
-- [ ] 2.8 Run both complete unit and integration suites plus lint/format; record task-group evidence in docs/worklog.md and commit exactly once after passing required verification, with no push.
+- [x] 2.1 Register local-ollama alongside local-echo in composition and widen only the explicit public target selector in API; verify updated tests/unit/test_targets.py and test_security_pack.py assert both registrations with unchanged six controls, no network at assembly/startup, unchanged echo and no settings load for explicit registry injection.
+- [x] 2.2 Add tests/integration/test_local_model_target.py with a deterministic threaded loopback fake runtime and real client; verify success, refused/reset connection, absent runtime, missing model, delayed headers/body timeout, malformed responses, unexpected statuses and oversized body/output, with resource cleanup and no real runtime dependency.
+- [x] 2.3 Verify full gateway/security-pack ALLOW original, REDACT centrally transformed, BLOCK and evaluation/audit failure zero runtime calls, per-request audit-before-dispatch, retained binding identity and exactly one successful HTTP request; add regressions first for any discovered bypass.
+- [x] 2.4 Verify unknown public IDs remain sanitized 422/no audit, unknown internal IDs and allowed public ID missing from injected registry use unresolved safe 503/zero calls, arbitrary injected destinations remain private, and prompt/model/URL strings cannot establish trusted audit identity.
+- [x] 2.5 Add prompt/output-bearing error/audit/log privacy and concurrent distinct-prompt tests using event/barrier synchronization; verify response association, no shared request/parser state, per-request audit ordering and unchanged poisoned-sink behavior.
+- [x] 2.6 Update full OpenAPI comparison in tests/integration/test_extensions.py to permit only the additional target enum difference; preserve EchoResult/schema fields/statuses and historical fixture JSON, document the difference in tests/fixtures/README.md; verify recorded echo HTTP fixtures and existing deterministic-control tests remain passing.
+- [x] 2.7 Update README request examples and implemented architecture/system-summary/challenge traceability to reflect actual integrated behavior and honest remaining gaps; verify documentation states no output inspection, no full model authorization/budgets/reporting, unchanged policy digest and sync thread safety/latency limitations.
+- [x] 2.8 Run both complete unit and integration suites plus lint/format; record task-group evidence in docs/worklog.md and commit exactly once after passing required verification, with no push.
 
 ## 3. Optional real-runtime demonstration
 
@@ -40,3 +40,5 @@ Owner: primary applying agent/developer, responsible for implementation, integra
 - [ ] 4.4 Record final verification/review references here and completed evidence in docs/worklog.md; commit this completed integration group exactly once after required PASS. Do not declare complete or archive before these gates. Archiving requires a later user request; never push without explicit instruction.
 
 Group 1 evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-1-bounded-adapter).
+
+Group 2 evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-2-governed-gateway).

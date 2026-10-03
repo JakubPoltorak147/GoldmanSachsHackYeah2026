@@ -54,9 +54,28 @@ def test_exact_immutable_lookup_without_invocation():
         RegisteredTarget(object(), first.adapter)
 
 
-def test_default_target_is_only_local_echo():
+def test_default_targets_include_unchanged_local_echo():
     registry = default_targets()
-    assert len(registry.registrations) == 1
+    assert [r.definition.target_id for r in registry.registrations] == [
+        "local-echo",
+        "local-ollama",
+    ]
     binding = registry.resolve("local-echo")
     interaction = Interaction.create("local-echo", " exact text ")
     assert binding.adapter.invoke(interaction) == TargetResult(interaction.content)
+
+
+def test_default_assembly_never_contacts_runtime(monkeypatch):
+    import httpx
+
+    def fail(*args, **kwargs):
+        pytest.fail("network during assembly")
+
+    monkeypatch.setattr(httpx.Client, "send", fail)
+    assert len(default_targets().registrations) == 2
+
+
+def test_invalid_default_settings_fail_without_echo_fallback(monkeypatch):
+    monkeypatch.setenv("CONTROL_LAYER_OLLAMA_MODEL", "RAW_SECRET")
+    with pytest.raises(ValueError, match="^invalid_target_configuration$"):
+        default_targets()

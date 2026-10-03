@@ -25,8 +25,8 @@ repository.
 
 | Challenge area | Status | Current repository coverage |
 | --- | --- | --- |
-| Functional control-layer boundary | IMPLEMENTED | `POST /v1/interactions` intercepts requests before a target and applies centralized control and policy evaluation. Current production target is local echo only. |
-| Provider-independent integration boundary | PARTIAL | A `TargetAdapter` boundary exists and the foundation is independent of a commercial provider, but only the local echo implementation exists. |
+| Functional control-layer boundary | IMPLEMENTED | `POST /v1/interactions` intercepts requests before a target and applies centralized control and policy evaluation. Production targets are local echo and bounded loopback Ollama text generation; final review acceptance is recorded in worklog. |
+| Provider-independent integration boundary | PARTIAL | A `TargetAdapter` boundary exists and the foundation is independent of a commercial provider, with local echo and a bounded local Ollama adapter; remote/agent/MCP integrations remain deferred. |
 | Architecture documentation | PARTIAL | Implemented architecture is documented in `docs/architecture.md`, and conceptual product direction exists in `docs/project-context.md`. A final challenge-oriented architecture diagram is still required. |
 | Centralized policy engine | PARTIAL | Strict startup YAML policy controls enablement and finding-to-action mappings. Model restrictions, budgets, richer thresholds, and other planned policy domains are not implemented. |
 | Configurable ALLOW / REDACT / BLOCK enforcement | IMPLEMENTED | Central policy resolves findings with `BLOCK > REDACT > ALLOW`; redaction is centrally applied. |
@@ -36,7 +36,7 @@ repository.
 | Output inspection / output DLP | NOT IMPLEMENTED | Target responses are not currently inspected by security controls. |
 | Budget and resource governance | NOT IMPLEMENTED | No token, compute, request, resource, or financial budget enforcement exists. |
 | Historical attack mitigation | PARTIAL | Five exact repository-owned literals/four codes identify bounded pickle-global and Python execution indicators; default policy BLOCK prevents dispatch. Versioned strict local catalog supports reviewed future file delivery. Binary scanning, generalized injection, external feeds and remote updates are not implemented. |
-| Allowed model restrictions | NOT IMPLEMENTED | Policy cannot currently restrict model selection. |
+| Allowed model restrictions | NOT IMPLEMENTED | One operator-fixed model is a deployment restriction outside policy, not centralized allowed-model governance. |
 | Tool and resource restrictions | NOT IMPLEMENTED | Tool and resource authorization policy is not currently implemented. |
 | Authentication / authorization | NOT IMPLEMENTED | The foundation intentionally has no verified caller identity or authorization system. |
 | Decision auditing | PARTIAL | Safe decision and operational events are emitted and flushed before eligible dispatch. Retention, querying, completion telemetry, and management reporting are not implemented. |
@@ -45,9 +45,9 @@ repository.
 | Interactive dashboard | NOT IMPLEMENTED | No UI exists. |
 | Sample configuration | PARTIAL | A strict policy file exists, but it does not yet demonstrate the full challenge configuration surface such as semantic thresholds and budget rules. |
 | Runtime policy changes | PARTIAL | Policy is administrator-selected and strictly validated, but it is fixed until process restart. |
-| Automated positive and negative tests | PARTIAL | 941 deterministic local tests (861 unit/80 integration) cover the implemented foundation, extension contracts and security pack, including adversarial near misses, multi-control policy/redaction, audit privacy/failures, migration and concurrency. Future budgets, semantic controls and other deferred capabilities lack coverage. |
+| Automated positive and negative tests | PARTIAL | Deterministic local unit/integration tests cover the implemented foundation, extension contracts and security pack, including adversarial near misses, multi-control policy/redaction, audit privacy/failures, migration and concurrency. Transport doubles and a threaded fake runtime verify model dispatch, limits, failures, privacy and concurrency without Ollama. Future budgets/semantic controls lack coverage. |
 | Commercial-service independence | IMPLEMENTED | The current foundation runs without an external model, provider, database, or paid commercial service. |
-| Ad-hoc control-layer demonstration | PARTIAL | The HTTP endpoint demonstrates six deterministic controls and configurable enforcement with local echo. External AI targets and semantic controls remain deferred. |
+| Ad-hoc control-layer demonstration | PARTIAL | The HTTP endpoint demonstrates six deterministic controls and configurable enforcement with local echo. A fixed local model now receives centrally approved content; semantic security and remote targets remain deferred. |
 
 ## Stable evidence
 
@@ -62,12 +62,12 @@ Current implementation details are described in:
 Completed verification evidence is recorded in:
 
 - `docs/worklog.md`;
-- `openspec/changes/add-deterministic-security-controls/evidence/final-implementation-verification.json`;
-- `openspec/changes/add-deterministic-security-controls/evidence/implementation-reviews.md`.
+- `openspec/changes/archive/2026-10-03-add-deterministic-security-controls/evidence/final-implementation-verification.json`;
+- `openspec/changes/archive/2026-10-03-add-deterministic-security-controls/evidence/implementation-reviews.md`.
 
 The deterministic pack was explicitly approved for apply, fully verified and
 accepted after fresh correctness and security reviews both returned PASS on
-2026-10-03. It remains an active change awaiting separate archive authorization.
+2026-10-03. It was subsequently archived after authorized finalization.
 This acceptance adds only bounded deterministic/PII/credential/historical-signature
 coverage; it does not satisfy semantic, budget, reporting or dashboard requirements.
 
@@ -88,3 +88,12 @@ Do not mark a requirement `IMPLEMENTED` because:
 
 Do not use this file as a substitute for an OpenSpec proposal, design, spec, or
 task list.
+
+
+Local-model integration preserves unchanged deterministic enforcement and policy
+digest, required eligibility audit and centrally redacted-only submission. Its
+transport/output caps are adapter defenses, not token/compute budget governance.
+Generated output is uninspected; reporting, semantic controls, authorization and
+budgets remain absent. README records settings, trusted cloud-disabled loopback
+runtime preparation, synchronous thread/latency limits and optional real smoke.
+Final acceptance is gated by the independent implementation reviews in worklog.

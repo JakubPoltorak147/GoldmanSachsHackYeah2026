@@ -834,3 +834,22 @@ and after approved escalation, so existing locked versions/hashes were retained;
 HTTPX, httpcore, certifi and their existing transitive dependencies now belong to
 main, with Poetry's computed content hash and successful consistency check.
 One task-group commit: `feat: add bounded local Ollama adapter`.
+
+### 2026-10-03 — Local model target group 2: governed gateway
+
+Registered local-ollama beside unchanged local-echo and widened only the explicit
+API selector. Added threaded loopback fake-runtime transport/gateway tests, including
+exact original/centrally redacted submission, BLOCK and failed gates with zero
+requests, audit-before-request, retained binding, privacy and synchronized concurrency.
+Full historical fixture comparisons normalize only approved OpenAPI differences.
+Updated implemented-state docs and bounded challenge coverage; final acceptance
+still requires fresh independent review.
+
+Verification: `poetry run pytest tests/unit -q` — 989 PASS;
+`poetry run pytest tests/integration -q` — 122 PASS (approved outside sandbox for
+HTTP boundary/loopback). Ruff check/format and whitespace — PASS (37 formatted files).
+No Ollama/model needed. Existing Starlette TestClient/httpx deprecation warning
+remains. Initial targeted run had one fixture expecting an unsupported `os.system(`
+literal to block (64 PASS, 1 FAIL); corrected it to the approved catalog literal,
+without changing detection. Full suites then passed.
+One group commit: `feat: integrate governed local model target`.

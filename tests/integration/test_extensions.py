@@ -185,7 +185,7 @@ def test_actual_producer_forgery_fails_before_response(tmp_path, output):
 FOUNDATION_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "foundation"
 
 
-def test_openapi_only_finding_code_item_broadens():
+def test_openapi_only_approved_finding_code_and_target_differences():
     baseline = json.loads((FOUNDATION_FIXTURES / "baseline-openapi.json").read_text())
     actual = create_app().openapi()
     baseline_item = baseline["components"]["schemas"]["DecisionResponse"]["properties"][
@@ -199,6 +199,21 @@ def test_openapi_only_finding_code_item_broadens():
     baseline["components"]["schemas"]["DecisionResponse"]["properties"][
         "finding_codes"
     ]["items"] = actual_item
+    target = actual["components"]["schemas"]["InteractionRequest"]["properties"][
+        "target_id"
+    ]
+    old_target = baseline["components"]["schemas"]["InteractionRequest"]["properties"][
+        "target_id"
+    ]
+    assert old_target == {"type": "string", "const": "local-echo", "title": "Target Id"}
+    assert target == {
+        "type": "string",
+        "enum": ["local-echo", "local-ollama"],
+        "title": "Target Id",
+    }
+    baseline["components"]["schemas"]["InteractionRequest"]["properties"][
+        "target_id"
+    ] = target
     assert actual == baseline
 
 
