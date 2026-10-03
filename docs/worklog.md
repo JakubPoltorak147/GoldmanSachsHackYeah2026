@@ -129,3 +129,57 @@ are included. The audit export remains unstaged.
 `chore: bootstrap project documentation and OpenSpec workflow`
 
 Resolve the hash of the commit containing this entry from Git history.
+
+
+### 2026-10-03 — Group 1: runtime and decision core
+
+**OpenSpec change:** `establish-control-layer-foundation`, tasks 1.1–1.7.
+
+**Goal / Built**
+
+Established Python 3.12+, Poetry non-package mode and a locked environment with
+only the approved application/test dependencies. Added frozen core contracts,
+separate operational errors, bounded ASCII email-address detection, strict
+startup YAML loading with duplicate detection and immutable policy snapshots,
+central action resolution, and original-offset selective redaction. Architecture
+now describes the implemented core. User apply approval and resolved assumptions
+are recorded in the change's tasks.md.
+
+**Deviations**
+
+None. The environment initially had Python 3.11 and no Poetry; Python 3.12.15
+and Poetry were bootstrapped using temporary tooling under /tmp. Sandbox command
+launch failed because user namespaces are unavailable; authorized escalated
+commands were used. No bootstrap tool or local environment configuration is staged.
+
+**Verification**
+
+- PASS: `poetry check`, `poetry install`, and imports of all approved dependencies
+  under Python 3.12.15. The checked-in lockfile installs without further changes.
+- PASS: `poetry run ruff check .`, `poetry run ruff format --check .`,
+  `poetry run pytest tests/unit` (103 passed), and `git diff --check`.
+- Initial formatting/lint failures were corrected before final passing checks.
+  Staging exposed an existing trailing blank line in a supplied delta spec that
+  unstaged diff checks could not see; removed it without changing requirements,
+  passed the staged whitespace check and amended the single group commit.
+- Regression-first evidence: six quoted-local substring tests and two HTML-entity
+  suffix tests failed before their fixes, then passed in the complete unit suite.
+- Manual detector probes confirmed ordinary detection, rejection of malformed
+  local parts and HTML-entity suffixes, and detection of a separate valid address
+  after an unsupported quoted local.
+
+**Independent review**
+
+Initial `group1_correctness` and `group1_security`: FAIL for the same confirmed
+quoted-local substring defect. Added failing regressions before suppression of
+quoted-local regions. A related self-probe found an HTML-entity suffix defect;
+added failing regressions and retained semicolons inside whole candidates.
+Fresh `group1_correctness_final`: PASS; independently verified 103 tests, lint,
+format, Poetry check and whitespace. Fresh `group1_security_final`: PASS;
+independently verified 103 tests and 210 candidate probes. No unresolved findings.
+
+**Commit**
+
+`feat: establish immutable policy and decision core`
+
+Resolve the hash of the commit containing this entry from Git history.

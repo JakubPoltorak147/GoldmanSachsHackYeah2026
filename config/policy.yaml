@@ -1,0 +1,7 @@
+version: 1
+policy_id: foundation-default
+controls:
+  email-address:
+    enabled: true
+    findings:
+      pii.email: REDACT
