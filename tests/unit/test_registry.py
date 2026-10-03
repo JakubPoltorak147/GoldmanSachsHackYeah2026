@@ -92,9 +92,16 @@ def test_input_copying_order_exact_lookup_and_frozen_bindings():
         registry.registrations = ()
 
 
-def test_production_registers_only_email():
+def test_production_preserves_email_first_in_expanded_pack():
     registry = default_controls()
-    assert [r.definition.id for r in registry.registrations] == ["email-address"]
+    assert [r.definition.id for r in registry.registrations] == [
+        "email-address",
+        "bearer-credential",
+        "pem-private-key",
+        "github-token",
+        "us-ssn",
+        "known-attack-signatures",
+    ]
     assert registry.registrations[0].definition.findings == (
         FindingDefinition("pii.email", True, True),
     )

@@ -665,3 +665,156 @@ those untracked files to the commits” and “and not staged” authorize inclu
 the remaining reference/requirements/collaboration files and tracked governance,
 context and historical worklog edits in the same baseline commit. These
 supersede the earlier exclusion above. No runtime changes or push are included.
+
+### 2026-10-03 — Deterministic security pack implementation verification
+
+**Change:** `add-deterministic-security-controls`; explicit APPLY APPROVAL states
+“This message is explicit APPLY APPROVAL for the approved proposal, design,
+delta specs and tasks.” Baseline gate verified before behavioral edits: `4b45120`
+is the amended replacement snapshot of `4584f2c`, both parented by `6f167a3`.
+All runtime/config/test/spec repair work is identical; the replacement adds the
+subsequently authorized governance/reference/requirements/collaboration and
+historical worklog files. Evidence: change `evidence/baseline-relationship.md`.
+
+Implemented five independent new controls: bounded whole-line bearer,
+complete supported PEM envelopes, classic ghp_/gho_ shapes, labelled US SSN,
+and five trusted local attack literals/four codes. Explicit default composition
+and policy enable all six controls/ten codes. Central enforcement, original spans,
+non-redactable attack metadata, startup completeness and audited dispatch consume
+existing contracts; domain/registry/policy/service/API/audit/targets/email code
+and dependencies are unchanged. Old email-only default policies fail startup;
+historical fixtures use explicit email-only registrations without weakened assertions.
+
+**Verification (all final results exit 0):**
+
+- `poetry check` — All set.
+- `poetry run ruff check .` — All checks passed.
+- `poetry run ruff format --check .` — 34 files already formatted.
+- `poetry run pytest tests/unit -q` — 856 passed.
+- `poetry run pytest tests/integration -q` — 79 passed, one existing
+  Starlette TestClient/httpx deprecation warning.
+- `poetry run pytest -q` — 935 passed, same existing warning.
+- `openspec validate add-deterministic-security-controls --strict` — valid.
+- `openspec validate --all --strict` — 5 items passed, 0 failed.
+- `openspec validate --archived --strict` — 2 archives passed, 0 failed.
+- `git diff --check` — PASS.
+
+The first complete normal-suite attempt failed collection because both new unit
+and integration modules shared a basename. Design/task file references were
+corrected before renaming the integration file to `test_security_pack_http.py`;
+normal-suite collection and all 935 tests then passed. This reproducer and final
+outputs are in change `evidence/implementation-verification.json`. Earlier
+restricted HTTP execution hung and was interrupted, matching the known baseline
+environment limitation; successful HTTP/normal runs used approved execution outside
+the sandbox. No dependencies or security assertions were weakened.
+
+Added deterministic adversarial grammar/candidate/canonical-base64 tests, strict
+catalog validation and immutable-snapshot tests, real multi-control composition/
+precedence/ordering/redaction, producer/code/span forgery, exception privacy,
+write/short-write/flush poisoning, HTTP failures and concurrent isolation. Tests
+include unchanged full OpenAPI/baseline wire fixtures and actual default local echo.
+Normal suite runs without network, LLM, credentials or paid service; synthetic
+payloads are never executed/deserialized. Independent implementation reviews are
+pending; accepted challenge traceability and task-group completion are not yet claimed.
+
+**Independent-review regression and final verification:** Initial fresh correctness
+and security reviewers both returned FAIL for the same supported-SSN omission:
+`XUS SSN: 123-45-6789` rejected the invalid long label after consuming the valid
+inner `SSN:` candidate. Five prefix regression cases failed before the fix; an
+HTTP regression now verifies default redaction. The Unicode left boundary is
+part of the label regex, preserving ASCII-only keyword folding and approved
+matching semantics. No shared core contract changed.
+
+After repair, every required command was rerun: `poetry check` (All set),
+`poetry run ruff check .` (PASS), `poetry run ruff format --check .`
+(34 formatted), `poetry run pytest tests/unit -q` (861 passed),
+`poetry run pytest tests/integration -q` (80 passed), `poetry run pytest -q`
+(941 passed), `openspec validate add-deterministic-security-controls --strict`
+(valid), `openspec validate --all --strict` (5 passed, 0 failed),
+`openspec validate --archived --strict` (2 passed, 0 failed), and
+`git diff --check` (PASS). All exit 0. The integration/normal suites retain only
+the existing TestClient/httpx warning. Exact outputs:
+`evidence/final-implementation-verification.json` in the change. Two new fresh
+read-only final reviewers are checking the repaired implementation; completion
+and accepted traceability remain gated on both PASS results.
+
+**Final independent acceptance and task-group completion:** Fresh read-only
+`/root/final_correctness_review` returned PASS, no unresolved findings; independently
+ran 861 unit tests and checked approved artifacts, exact grammars, migration,
+composition, historical compatibility and the SSN repair. Fresh read-only
+`/root/final_security_review` returned PASS, no concrete security/bypass findings;
+checked 20,000 SSN boundary cases, ran 624 focused tests and 17 security-pack HTTP
+tests, and reviewed catalog trust/bounds/snapshot, validation, privacy, fail-closed
+dispatch and concurrency. Neither implemented or edited files. Full review evidence:
+change `evidence/implementation-reviews.md`. Both reviewed the repaired implementation
+after the complete final verification above.
+
+Accepted challenge traceability now records bounded deterministic controls,
+PII/credential handling, centralized configurable enforcement, historical literal
+mitigation and positive/negative self-testing. Broad challenge categories remain
+partial/deferred; semantic controls, budgets, reporting and dashboard are not claimed.
+All 19 tasks constitute one approved task group. The single authorized commit
+subject is `feat: add deterministic security controls`; resolve its hash from the
+commit containing this entry. Owned staged scope and whitespace are checked before
+commit; no unrelated work, dependencies or core contracts are included. No archive,
+push or new feature is authorized or performed.
+
+### 2026-10-03 — Deterministic security controls finalization and archive
+
+**Authorization and scope:** The user explicitly requested finalization only of
+`add-deterministic-security-controls`, final verification, completion evidence,
+archive, current/archived validation and a repository-authorized commit; no runtime
+changes, new feature or push. Implementation commit `d11ffc3` has all 19 tasks
+complete and recorded fresh final correctness/security PASS reviews. Current
+runtime/configuration/tests match that reviewed commit exactly.
+
+**Fresh final verification (all successful commands exit 0):**
+
+- `poetry check` — All set.
+- `poetry run ruff check .` — All checks passed.
+- `poetry run ruff format --check .` — 34 files already formatted.
+- `poetry run pytest tests/unit -q` — 861 passed.
+- `poetry run pytest tests/integration -q` — 80 passed.
+- `poetry run pytest -q` — 941 passed before archive and 941 passed after archive.
+- `openspec validate add-deterministic-security-controls --strict` — valid before
+  sync and after synchronization while still active.
+- Before archive: `openspec validate --all --strict` — 5 passed;
+  `openspec validate --specs --strict` — 4 passed;
+  `openspec validate --archived --strict` — 2 passed.
+- After archive: `openspec validate --all --strict` and
+  `openspec validate --specs --strict` — 7 passed, 0 failed each;
+  `openspec validate --archived --strict` — 3 passed, 0 failed.
+- `openspec list --json` — no active changes.
+- `git diff --check` — PASS; staged whitespace checked before commit.
+
+HTTP/complete runs used approved execution outside the sandbox. The initial
+restricted integration attempt produced no results and was interrupted (exit 130)
+after the documented TestClient hang; it is not counted as PASS. Passing HTTP and
+complete runs retain the existing TestClient/httpx deprecation warning. OpenSpec
+emits an informational long-description hint for the approved whole gateway
+requirement; its description and scenarios remain intact and strict validation passes.
+
+**Conformity and independent finalization review:** Fresh read-only reviewer
+`/root/finalization_conformity` returned PASS for approved scope, current reviewed
+runtime and absence of active-change path dependencies in tests/app/config. Its
+second read-only review returned PASS for all synchronized delta requirements and
+scenarios, preservation of untouched blocks/titles/Purpose/email, archive integrity
+and unchanged runtime/config/tests. No files were edited by the reviewer. The
+previous final independent implementation correctness/security reviews remain PASS;
+see [archived implementation reviews](../openspec/changes/archive/2026-10-03-add-deterministic-security-controls/evidence/implementation-reviews.md).
+
+**Synchronization and archive:** Created current credential-exposure-detection,
+labelled-ssn-detection and known-attack-signatures capabilities; added policy and
+audit requirements; merged the two approved gateway updates. All six deltas match
+current requirement/scenario blocks exactly. Existing titles/Purpose, unmentioned
+requirements and the complete email specification remain unchanged.
+Archived at `openspec/changes/archive/2026-10-03-add-deterministic-security-controls/`.
+All 15 original artifacts, including `.openspec.yaml` and evidence, are preserved
+byte for byte from `d11ffc3`, except the authorized finalization append to tasks.
+The active copy is absent. Direct Git comparisons confirm no app/config/tests or
+dependency changes.
+
+**Git:** Started clean. One finalization task-group commit includes only the archive
+move, synchronized current specs and completion/worklog evidence. Subject:
+`chore: archive deterministic security controls`; resolve its hash from the commit
+containing this entry. No push or other feature is included.

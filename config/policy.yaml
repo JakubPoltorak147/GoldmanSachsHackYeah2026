@@ -1,7 +1,31 @@
 version: 1
-policy_id: foundation-default
+policy_id: deterministic-security-default
 controls:
   email-address:
     enabled: true
     findings:
       pii.email: REDACT
+  bearer-credential:
+    enabled: true
+    findings:
+      secret.bearer: BLOCK
+  pem-private-key:
+    enabled: true
+    findings:
+      secret.pem_private_key: BLOCK
+  github-token:
+    enabled: true
+    findings:
+      secret.github_pat: BLOCK
+      secret.github_oauth: BLOCK
+  us-ssn:
+    enabled: true
+    findings:
+      pii.us_ssn: REDACT
+  known-attack-signatures:
+    enabled: true
+    findings:
+      attack.pickle_os_system: BLOCK
+      attack.pickle_posix_system: BLOCK
+      attack.python_os_system: BLOCK
+      attack.python_exec_base64: BLOCK

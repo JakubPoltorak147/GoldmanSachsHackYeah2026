@@ -57,7 +57,7 @@ class FakeControl:
 
 
 def make_service(action=Action.REDACT, enabled=True, control=None, target_fail=False):
-    registry = default_controls()
+    registry = ControlRegistry((default_controls().registrations[0],))
     if control is not None:
         registry = ControlRegistry(
             (ControlRegistration(registry.registrations[0].definition, control),)

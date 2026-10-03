@@ -15,14 +15,15 @@ execution service behind a strict FastAPI HTTP boundary.
 - `policy.py`: strict YAML startup loader, immutable policy snapshot and policy
   digest, finding validation, central resolution and original-text redaction.
   Duplicate keys, unknown configuration and unsupported mappings are rejected.
-  The default `config/policy.yaml` enables email detection and maps it to REDACT.
+  The default `config/policy.yaml` enables all six deterministic controls, REDACTs
+  email/labelled SSN and BLOCKs supported credentials/attack indicators.
 
 Central resolution uses BLOCK > REDACT > ALLOW; no findings yields ALLOW.
 ALLOW preserves the original interaction. REDACT merges overlapping or adjacent
 selected spans and constructs a new interaction from original slices with
 `[REDACTED]` markers. BLOCK produces no forwarding interaction. Invalid findings,
 spans or mappings raise an operational evaluation error, never a synthetic finding
-or policy BLOCK. Default production composition registers only the email finding code.
+or policy BLOCK. Default production composition registers the ten codes of the deterministic pack.
 
 This is deliberately bounded ASCII email-address detection, not general email or
 PII protection. Quoted local parts, Unicode addresses, domain literals, `xn--`
@@ -103,7 +104,7 @@ or map valid subsets. Unsupported REDACT is rejected even when disabled. Adding 
 future production control requires updating every administrator-selected policy.
 The existing version-1 format and canonical configuration digest remain unchanged.
 Registry order determines evaluation order independently of YAML order; disabled
-entries remain observable in audit. Concrete email/echo selection exists only in
+entries remain observable in audit. Concrete detector/echo selection exists only in
 composition.py. Policy and orchestration have no concrete implementation defaults.
 
 Validation uses the invoked producer registration, treats returned identity as an
@@ -125,3 +126,42 @@ this prerequisite merges, new control and target files/tests can have distinct o
 in separate worktrees. Production composition, configuration and shared core/API/
 audit/spec integration remain serialized under one integration owner, with concrete
 ownership and dependencies recorded in each dependent OpenSpec change.
+
+
+## Deterministic security pack
+
+New flat bearer_control/pem_control/github_control/ssn_control modules implement
+stateless bounded evaluators; controls.py and the email evaluator remain unchanged.
+Composition explicitly registers email, bearer, PEM, GitHub, SSN and known attacks,
+in that order. Core domain, registry, policy, service, API, audit and target behavior
+is unchanged. All controls see original content before central redaction; no early
+BLOCK shortcut suppresses other findings. Matching spans use Python characters.
+
+attack_signatures.py reads at most 64 KiB plus one byte from the repository-owned
+config/attack-signatures.json using a module-resolved absolute path. Its strict JSON
+loader rejects duplicate keys, unknown fields, nonstandard constants, invalid
+metadata/scalars and out-of-bounds inputs with sanitized PolicyError. Catalog ID and
+1–32 signature entries become frozen dataclasses/tuples. Literals are 8–256 scalar
+characters. IDs/literals are unique; related quote variants may share a code. Codes
+are deduplicated into registered required-span, non-redactable definitions before
+policy binding; cross-control code collisions remain invalid.
+
+The frozen evaluator uses exact case-sensitive string search, retaining overlapping
+occurrences and deduplicating only identical code/span triples. It executes no
+regex rules, code, pickle or network request. Five repository literals cover four
+pickle-global/Python-execution indicator codes. Coverage and false-positive/negative
+limits are documented in README; this is not binary-model or general injection defense.
+
+The startup-bound registry and immutable catalog are reused under concurrent calls;
+match buffers are request-local. The audit lock and dispatch gate remain unchanged.
+Only trusted finding codes/counts/status enter audit, never matched values, literals,
+spans or catalog contents. Policy digest covers policy only, not the deployed
+catalog revision. Catalog changes require reviewed local replacement, compatible
+policy and restart; no remote updates/runtime reload exist.
+
+Default registration expansion intentionally invalidates old email-only policies
+unless every new control is explicitly configured (possibly disabled). Historical
+email-only tests inject their original registry and preserve the original digest,
+wire fixtures and email semantics. Expanded default composition preserves public
+local echo, request bounds, status/response shapes and full OpenAPI. Rollback pairs
+baseline code with baseline policy, never implicit control disabling.
