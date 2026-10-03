@@ -818,3 +818,118 @@ dependency changes.
 move, synchronized current specs and completion/worklog evidence. Subject:
 `chore: archive deterministic security controls`; resolve its hash from the commit
 containing this entry. No push or other feature is included.
+
+### 2026-10-03 — Local model target group 1: bounded adapter
+
+User explicitly approved exact `add-local-model-target` artifacts for apply, with
+no installation/download, architecture redesign, archive or push. Approval scope
+is recorded in tasks.md. Added frozen settings, local-only bounded HTTPX adapter,
+strict response validation and sanitized failures, plus configuration documentation.
+
+Verification: `poetry run pytest tests/unit/test_ollama_target.py -q` — 126 PASS;
+`poetry check` — PASS; adapter import without SDK/server — PASS;
+`poetry run ruff check .` — PASS; `poetry run ruff format --check .` — 36 files PASS;
+`git diff --check` — PASS. No runtime required. PyPI was unreachable both restricted
+and after approved escalation, so existing locked versions/hashes were retained;
+HTTPX, httpcore, certifi and their existing transitive dependencies now belong to
+main, with Poetry's computed content hash and successful consistency check.
+One task-group commit: `feat: add bounded local Ollama adapter`.
+
+### 2026-10-03 — Local model target group 2: governed gateway
+
+Registered local-ollama beside unchanged local-echo and widened only the explicit
+API selector. Added threaded loopback fake-runtime transport/gateway tests, including
+exact original/centrally redacted submission, BLOCK and failed gates with zero
+requests, audit-before-request, retained binding, privacy and synchronized concurrency.
+Full historical fixture comparisons normalize only approved OpenAPI differences.
+Updated implemented-state docs and bounded challenge coverage; final acceptance
+still requires fresh independent review.
+
+Verification: `poetry run pytest tests/unit -q` — 989 PASS;
+`poetry run pytest tests/integration -q` — 122 PASS (approved outside sandbox for
+HTTP boundary/loopback). Ruff check/format and whitespace — PASS (37 formatted files).
+No Ollama/model needed. Existing Starlette TestClient/httpx deprecation warning
+remains. Initial targeted run had one fixture expecting an unsupported `os.system(`
+literal to block (64 PASS, 1 FAIL); corrected it to the approved catalog literal,
+without changing detection. Full suites then passed.
+One group commit: `feat: integrate governed local model target`.
+
+### 2026-10-03 — Local model target group 3: optional smoke
+
+Added `scripts/smoke_local_model.py` outside pytest discovery. Explicit execution
+uses TestClient/in-memory audit and observed retained adapters to check model scalar
+text success, pre-dispatch evidence, echo and BLOCK zero-call dispatch. Only fixed
+outcomes/length/elapsed time are printed. Missing prerequisites return sanitized
+nonzero failure, never setup/download/fallback. README documents preparation/command.
+
+Verification: `poetry run pytest tests/unit/test_smoke_local_model.py -q` — 12 PASS
+using deterministic targets, no Ollama. Ruff check/format — PASS (39 files);
+`git diff --check` — PASS. Initial malformed-surrogate fixture failed while HTTPX
+constructed JSON, before the script check (11 PASS, 1 FAIL); encoding a literal
+JSON escape corrected the fixture and all checks passed.
+Optional real Ollama smoke: **NOT RUN**. `command -v ollama` found no executable;
+connection to default loopback port 11434 was refused. No runtime/model installation
+or download. Runtime version/model/hardware/inference latency: unavailable/not measured.
+One group commit: `test: add optional local model smoke`.
+
+### 2026-10-03 — Local model target final verification and independent review
+
+Final implementation state submitted to fresh reviewers: `a327fc0`, following
+adapter group `d1d1fc8` and integration group `cc3c977`. Required verification after
+all three groups (commands exit 0, no real Ollama/model):
+
+- `poetry check` — All set.
+- `poetry run ruff check .` — All checks passed.
+- `poetry run ruff format --check .` — 39 files already formatted.
+- `poetry run pytest tests/unit` — 1001 passed, 1 existing TestClient deprecation warning.
+- `poetry run pytest tests/integration` — 122 passed, 1 existing TestClient warning.
+- `openspec validate add-local-model-target --strict` — valid.
+- `openspec validate --all --strict` — 8 passed, 0 failed (existing long gateway
+  requirement informational hint only).
+- `openspec validate --archived --strict` — 3 passed, 0 failed.
+- `git diff --check` — PASS.
+
+HTTP/loopback TestClient checks used approved execution outside the sandbox. All
+normal tests are deterministic with client doubles/fake runtime or injected targets.
+Optional real smoke remains NOT RUN as recorded in group 3. No core policy/service/
+audit/registry/domain/control, policy config/catalog or historical fixture JSON edits.
+Fresh correctness and security review outcomes will be recorded below before
+completion; artifact/task readiness alone is not acceptance.
+
+**Fresh specification/correctness review — PASS:** `/root/correctness_review` did
+not implement this change and reviewed final code `a327fc0`, all approved artifacts,
+current specs and subsequent evidence/doc wording changes. No blocking findings or
+scope deviations. Confirmed settings, bounded one-call transport and parsing,
+central policy/audit/retained binding/zero-call gates, unchanged echo/protected
+files, public compatibility and optional smoke/privacy/limitations.
+Independent focused adapter/smoke/target/fake-runtime/compatibility run:
+`poetry run pytest tests/unit/test_ollama_target.py tests/unit/test_smoke_local_model.py tests/unit/test_targets.py tests/integration/test_local_model_target.py tests/integration/test_extensions.py -q`
+— 217 PASS, 1 existing warning (7.18s), outside sandbox; initial restricted
+TestClient attempt hung and was interrupted without a verification outcome.
+No required corrective regression was identified.
+
+**Fresh security/bypass review — PASS:** `/root/security_review`, a fresh reviewer
+that did not implement, reviewed final implementation
+`a327fc09fb3cd6a340eae012da11deeaaeed631c` and documentation-only updates against
+approved scope/current specs. No concrete bypass or mandatory fix. Independently
+ran 180 adapter/smoke/fake-runtime checks plus 47 existing routing/service regressions,
+all PASS, with no file edits. Verified fixed loopback destination/model, disabled
+proxies/redirects/retries, pre-parse bounds/strict scalar completion, central redaction,
+retained binding/audit gating, repeated poisoned-sink zero dispatch, identity and
+error/log privacy, concurrency isolation and smoke privacy. References included
+ollama_target.py settings/transport/parser and unchanged service.py retained dispatch.
+
+**Final disposition:** Both independent implementation reviews PASS. No confirmed
+findings, so no corrective code changes/regressions were needed under task 4.3.
+Final code/tests remain byte-identical to reviewed `a327fc0`; final group contains
+only documentation/evidence/task completion. Required checks above cover final code;
+strict validation/lint/format/whitespace were rechecked after evidence completion.
+All 23 tasks are complete; verification and review gates are satisfied. Real smoke
+NOT RUN is optional and does not weaken deterministic verification. Remaining limits:
+uninspected output, trusted cloud-disabled daemon without attestation, per-operation
+inactivity bounds rather than total deadline/cancellation, synchronous thread/queue
+latency and no semantic controls, full model authorization, budgets or reporting.
+One completed integration/evidence commit: `chore: record local model verification`;
+resolve its hash from the commit containing this entry. No archive, spec synchronization,
+installation/model download, push or new change. Implementation PASS, ready for later
+user-authorized archive.

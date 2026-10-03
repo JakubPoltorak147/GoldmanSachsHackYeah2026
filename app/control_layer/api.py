@@ -25,7 +25,7 @@ from app.control_layer.targets import TargetRegistry
 class InteractionRequest(BaseModel):
     model_config = ConfigDict(extra="forbid", strict=True)
 
-    target_id: Literal["local-echo"]
+    target_id: Literal["local-echo", "local-ollama"]
     content: str = Field(min_length=1, max_length=16384)
 
     @field_validator("content")

@@ -17,6 +17,7 @@ from app.control_layer.github_control import (
     GITHUB_PAT_CODE,
     GitHubTokenControl,
 )
+from app.control_layer.ollama_target import OllamaTextTarget, load_ollama_settings
 from app.control_layer.pem_control import PEM_CODE, PEM_CONTROL_ID, PemPrivateKeyControl
 from app.control_layer.registry import (
     ControlDefinition,
@@ -87,5 +88,11 @@ def default_controls() -> ControlRegistry:
 
 def default_targets() -> TargetRegistry:
     return TargetRegistry(
-        (RegisteredTarget(TargetDefinition("local-echo"), LocalEchoTarget()),)
+        (
+            RegisteredTarget(TargetDefinition("local-echo"), LocalEchoTarget()),
+            RegisteredTarget(
+                TargetDefinition("local-ollama"),
+                OllamaTextTarget(load_ollama_settings()),
+            ),
+        )
     )

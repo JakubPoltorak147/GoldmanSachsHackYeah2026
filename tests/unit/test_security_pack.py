@@ -81,7 +81,8 @@ def test_default_registration_ownership_capabilities_policy_and_targets():
                 Action.REDACT if code.startswith("pii.") else Action.BLOCK
             )
     assert [t.definition.target_id for t in default_targets().registrations] == [
-        "local-echo"
+        "local-echo",
+        "local-ollama",
     ]
 
 

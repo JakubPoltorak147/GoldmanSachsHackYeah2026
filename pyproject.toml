@@ -15,10 +15,10 @@ fastapi = "^0.135"
 pydantic = "^2.12"
 PyYAML = "^6.0"
 uvicorn = "^0.41"
+httpx = "^0.28"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^9.0"
-httpx = "^0.28"
 ruff = "^0.15"
 
 [tool.pytest.ini_options]

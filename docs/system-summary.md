@@ -2,7 +2,7 @@
 
 This document summarizes the implemented `establish-control-layer-foundation`,
 `generalize-control-layer-extension-points` and
-`add-deterministic-security-controls` behavior. It explains the current
+`add-deterministic-security-controls` and `add-local-model-target` behavior. It explains the current
 application and its relationship to the approved assumptions and original product goals. Required behavior remains defined by
 OpenSpec; implementation details are recorded in [architecture.md](architecture.md).
 
@@ -10,16 +10,16 @@ OpenSpec; implementation details are recorded in [architecture.md](architecture.
 
 The application accepts text, checks it using six independently registered
 deterministic controls, applies central policy, records a safe audit event, and forwards eligible text to a local
-echo target. This establishes a working control-layer boundary that can be tested
+echo or fixed local Ollama text target. This establishes a working control-layer boundary that can be tested
 without an external model, provider, database, or commercial API.
 
-The current target simply returns the text it receives. There is no model or agent
-reasoning in this foundation.
+Local echo returns received text unchanged. Local Ollama submits approved text
+to one operator-configured loopback model; generated output is uninspected.
 
 ### Request flow
 
 1. **Validate the request.** `POST /v1/interactions` requires exactly `target_id`
-   and `content`. The target must be `local-echo`; content must contain 1–16,384
+   and `content`. The target must be `local-echo` or `local-ollama`; content must contain 1–16,384
    Python characters after JSON decoding. Wrong types, extra fields, caller-supplied
    identity, malformed JSON, and lone Unicode surrogates are rejected. Valid text
    is preserved without trimming or normalization.
@@ -105,7 +105,7 @@ execution path toward that goal.
 | --- | --- |
 | Central policy and explainable decisions | Strict startup configuration, structured findings and resolutions, and central ALLOW/REDACT/BLOCK decisions. Live policy reload is deferred. |
 | Deterministic security controls and data handling | Bounded email/labelled SSN, bearer/PEM/classic GitHub shapes and five known-attack literals under central policy. Broad PII/secrets and output inspection are deferred. |
-| Provider independence and integration boundaries | Immutable target registrations, exact retained dispatch bindings, a TargetAdapter contract, and local echo implementation. External provider, model, agent, and MCP integrations are deferred. |
+| Provider independence and integration boundaries | Immutable target registrations, exact retained dispatch bindings, a TargetAdapter contract, local echo and bounded local Ollama implementations. Remote provider, agent, and MCP integrations are deferred. |
 | Auditability and telemetry | Safe decision/operational records and evaluation duration on stdout. Durable storage, completion records, and a dashboard are deferred. |
 | Robust local verification | Deterministic unit tests, HTTP integration tests, injected targets/sinks, and independent correctness/security reviews. |
 | Broader governance | Authentication, authorization, budgets, execution limits, semantic controls, prompt-injection controls, and model/tool/resource restrictions are deferred. |
@@ -155,6 +155,32 @@ unit and HTTP tests cover adversarial boundaries, mixed findings, selective reda
 fail-closed output validation, audit privacy/dispatch and concurrent state isolation.
 Final verification records 861 unit and 80 integration tests (941 normal tests),
 Poetry/Ruff/strict OpenSpec/whitespace PASS and fresh independent correctness and
-security PASS reviews. Exact evidence is in the active change and worklog; accepted
+security PASS reviews. Exact evidence is in the archived change and worklog; accepted
 challenge traceability records bounded coverage while keeping broader areas partial
-or deferred. The change is implemented and reviewed, awaiting archive authorization.
+or deferred. The deterministic-pack change was subsequently archived after authorized finalization.
+
+
+## Local model integration and remaining limits
+
+The local model uses existing central enforcement, retained binding and
+mandatory audit gates. BLOCK/evaluation/audit failures make zero runtime calls;
+REDACT submits only centrally transformed content. Both targets register without
+network checks. Absent runtime/model fails lazily with sanitized 502, without
+retry/fallback/download. Prompt/response text never enters application audit or
+operational errors. The policy digest and six deterministic controls are unchanged.
+
+Settings freeze outside policy until restart (defaults/ranges in README). One
+fixed model is deployment configuration, not full model authorization. Per-call
+clients/buffers isolate concurrent synchronous calls. I/O inactivity limits are
+not end-to-end deadlines or cancellation guarantees; model/hardware/queue latency
+can occupy threads. Output DLP, semantic security, budgets, reporting and runtime
+attestation remain absent. Normal suites use deterministic doubles/fake runtime;
+real smoke is optional and separately invoked. Final evidence is in worklog.
+
+
+The local-model implementation was accepted after 1001 unit and 122 integration
+checks, Ruff/Poetry/strict active/all/archived OpenSpec/whitespace PASS and fresh
+independent correctness/security PASS reviews. The optional real smoke was NOT RUN
+because Ollama was not on PATH and port 11434 was unavailable; nothing was installed
+or downloaded. This change remains active and unarchived. See the
+[final implementation evidence](worklog.md#2026-10-03--local-model-target-final-verification-and-independent-review).

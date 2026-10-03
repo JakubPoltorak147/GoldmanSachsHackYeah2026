@@ -47,8 +47,8 @@ symbolic IDs to adapters. The service resolves once before evaluation, retains t
 binding through audit and invokes it after successful eligible emission. Resolution
 is lookup only. Unknown internal IDs use `unresolved` operational audit metadata
 and perform no control evaluation or dispatch. The reserved ID cannot be registered.
-Default composition registers only `local-echo`; internal test registries can contain
-other local targets without broadening the HTTP contract.
+Default composition registers `local-echo` and `local-ollama`; other injected
+internal targets remain private.
 
 `audit.py` defines the allowlisted AuditEvent and JsonLinesAuditSink. Events contain
 server ID, UTC time, retained registered target, policy digest, evaluated controls, explicit control
@@ -68,7 +68,7 @@ The HTTP application wires one stdout sink for its lifespan.
 `api.py` exposes `create_app` and POST `/v1/interactions`. Its lifespan loads the
 administrator-selected `CONTROL_LAYER_POLICY` file (default `config/policy.yaml`)
 before accepting requests and creates the service with a stdout sink and local
-echo target. Invalid startup policy raises sanitized PolicyError; no fallback exists.
+echo and local-model targets. Invalid startup policy raises sanitized PolicyError; no fallback exists.
 Policy is fixed until restart. Test injection preserves the same startup loader.
 
 Strict Pydantic request DTOs forbid extras, coercion, unsupported targets, empty
@@ -115,10 +115,10 @@ span-optional codes allow spanless ALLOW/BLOCK. Central span redaction is unchan
 
 `create_app` accepts explicit control_registry/target_registry/sink injections
 through the same startup binder as defaults. Response finding_codes contains strict
-validated strings in evaluation order with multiplicity; OpenAPI removes only the
-former `pii.email` item constant. All other schemas and public statuses remain
-unchanged; public requests still admit only local echo. Generated clients may need
-regeneration. The implementation keeps flat modules; no package migration is needed.
+validated strings in evaluation order with multiplicity. OpenAPI differences from
+the historical foundation are the former `pii.email` item constant removal and
+the explicit local-echo/local-ollama target enum. Other schemas and public statuses
+remain unchanged. Generated clients may need regeneration. The implementation keeps flat modules; no package migration is needed.
 
 Registrations freeze metadata and bindings, not evaluator/adapter internal state;
 extensions must be safe for concurrent invocation or synchronize internally. After
@@ -133,8 +133,8 @@ ownership and dependencies recorded in each dependent OpenSpec change.
 New flat bearer_control/pem_control/github_control/ssn_control modules implement
 stateless bounded evaluators; controls.py and the email evaluator remain unchanged.
 Composition explicitly registers email, bearer, PEM, GitHub, SSN and known attacks,
-in that order. Core domain, registry, policy, service, API, audit and target behavior
-is unchanged. All controls see original content before central redaction; no early
+in that order. The pack leaves core domain, registry, policy, service and audit behavior
+unchanged; the subsequent local-model integration changes only composition/API. All controls see original content before central redaction; no early
 BLOCK shortcut suppresses other findings. Matching spans use Python characters.
 
 attack_signatures.py reads at most 64 KiB plus one byte from the repository-owned
@@ -165,3 +165,32 @@ email-only tests inject their original registry and preserve the original digest
 wire fixtures and email semantics. Expanded default composition preserves public
 local echo, request bounds, status/response shapes and full OpenAPI. Rollback pairs
 baseline code with baseline policy, never implicit control disabling.
+
+
+## Local Ollama text boundary
+
+`ollama_target.py` owns frozen validated settings and a synchronous TargetAdapter.
+Default assembly loads six explicit environment settings without contacting a
+runtime; invalid configuration raises fixed `invalid_target_configuration`. Explicit
+injected registries bypass default settings. HTTPX 0.28 is a runtime dependency.
+The literal HTTP loopback origin and single fixed model are server-owned, outside
+policy; this change does not alter policy schema/digest or any deterministic control.
+
+After successful eligibility audit, one per-invocation client POSTs exact approved
+content to `/api/generate` with model and `stream: false`. Environment proxies,
+redirects and retries are disabled. Raw identity-encoded bytes are capped before
+strict UTF-8/JSON parsing. Completed scalar text alone becomes TargetResult;
+metadata is ignored, overflow rejected and every failure sanitized as target_failed.
+Response/client buffers are invocation-local, with resources closed on failures.
+
+Connect/write/pool and read inactivity timeouts are explicit, with no total deadline
+or guaranteed runtime cancellation. Synchronous thread-pool calls may queue/occupy
+threads for hardware/load-dependent durations. Evaluation audit duration excludes
+inference, and eligibility does not imply execution success. There is no output
+inspection, centralized model authorization, semantic control, budget or reporting
+addition. Deployment trusts the separately administered loopback daemon, with
+cloud disabled. No runtime/model installation, download or lifecycle handling exists.
+
+Unit tests inject client doubles; integration uses a deterministic threaded loopback
+runtime and real HTTPX plus the full gateway. The optional separately invoked smoke
+is documented in README and is excluded from normal test discovery.
