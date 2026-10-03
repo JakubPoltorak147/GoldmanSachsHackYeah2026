@@ -1,0 +1,131 @@
+# Worklog
+
+Chronological record of completed project work.
+
+This is not a backlog and not a planning document.
+Planned work belongs in OpenSpec.
+
+Add one entry per completed task group.
+
+---
+
+## Entry template
+
+### YYYY-MM-DD — <short goal>
+
+**OpenSpec change:** `<change-name>` or `none`
+
+**Goal**
+
+What this task group was intended to achieve.
+
+**Built**
+
+- What changed.
+- Important implementation details only where useful.
+
+**Deviations**
+
+- Differences from the approved design or task.
+- `None` when there were no deviations.
+
+**Verification**
+
+List only commands and checks actually performed, with their results.
+For Python changes, Ruff and relevant test commands may be appropriate once
+those tools and tests exist. For documentation work, record document inspection,
+whitespace checks, and relevant workflow checks.
+
+Record PASS, FAIL or skipped with the reason.
+
+**Independent review**
+
+Reviewer result: `PASS` / `FAIL` / `not required`
+
+Product implementation always requires a fresh independent review result of `PASS`
+before completion or archive. `not required` may be used only for a documentation
+or administrative task outside product implementation when no review is required
+by the task; record the reason. It cannot waive a product review requirement.
+
+Summarize confirmed findings and their resolution.
+
+**Manual check**
+
+What was actually run or inspected.
+
+**Commit**
+
+`<commit hash> <commit subject>`
+
+For the commit containing this entry, record its exact subject and resolve the hash
+from Git history after committing; do not embed a self-referential commit hash.
+
+---
+
+## Completed work
+
+### 2026-10-03 — Bootstrap project documentation and OpenSpec workflow
+
+**OpenSpec change:** `none` (repository bootstrap only; no product change created)
+
+**Goal**
+
+Prepare a truthful documentation and workflow baseline without selecting or
+implementing product architecture.
+
+**Built**
+
+- Replaced the copied starter README with product status, document links, workflow,
+  and OpenSpec setup instructions.
+- Clarified approval before apply and verification plus independent review `PASS`
+  before completion or archive; generated OpenSpec skills remain unchanged.
+- Marked project-context architecture as conceptual and reduced architecture
+  documentation to the current unimplemented state.
+- Clarified worklog verification and review requirements.
+- Added Python ignore rules and four-space Python indentation.
+- Removed the copied Node manifests, Docker ignore file, and isolation script.
+- Retained OpenSpec configuration, placeholders, skills, ownership marker, and
+  the project security-reviewer instructions.
+
+**Deviations**
+
+None. No application code, runtime configuration, product specs, or infrastructure
+was introduced. The requested audit export `bootstrap-audit.txt` is retained locally
+and excluded from this commit.
+
+**Verification**
+
+- PASS: inspected working-tree and staged diffs; `git diff --check` and
+  `git diff --cached --check` passed.
+- PASS: `openspec --version` reported `1.14.0`; `openspec context --json`
+  recognized this repository's OpenSpec root.
+- PASS: `openspec list --json` and `openspec list --specs --json` reported no
+  changes or capability specs; `openspec schemas --json` resolved `spec-driven`.
+- PASS: the installed OpenSpec `readProjectConfig` parser read `schema: spec-driven`;
+  `openspec doctor --json` reported a healthy root with no status issues.
+- PASS: compared SHA-256 hashes of all six generated skills with the pre-edit
+  baseline; contents are unchanged.
+- PASS: checked that all four named starter files are absent.
+- PASS: inspected `git status --short --untracked-files=all`.
+- PASS: checked the staged path set against the explicit 18-file allowlist and
+  inspected staged content; no local dev-container or secret files are staged.
+- Product tests were not run: no application or product test suite exists.
+
+**Independent review**
+
+PASS: fresh independent correctness review (`bootstrap_review`) and staging /
+workflow safety review (`bootstrap_safety_review`) found no concrete findings.
+Both confirmed the approved scope, unchanged generated skills, workflow gates,
+and staged whitespace checks.
+
+**Manual check**
+
+Inspected repository documentation, configuration, skills, and Git status.
+Inspected the staged file list and content; only the authorized bootstrap files
+are included. The audit export remains unstaged.
+
+**Commit**
+
+`chore: bootstrap project documentation and OpenSpec workflow`
+
+Resolve the hash of the commit containing this entry from Git history.
