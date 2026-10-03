@@ -111,9 +111,17 @@ def test_unsupported_disabled_redaction(tmp_path):
         load(tmp_path, raw)
 
 
-def test_existing_digest():
+def test_existing_digest(tmp_path):
+    path = tmp_path / "historical-policy.yaml"
+    path.write_text(
+        "version: 1\npolicy_id: foundation-default\ncontrols:\n"
+        "  email-address:\n    enabled: true\n    findings:\n"
+        "      pii.email: REDACT\n"
+    )
     assert (
-        load_policy("config/policy.yaml", default_controls()).digest
+        load_policy(
+            path, ControlRegistry((default_controls().registrations[0],))
+        ).digest
         == "5416596669594e811989eb6cfba7311737e80922f2fb4c2171837038aa427ec4"
     )
 

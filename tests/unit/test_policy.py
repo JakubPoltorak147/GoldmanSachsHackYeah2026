@@ -37,7 +37,7 @@ def config(action="REDACT", enabled="true", findings=True):
 def load(tmp_path, text):
     path = tmp_path / "policy.yaml"
     path.write_text(text)
-    return load_policy(path, default_controls())
+    return load_policy(path, ControlRegistry((default_controls().registrations[0],)))
 
 
 @pytest.mark.parametrize("action", list(Action))

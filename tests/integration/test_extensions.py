@@ -230,7 +230,7 @@ def test_recorded_foundation_http_compatibility(tmp_path, case):
     name = case["name"]
     stream = io.StringIO()
     target = Target()
-    controls = default_controls()
+    controls = ControlRegistry((default_controls().registrations[0],))
     if name == "evaluation_failed":
 
         class FailedControl:

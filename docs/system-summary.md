@@ -1,14 +1,15 @@
 # System summary and approved assumptions
 
-This document summarizes the implemented `establish-control-layer-foundation`
-and `generalize-control-layer-extension-points` changes. It explains the current
+This document summarizes the implemented `establish-control-layer-foundation`,
+`generalize-control-layer-extension-points` and
+`add-deterministic-security-controls` behavior. It explains the current
 application and its relationship to the approved assumptions and original product goals. Required behavior remains defined by
 OpenSpec; implementation details are recorded in [architecture.md](architecture.md).
 
 ## What the system does
 
-The application accepts text, checks it using a deterministic control, applies
-central policy, records a safe audit event, and forwards eligible text to a local
+The application accepts text, checks it using six independently registered
+deterministic controls, applies central policy, records a safe audit event, and forwards eligible text to a local
 echo target. This establishes a working control-layer boundary that can be tested
 without an external model, provider, database, or commercial API.
 
@@ -46,8 +47,9 @@ reasoning in this foundation.
 
 ### Policy configuration
 
-The default [policy](../config/policy.yaml) enables email-address detection and
-maps `pii.email` to `REDACT`. An administrator can select another file through
+The default [policy](../config/policy.yaml) enables all six controls, REDACTs
+email/labelled US SSN and BLOCKs supported bearer/PEM/GitHub credentials and known
+attack literals. An administrator can select another file through
 `CONTROL_LAYER_POLICY`. Policy loads before the application accepts requests and
 remains fixed until restart.
 
@@ -102,7 +104,7 @@ execution path toward that goal.
 | Original goal | Current implementation |
 | --- | --- |
 | Central policy and explainable decisions | Strict startup configuration, structured findings and resolutions, and central ALLOW/REDACT/BLOCK decisions. Live policy reload is deferred. |
-| Deterministic security controls and data handling | One bounded input email detector and central span redaction. General PII, secret detection, and output inspection are deferred. |
+| Deterministic security controls and data handling | Bounded email/labelled SSN, bearer/PEM/classic GitHub shapes and five known-attack literals under central policy. Broad PII/secrets and output inspection are deferred. |
 | Provider independence and integration boundaries | Immutable target registrations, exact retained dispatch bindings, a TargetAdapter contract, and local echo implementation. External provider, model, agent, and MCP integrations are deferred. |
 | Auditability and telemetry | Safe decision/operational records and evaluation duration on stdout. Durable storage, completion records, and a dashboard are deferred. |
 | Robust local verification | Deterministic unit tests, HTTP integration tests, injected targets/sinks, and independent correctness/security reviews. |
@@ -131,3 +133,28 @@ Installation, policy selection, request examples, and verification commands are
 in the [README](../README.md). Current requirements are in
 [OpenSpec specs](../openspec/specs/); the approved design and original deltas remain
 in the [archived OpenSpec change](../openspec/changes/archive/2026-10-03-establish-control-layer-foundation/).
+
+
+## Deterministic pack coverage and limits
+
+Five additional controls consume the existing extension contracts without core
+redesign. Each code has one registered owner; controls supply findings, not actions.
+Credentials/PII use validated original-content spans for optional central redaction;
+attack findings are non-redactable. Policy remains the sole enforcement owner.
+
+The implemented pack protects precise whole-line bearer, complete supported PEM,
+classic ghp_/gho_ shapes and explicitly labelled US SSN subsets. The five-entry
+trusted local catalog detects four known pickle-global/Python-execution indicators,
+with exact case-sensitive literal search and immutable startup metadata. README
+records exact grammar, default mappings, catalog trust and unsupported cases.
+
+There is no general secret heuristic, unlabelled SSN discovery, crypto/identity
+verification, binary/model artifact scanning, semantic detector or general jailbreak
+protection. Benign examples can match; unsupported variants can pass. Added local
+unit and HTTP tests cover adversarial boundaries, mixed findings, selective redaction,
+fail-closed output validation, audit privacy/dispatch and concurrent state isolation.
+Final verification records 861 unit and 80 integration tests (941 normal tests),
+Poetry/Ruff/strict OpenSpec/whitespace PASS and fresh independent correctness and
+security PASS reviews. Exact evidence is in the active change and worklog; accepted
+challenge traceability records bounded coverage while keeping broader areas partial
+or deferred. The change is implemented and reviewed, awaiting archive authorization.

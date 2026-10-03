@@ -71,7 +71,7 @@ def setup_app(
         target_registry=TargetRegistry(
             (RegisteredTarget(TargetDefinition("local-echo"), target),)
         ),
-        control_registry=None
+        control_registry=ControlRegistry((default_controls().registrations[0],))
         if control is None
         else ControlRegistry(
             (
@@ -298,6 +298,7 @@ def test_environment_selects_block_policy_at_startup(tmp_path, monkeypatch):
     target = SpyTarget(stream)
     app = create_app(
         audit_sink=JsonLinesAuditSink(stream),
+        control_registry=ControlRegistry((default_controls().registrations[0],)),
         target_registry=TargetRegistry(
             (RegisteredTarget(TargetDefinition("local-echo"), target),)
         ),
@@ -318,6 +319,7 @@ def test_missing_environment_policy_prevents_startup(tmp_path, monkeypatch):
     target = SpyTarget(stream)
     app = create_app(
         audit_sink=JsonLinesAuditSink(stream),
+        control_registry=ControlRegistry((default_controls().registrations[0],)),
         target_registry=TargetRegistry(
             (RegisteredTarget(TargetDefinition("local-echo"), target),)
         ),

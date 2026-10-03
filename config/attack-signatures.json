@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "catalog_id": "initial-known-attacks-v1",
+  "signatures": [
+    {"id": "pickle-os-system", "code": "attack.pickle_os_system", "literal": "cos\nsystem\n"},
+    {"id": "pickle-posix-system", "code": "attack.pickle_posix_system", "literal": "cposix\nsystem\n"},
+    {"id": "python-os-system-single", "code": "attack.python_os_system", "literal": "__import__('os').system("},
+    {"id": "python-os-system-double", "code": "attack.python_os_system", "literal": "__import__(\"os\").system("},
+    {"id": "python-exec-base64", "code": "attack.python_exec_base64", "literal": "exec(base64.b64decode("}
+  ]
+}
