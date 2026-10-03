@@ -1,8 +1,8 @@
 # System summary and approved assumptions
 
 This document summarizes the implemented `establish-control-layer-foundation`
-change. It explains the current application and its relationship to the approved
-assumptions and original product goals. Required behavior remains defined by
+and `generalize-control-layer-extension-points` changes. It explains the current
+application and its relationship to the approved assumptions and original product goals. Required behavior remains defined by
 OpenSpec; implementation details are recorded in [architecture.md](architecture.md).
 
 ## What the system does
@@ -24,8 +24,11 @@ reasoning in this foundation.
    is preserved without trimming or normalization.
 2. **Create an interaction.** The server assigns a UUID. The interaction is
    immutable and contains the ID, target ID, and original content.
-3. **Evaluate enabled controls.** The email-address control returns structured
-   `pii.email` findings with original-text spans. Findings contain trusted
+3. **Resolve the target and evaluate enabled controls.** The service retains one
+   exact registered target binding for audit and dispatch. Startup-bound control
+   registrations determine evaluation order and trusted producer identities.
+   Findings are validated against the registration actually invoked. The
+   email-address control returns structured `pii.email` findings with original-text spans. Findings contain trusted
    identifiers and locations, without copying detected addresses or choosing an
    enforcement action. A disabled control is skipped.
 4. **Resolve central policy.** Policy maps findings to `ALLOW`, `REDACT`, or
@@ -78,14 +81,15 @@ email address, personal information, or secret.
 
 ### Audit contents and failures
 
-Decision events contain a server interaction ID, UTC timestamp, fixed target ID,
-policy digest, evaluated controls, explicit control enablement, action, finding
+Decision events contain a server interaction ID, UTC timestamp, target ID derived
+from the retained registration, policy digest, evaluated controls, explicit control enablement, action, finding
 codes/counts, forwarding eligibility, and evaluation duration. They exclude
 content, matched values, snippets, source spans, content hashes, and exception text.
 
 Evaluation failure can produce a separate safe operational event when the sink
-is available. It carries a fixed error code and no policy action or finding. If
-the sink is unavailable, the service still prevents dispatch. A target failure
+is available. It carries a fixed error code and no policy action or finding.
+Unknown internal targets use the reserved server-owned `unresolved` identity and never expose
+the supplied target string. If the sink is unavailable, the service still prevents dispatch. A target failure
 leaves the earlier decision record intact; it does not turn that record into a
 claim that execution succeeded.
 
@@ -99,12 +103,13 @@ execution path toward that goal.
 | --- | --- |
 | Central policy and explainable decisions | Strict startup configuration, structured findings and resolutions, and central ALLOW/REDACT/BLOCK decisions. Live policy reload is deferred. |
 | Deterministic security controls and data handling | One bounded input email detector and central span redaction. General PII, secret detection, and output inspection are deferred. |
-| Provider independence and integration boundaries | A TargetAdapter contract and local echo implementation. External provider, model, agent, and MCP integrations are deferred. |
+| Provider independence and integration boundaries | Immutable target registrations, exact retained dispatch bindings, a TargetAdapter contract, and local echo implementation. External provider, model, agent, and MCP integrations are deferred. |
 | Auditability and telemetry | Safe decision/operational records and evaluation duration on stdout. Durable storage, completion records, and a dashboard are deferred. |
 | Robust local verification | Deterministic unit tests, HTTP integration tests, injected targets/sinks, and independent correctness/security reviews. |
 | Broader governance | Authentication, authorization, budgets, execution limits, semantic controls, prompt-injection controls, and model/tool/resource restrictions are deferred. |
 
-This foundation demonstrates centralized enforcement and safe dispatch locally.
+The foundation and extension registrations demonstrate centralized enforcement
+and safe dispatch locally.
 It does not yet provide the complete security surface described in the product
 roadmap.
 
@@ -115,6 +120,12 @@ The foundation change's [worklog](worklog.md) records 133 passing unit tests,
 a real Uvicorn HTTP smoke test, and fresh independent correctness and security
 reviews returning `PASS`. These are the recorded implementation results;
 this summary does not claim a new execution of those checks.
+
+The extension-point change subsequently recorded 237 passing unit tests and
+63 passing integration tests, compatibility checks and fresh independent
+correctness/security PASS reviews. Its approved artifacts are in the
+[extension-point archive](../openspec/changes/archive/2026-10-03-generalize-control-layer-extension-points/).
+Fresh post-archive baseline verification is recorded separately in the worklog.
 
 Installation, policy selection, request examples, and verification commands are
 in the [README](../README.md). Current requirements are in

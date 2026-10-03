@@ -3,9 +3,13 @@
 Before substantial exploration, planning, review or implementation, read:
 
 1. `docs/project-context.md`;
-2. the relevant current specs under `openspec/specs/`;
-3. the active change under `openspec/changes/<change>/`, when one exists;
-4. `docs/architecture.md` only for architecture that is already implemented.
+2. `docs/requirements/challenge-requirements.md` when the work affects challenge
+   scope, deliverables, or prioritization;
+3. the relevant current specs under `openspec/specs/`;
+4. the active change under `openspec/changes/<change>/`, when one exists;
+5. `docs/architecture.md` only for architecture that is already implemented;
+6. `docs/collaboration.md` when multiple developers or coding agents are working
+   in parallel.
 
 Keep these responsibilities separate:
 
@@ -15,6 +19,9 @@ Keep these responsibilities separate:
 - `openspec/changes/` contains proposed or approved changes in progress.
 - `docs/architecture.md` describes architecture that actually exists.
 - `docs/worklog.md` records completed work and verification.
+- `docs/requirements/challenge-requirements.md` records the external challenge scope.
+- `docs/requirements/traceability.md` records challenge coverage, not implementation plans.
+- `docs/collaboration.md` defines coordination rules for parallel work.
 
 Do not treat roadmap ideas or proposed designs as implemented behaviour.
 
@@ -84,6 +91,26 @@ A subagent that edits code must receive:
 - an explicit list of files or areas it must not touch.
 
 Subagents do not commit, change branches, archive OpenSpec changes, or modify user data.
+
+## Parallel human development
+
+Multiple implementation changes may proceed in parallel only when their ownership
+boundaries and dependencies are explicit.
+
+Use separate branches and preferably separate Git worktrees.
+
+Do not let two active implementation changes independently modify the same
+security-critical contract.
+
+Treat shared policy, domain, orchestration, API, audit, architecture and current
+spec files as integration hotspots.
+
+When parallel work needs the same hotspot, first create and merge a prerequisite
+change that establishes the shared extension point, or serialize that part of the
+implementation.
+
+Record concrete ownership and dependencies in the active OpenSpec change rather
+than maintaining a separate execution roadmap.
 
 ## Independent review
 

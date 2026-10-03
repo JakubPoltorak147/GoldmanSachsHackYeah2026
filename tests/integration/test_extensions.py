@@ -182,12 +182,11 @@ def test_actual_producer_forgery_fails_before_response(tmp_path, output):
     assert "RAW_SECRET" not in stream.getvalue() + response.text
 
 
+FOUNDATION_FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "foundation"
+
+
 def test_openapi_only_finding_code_item_broadens():
-    baseline = json.loads(
-        Path(
-            "openspec/changes/generalize-control-layer-extension-points/evidence/baseline-openapi.json"
-        ).read_text()
-    )
+    baseline = json.loads((FOUNDATION_FIXTURES / "baseline-openapi.json").read_text())
     actual = create_app().openapi()
     baseline_item = baseline["components"]["schemas"]["DecisionResponse"]["properties"][
         "finding_codes"
@@ -219,11 +218,7 @@ def test_response_codes_are_strict_strings():
         )
 
 
-BASELINE = json.loads(
-    Path(
-        "openspec/changes/generalize-control-layer-extension-points/evidence/baseline-http.json"
-    ).read_text()
-)["cases"]
+BASELINE = json.loads((FOUNDATION_FIXTURES / "baseline-http.json").read_text())["cases"]
 
 
 @pytest.mark.parametrize("case", BASELINE, ids=lambda case: case["name"])
