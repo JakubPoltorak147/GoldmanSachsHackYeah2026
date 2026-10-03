@@ -7,15 +7,14 @@ from time import perf_counter
 from uuid import UUID
 
 from app.control_layer.audit import AuditEvent, AuditSink
-from app.control_layer.controls import PRODUCTION_CODES, EmailAddressControl
-from app.control_layer.domain import Control, Decision, EvaluationError, Interaction
+from app.control_layer.domain import Decision, EvaluationError, Interaction
 from app.control_layer.policy import (
-    Policy,
+    BoundPolicy,
     decide,
     forwarded_interaction,
     validate_findings,
 )
-from app.control_layer.targets import TargetAdapter, TargetResult
+from app.control_layer.targets import TargetRegistry, TargetResult
 
 
 @dataclass(frozen=True)
@@ -29,21 +28,23 @@ class ServiceOutcome:
 class InteractionService:
     def __init__(
         self,
-        policy: Policy,
+        policy: BoundPolicy,
         audit_sink: AuditSink,
-        target: TargetAdapter,
-        controls: tuple[Control, ...] | None = None,
+        targets: TargetRegistry,
     ) -> None:
+        if type(policy) is not BoundPolicy or type(targets) is not TargetRegistry:
+            raise ValueError("invalid_composition")
         self.policy = policy
         self.audit_sink = audit_sink
-        self.target = target
-        self.controls = controls if controls is not None else (EmailAddressControl(),)
+        self.targets = targets
 
     def _event(
         self,
         interaction: Interaction,
         started: float,
         evaluated: tuple[str, ...],
+        target_id: str,
+        policy: BoundPolicy,
         decision: Decision | None = None,
     ) -> AuditEvent:
         counts = (
@@ -53,12 +54,10 @@ class InteractionService:
             event_type="decision" if decision else "operational_failure",
             interaction_id=interaction.id,
             timestamp=datetime.now(UTC),
-            target_id="local-echo",
-            policy_digest=self.policy.digest,
+            target_id=target_id,
+            policy_digest=policy.digest,
             evaluated_controls=evaluated,
-            control_status=tuple(
-                (c.control_id, c.enabled) for c in self.policy.controls
-            ),
+            control_status=tuple((c.control_id, c.enabled) for c in policy.entries),
             action=decision.action if decision else None,
             finding_counts=tuple(sorted(counts.items())),
             forwarding_eligible=decision is not None and decision.action != "BLOCK",
@@ -69,38 +68,33 @@ class InteractionService:
     def evaluate(self, interaction: Interaction) -> ServiceOutcome:
         started = perf_counter()
         evaluated = []
+        target_id = "unresolved"
+        policy = self.policy
         try:
-            if interaction.target_id != "local-echo":
-                raise EvaluationError()
-            registry = {control.id: control for control in self.controls}
-            if set(registry) != set(PRODUCTION_CODES) or len(registry) != len(
-                self.controls
-            ):
-                raise EvaluationError()
+            binding = self.targets.resolve(interaction.target_id)
+            target_id = binding.definition.target_id
             findings = []
-            for config in self.policy.controls:
-                if (
-                    config.control_id not in registry
-                    or type(config.enabled) is not bool
-                ):
+            for entry in policy.entries:
+                if type(entry.enabled) is not bool:
                     raise EvaluationError()
-                if config.enabled:
-                    control = registry[config.control_id]
-                    output = control.evaluate(interaction)
+                if entry.enabled:
+                    output = entry.registration.evaluator.evaluate(interaction)
                     validated = validate_findings(
-                        output, config.control_id, interaction.content, PRODUCTION_CODES
+                        output, entry.registration, interaction.content
                     )
-                    evaluated.append(config.control_id)
+                    evaluated.append(entry.control_id)
                     findings.extend(validated)
-            decision = decide(
-                interaction, tuple(findings), tuple(evaluated), self.policy
-            )
+            decision = decide(interaction, tuple(findings), tuple(evaluated), policy)
             forwarded = forwarded_interaction(interaction, decision)
-            event = self._event(interaction, started, tuple(evaluated), decision)
+            event = self._event(
+                interaction, started, tuple(evaluated), target_id, policy, decision
+            )
         except Exception:
             try:
                 self.audit_sink.emit(
-                    self._event(interaction, started, tuple(evaluated))
+                    self._event(
+                        interaction, started, tuple(evaluated), target_id, policy
+                    )
                 )
             except Exception:
                 pass
@@ -112,7 +106,7 @@ class InteractionService:
         if forwarded is None:
             return ServiceOutcome(interaction.id, decision=decision)
         try:
-            result = self.target.invoke(forwarded)
+            result = binding.adapter.invoke(forwarded)
             if type(result) is not TargetResult or type(result.content) is not str:
                 raise EvaluationError()
         except Exception:

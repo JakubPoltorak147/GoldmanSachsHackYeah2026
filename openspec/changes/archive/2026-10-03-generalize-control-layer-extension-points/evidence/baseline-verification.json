@@ -1,0 +1,113 @@
+{
+  "branch": "main",
+  "captured_at": "2026-10-03T20:44:19.561920+00:00",
+  "commands": [
+    {
+      "command": [
+        "poetry",
+        "check"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "All set!\n"
+    },
+    {
+      "command": [
+        "poetry",
+        "run",
+        "ruff",
+        "check",
+        "."
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "All checks passed!\n"
+    },
+    {
+      "command": [
+        "poetry",
+        "run",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "14 files already formatted\n"
+    },
+    {
+      "command": [
+        "poetry",
+        "run",
+        "pytest",
+        "tests/unit"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "============================= test session starts ==============================\nplatform linux -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0\nrootdir: /workspace/GoldmanSachsHackYeah2026\nconfigfile: pyproject.toml\nplugins: anyio-4.15.1\ncollected 133 items\n\ntests/unit/test_core.py .......                                          [  5%]\ntests/unit/test_email.py ............................................... [ 40%]\n.....                                                                    [ 44%]\ntests/unit/test_policy.py ............................................   [ 77%]\ntests/unit/test_service.py ..............................                [100%]\n\n============================= 133 passed in 0.81s ==============================\n"
+    },
+    {
+      "command": [
+        "poetry",
+        "run",
+        "pytest",
+        "tests/integration"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": "============================= test session starts ==============================\nplatform linux -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0\nrootdir: /workspace/GoldmanSachsHackYeah2026\nconfigfile: pyproject.toml\nplugins: anyio-4.15.1\ncollected 40 items\n\ntests/integration/test_api.py ........................................   [100%]\n\n============================== 40 passed in 2.03s ==============================\n"
+    },
+    {
+      "command": [
+        "openspec",
+        "validate",
+        "--all",
+        "--strict"
+      ],
+      "exit_code": 0,
+      "stderr": "- Validating...\n",
+      "stdout": "✓ spec/decision-audit\n✓ spec/email-address-detection\n✓ change/generalize-control-layer-extension-points\n✓ spec/interaction-gateway\n✓ spec/policy-decisions\nTotals: 5 passed, 0 failed (5 items)\n"
+    },
+    {
+      "command": [
+        "openspec",
+        "validate",
+        "--archived",
+        "--strict"
+      ],
+      "exit_code": 0,
+      "stderr": "- Validating archived changes...\n",
+      "stdout": "✓ change/2026-10-03-establish-control-layer-foundation\nTotals: 1 passed, 0 failed (1 items)\n"
+    },
+    {
+      "command": [
+        "git",
+        "-c",
+        "safe.directory=/workspace/GoldmanSachsHackYeah2026",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stderr": "",
+      "stdout": ""
+    }
+  ],
+  "poetry_version": "Poetry (version 2.5.1)",
+  "policy_digest": "5416596669594e811989eb6cfba7311737e80922f2fb4c2171837038aa427ec4",
+  "policy_file_sha256": "9dd0abf869bb4bb7733c63406344807c8f22ab7d20a87bf368ebae5dae0e2995",
+  "policy_id": "foundation-default",
+  "preexisting_status": "M AGENTS.md\n M docs/project-context.md\n M docs/worklog.md\n?? docs/collaboration.md\n?? docs/generalize-control-layer-extension-points-summary.md\n?? docs/reference/\n?? docs/requirements/\n?? openspec/changes/generalize-control-layer-extension-points/",
+  "python_version": "3.12.15 (main, Oct  3 2026, 20:05:42) [GCC 12.2.0]",
+  "revision": "97d2c1504b4426450fde5b58e61d4e5a100bbc18",
+  "unchanged_product_paths": [
+    "app",
+    "tests",
+    "config",
+    "pyproject.toml",
+    "poetry.lock",
+    "README.md",
+    "docs/architecture.md",
+    "openspec/specs"
+  ]
+}

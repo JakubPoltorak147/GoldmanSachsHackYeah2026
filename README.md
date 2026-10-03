@@ -46,6 +46,55 @@ controls:
 Supported mappings are `ALLOW`, `REDACT`, `BLOCK`. Disabled controls are skipped;
 any configured mapping is still validated. Audit events expose explicit enablement.
 
+## Extension contracts and compatibility
+
+`composition.py` explicitly registers only email and local echo in production.
+`ControlRegistry` holds ordered, frozen `ControlRegistration` objects pairing an
+immutable `ControlDefinition` and its `FindingDefinition` catalogue with an
+evaluator. Control IDs use `[a-z][a-z0-9_-]{0,63}` and globally unique finding
+codes use `[a-z][a-z0-9_.-]{0,63}`. Registration copies input collections; evaluator
+IDs cannot change the retained binding. Evaluators and adapters must support
+concurrent calls or synchronize their own state.
+
+`load_policy(path, registry)` returns a `BoundPolicy` retaining the exact
+registrations. Every registered control needs an explicit boolean `enabled` entry.
+Enabled controls need mappings for every declared code; disabled controls may omit
+findings or map a subset. Adding a future production registration therefore
+requires updating every selected policy file before deployment, even when disabled.
+Execution follows registration order, independently of YAML key order. The digest
+identifies canonical policy configuration, not registry order or executable code.
+
+Findings are validated against the actual invoked registration. A definition that
+supports REDACT must require a valid original-text span under every policy action.
+Spanless definitions can support ALLOW/BLOCK only. Redaction remains central span
+replacement with `[REDACTED]`; controls supply no transformation callbacks.
+
+`TargetRegistry` holds frozen `RegisteredTarget(TargetDefinition(id), adapter)`
+bindings. Exact resolution invokes no adapter and has no URL interpretation or
+fallback. The service retains one binding from before evaluation through audit
+and dispatch; unknown internal targets fail with safe audit ID `unresolved`, which
+cannot be registered. Registration does not grant public access: HTTP still accepts
+only `local-echo`.
+
+Tests can pass `control_registry`, `target_registry`, `audit_sink` and `policy_path`
+to `create_app`. Both defaults and injections use the same startup binder; invalid
+injections fail without fallback. The internal service accepts a bound policy,
+sink and target registry. Previous Python fixture constructors have changed; these
+are internal contracts rather than a public SDK.
+
+Response `finding_codes` is now a strict list of strings from validated findings,
+preserving order and repeated codes. OpenAPI removes its former `pii.email` item
+constant; generated clients may require regeneration. Default values, all other
+schemas, response envelopes, status mappings and the default policy digest remain
+unchanged. The flat module layout is retained; package migration is optional for
+future work.
+
+After this prerequisite merges, separate developers can own new control files and
+new target files/tests in separate branches/worktrees. One integration owner must
+serialize edits to production composition, policy configuration and shared core,
+API, audit and current specs. Each dependent OpenSpec change records exact ownership
+and dependencies.
+
 ## Try an interaction
 
 ```sh

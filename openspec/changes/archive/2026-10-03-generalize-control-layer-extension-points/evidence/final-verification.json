@@ -1,0 +1,95 @@
+{
+  "captured_at": "2026-10-03T21:07:53.156603+00:00",
+  "commands": [
+    {
+      "command": [
+        "poetry",
+        "check"
+      ],
+      "exit_code": 0,
+      "stdout": "All set!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "poetry",
+        "run",
+        "ruff",
+        "check",
+        "."
+      ],
+      "exit_code": 0,
+      "stdout": "All checks passed!\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "poetry",
+        "run",
+        "ruff",
+        "format",
+        "--check",
+        "."
+      ],
+      "exit_code": 0,
+      "stdout": "22 files already formatted\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "poetry",
+        "run",
+        "pytest",
+        "tests/unit"
+      ],
+      "exit_code": 0,
+      "stdout": "============================= test session starts ==============================\nplatform linux -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0\nrootdir: /workspace/GoldmanSachsHackYeah2026\nconfigfile: pyproject.toml\nplugins: anyio-4.15.1\ncollected 237 items\n\ntests/unit/test_binding.py .........................                     [ 10%]\ntests/unit/test_core.py .......                                          [ 13%]\ntests/unit/test_email.py ............................................... [ 33%]\n.....                                                                    [ 35%]\ntests/unit/test_finding_validation.py .........................          [ 45%]\ntests/unit/test_policy.py ............................................   [ 64%]\ntests/unit/test_registry.py .........................                    [ 75%]\ntests/unit/test_routing.py .................                             [ 82%]\ntests/unit/test_service.py ..............................                [ 94%]\ntests/unit/test_targets.py ............                                  [100%]\n\n============================= 237 passed in 1.55s ==============================\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "poetry",
+        "run",
+        "pytest",
+        "tests/integration"
+      ],
+      "exit_code": 0,
+      "stdout": "============================= test session starts ==============================\nplatform linux -- Python 3.12.15, pytest-9.1.1, pluggy-1.6.0\nrootdir: /workspace/GoldmanSachsHackYeah2026\nconfigfile: pyproject.toml\nplugins: anyio-4.15.1\ncollected 63 items\n\ntests/integration/test_api.py ........................................   [ 63%]\ntests/integration/test_extensions.py .......................             [100%]\n\n=============================== warnings summary ===============================\n.venv/lib/python3.12/site-packages/fastapi/testclient.py:1\n  /workspace/GoldmanSachsHackYeah2026/.venv/lib/python3.12/site-packages/fastapi/testclient.py:1: StarletteDeprecationWarning: Using `httpx` with `starlette.testclient` is deprecated; install `httpx2` instead.\n    from starlette.testclient import TestClient as TestClient  # noqa\n\n-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html\n======================== 63 passed, 1 warning in 2.78s =========================\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "openspec",
+        "validate",
+        "generalize-control-layer-extension-points",
+        "--strict"
+      ],
+      "exit_code": 0,
+      "stdout": "Change 'generalize-control-layer-extension-points' is valid\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "openspec",
+        "validate",
+        "--all",
+        "--strict"
+      ],
+      "exit_code": 0,
+      "stdout": "\u2713 spec/decision-audit\n\u2713 spec/email-address-detection\n\u2713 change/generalize-control-layer-extension-points\n\u2713 spec/interaction-gateway\n\u2713 spec/policy-decisions\nTotals: 5 passed, 0 failed (5 items)\n",
+      "stderr": "- Validating...\n"
+    },
+    {
+      "command": [
+        "git",
+        "diff",
+        "--check"
+      ],
+      "exit_code": 0,
+      "stdout": "",
+      "stderr": ""
+    }
+  ],
+  "policy_file_sha256": "9dd0abf869bb4bb7733c63406344807c8f22ab7d20a87bf368ebae5dae0e2995",
+  "baseline_revision": "97d2c1504b4426450fde5b58e61d4e5a100bbc18"
+}

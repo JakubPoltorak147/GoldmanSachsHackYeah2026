@@ -1,0 +1,290 @@
+{
+  "cases": [
+    {
+      "audit_record_count": 1,
+      "forwarded_content": [
+        "  Hello 🙂 é\n  "
+      ],
+      "name": "allow_no_findings",
+      "policy_mapping": "REDACT (default)",
+      "request": {
+        "json": {
+          "content": "  Hello 🙂 é\n  ",
+          "target_id": "local-echo"
+        },
+        "method": "POST",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "action": "ALLOW",
+        "finding_codes": [],
+        "interaction_id": "<server-generated-uuid>",
+        "reason_code": "no_findings",
+        "result": {
+          "content": "  Hello 🙂 é\n  "
+        }
+      },
+      "status": 200,
+      "target_calls": 1
+    },
+    {
+      "audit_record_count": 1,
+      "forwarded_content": [
+        "Contact <[REDACTED]>"
+      ],
+      "name": "redact_default",
+      "policy_mapping": "REDACT (default)",
+      "request": {
+        "json": {
+          "content": "Contact <alice@example.com>",
+          "target_id": "local-echo"
+        },
+        "method": "POST",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "action": "REDACT",
+        "finding_codes": [
+          "pii.email"
+        ],
+        "interaction_id": "<server-generated-uuid>",
+        "reason_code": "policy_resolved",
+        "result": {
+          "content": "Contact <[REDACTED]>"
+        }
+      },
+      "status": 200,
+      "target_calls": 1
+    },
+    {
+      "audit_record_count": 1,
+      "forwarded_content": [
+        "Contact <alice@example.com>"
+      ],
+      "name": "allow_email",
+      "policy_mapping": "ALLOW",
+      "request": {
+        "json": {
+          "content": "Contact <alice@example.com>",
+          "target_id": "local-echo"
+        },
+        "method": "POST",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "action": "ALLOW",
+        "finding_codes": [
+          "pii.email"
+        ],
+        "interaction_id": "<server-generated-uuid>",
+        "reason_code": "policy_resolved",
+        "result": {
+          "content": "Contact <alice@example.com>"
+        }
+      },
+      "status": 200,
+      "target_calls": 1
+    },
+    {
+      "audit_record_count": 1,
+      "forwarded_content": [],
+      "name": "block_email",
+      "policy_mapping": "BLOCK",
+      "request": {
+        "json": {
+          "content": "Contact <alice@example.com>",
+          "target_id": "local-echo"
+        },
+        "method": "POST",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "action": "BLOCK",
+        "finding_codes": [
+          "pii.email"
+        ],
+        "interaction_id": "<server-generated-uuid>",
+        "reason_code": "policy_resolved"
+      },
+      "status": 403,
+      "target_calls": 0
+    },
+    {
+      "audit_record_count": 0,
+      "forwarded_content": [],
+      "name": "invalid_request",
+      "policy_mapping": "REDACT (default)",
+      "request": {
+        "json": {
+          "content": "",
+          "target_id": "local-echo"
+        },
+        "method": "POST",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "error_code": "invalid_request"
+      },
+      "status": 422,
+      "target_calls": 0
+    },
+    {
+      "audit_record_count": 0,
+      "forwarded_content": [],
+      "name": "unsupported_target",
+      "policy_mapping": "REDACT (default)",
+      "request": {
+        "json": {
+          "content": "Hello",
+          "target_id": "unsupported"
+        },
+        "method": "POST",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "error_code": "invalid_request"
+      },
+      "status": 422,
+      "target_calls": 0
+    },
+    {
+      "audit_record_count": 0,
+      "forwarded_content": [],
+      "name": "malformed_json",
+      "policy_mapping": "REDACT (default)",
+      "request": {
+        "content": "{\"target_id\":\"local-echo\",",
+        "headers": {
+          "content-type": "application/json"
+        },
+        "method": "POST",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "error_code": "invalid_request"
+      },
+      "status": 422,
+      "target_calls": 0
+    },
+    {
+      "audit_record_count": 1,
+      "forwarded_content": [],
+      "name": "evaluation_failed",
+      "policy_mapping": "REDACT (default)",
+      "request": {
+        "json": {
+          "content": "Hello",
+          "target_id": "local-echo"
+        },
+        "method": "POST",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "error_code": "evaluation_failed",
+        "interaction_id": "<server-generated-uuid>"
+      },
+      "status": 503,
+      "target_calls": 0
+    },
+    {
+      "audit_record_count": 0,
+      "forwarded_content": [],
+      "name": "audit_failed",
+      "policy_mapping": "REDACT (default)",
+      "request": {
+        "json": {
+          "content": "Hello",
+          "target_id": "local-echo"
+        },
+        "method": "POST",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "error_code": "audit_failed",
+        "interaction_id": "<server-generated-uuid>"
+      },
+      "status": 503,
+      "target_calls": 0
+    },
+    {
+      "audit_record_count": 1,
+      "forwarded_content": [
+        "Hello"
+      ],
+      "name": "target_failed",
+      "policy_mapping": "REDACT (default)",
+      "request": {
+        "json": {
+          "content": "Hello",
+          "target_id": "local-echo"
+        },
+        "method": "POST",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "error_code": "target_failed",
+        "interaction_id": "<server-generated-uuid>"
+      },
+      "status": 502,
+      "target_calls": 1
+    },
+    {
+      "audit_record_count": 0,
+      "forwarded_content": [],
+      "name": "service_unavailable",
+      "policy_mapping": "REDACT (default)",
+      "request": {
+        "json": {
+          "content": "Hello",
+          "target_id": "local-echo"
+        },
+        "method": "POST",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "error_code": "service_unavailable"
+      },
+      "status": 503,
+      "target_calls": 0
+    },
+    {
+      "audit_record_count": 0,
+      "forwarded_content": [],
+      "name": "not_found",
+      "policy_mapping": "REDACT (default)",
+      "request": {
+        "json": {
+          "content": "Hello",
+          "target_id": "local-echo"
+        },
+        "method": "POST",
+        "path": "/unknown"
+      },
+      "response": {
+        "error_code": "not_found"
+      },
+      "status": 404,
+      "target_calls": 0
+    },
+    {
+      "audit_record_count": 0,
+      "forwarded_content": [],
+      "name": "method_not_allowed",
+      "policy_mapping": "REDACT (default)",
+      "request": {
+        "json": {
+          "content": "Hello",
+          "target_id": "local-echo"
+        },
+        "method": "GET",
+        "path": "/v1/interactions"
+      },
+      "response": {
+        "error_code": "method_not_allowed"
+      },
+      "status": 405,
+      "target_calls": 0
+    }
+  ],
+  "normalization": "Only server-generated response interaction_id values are replaced with <server-generated-uuid>; null omission is retained. All inputs and failures are synthetic local cases."
+}

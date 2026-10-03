@@ -252,11 +252,18 @@ The demonstration agent or model exists to prove that the control layer integrat
 
 Do not spend substantial project effort building an advanced agent when the same requirement can be demonstrated with a simple existing or local implementation.
 
-## Current implementation status
+## Implementation status
 
-No application components have been implemented. This document records product
-constraints and conceptual direction; it does not establish a production architecture.
+This document intentionally does not track current implementation status.
 
-Implementation decisions belong in OpenSpec change designs and, after they become true, in `docs/architecture.md`.
+Use:
 
-Do not describe planned functionality as already implemented.
+- `openspec/specs/` for current required behavior;
+- `openspec/changes/` for proposed or approved work in progress;
+- `docs/architecture.md` for architecture that actually exists;
+- `docs/system-summary.md` for a concise description of current implemented behavior;
+- `docs/requirements/traceability.md` for coverage against the external challenge;
+- `docs/worklog.md` for completed verification and review evidence.
+
+Implementation decisions belong in reviewed OpenSpec changes and should be added
+to `docs/architecture.md` only after they become true.
