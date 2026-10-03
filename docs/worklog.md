@@ -323,3 +323,53 @@ with no new behavior, requirements, policy, or enforcement changes.
 `docs: summarize control layer and approved assumptions`
 
 Resolve the hash of the commit containing this entry from Git history.
+
+### 2026-10-03 — Archive the foundation as the current baseline
+
+**OpenSpec change:** `establish-control-layer-foundation`, archived as
+`2026-10-03-establish-control-layer-foundation`.
+
+**Built**
+
+- Inspected all change artifacts, implementation boundaries, repository status,
+  task evidence and implementation commits. The current user instruction
+  authorizes archive, superseding the earlier apply-session archive restriction.
+- Ran `openspec archive establish-control-layer-foundation --yes` with spec sync
+  and validation enabled. Promoted four capabilities with 11 added requirements
+  and preserved the complete change, including `.openspec.yaml`, in the archive.
+- Updated README validation commands, the system-summary archive link, and archived
+  task evidence links/authorization. No application, test, dependency or runtime
+  configuration changed. Pre-existing documentation edits were left untouched.
+
+**Verification**
+
+- PASS: 19/19 tasks, all artifacts complete, matching implementation commits, and
+  recorded final independent correctness/security reviews PASS with no unresolved
+  findings (see the group 3 entry above). No current-spec conflict or destination
+  collision; all deltas contain only ADDED requirements and authored Purpose.
+- PASS: reran Poetry check, Ruff lint/format, and all 173 unit/integration tests.
+- PASS: `openspec validate establish-control-layer-foundation --strict` before
+  archive; `openspec validate --all --strict` (4 specs) and
+  `openspec validate --archived --strict` (1 archive) after archive.
+- PASS: exact comparison of all four Purpose sections and complete requirement/
+  scenario bodies against archived deltas; new main-spec headings are canonical.
+- PASS: OpenSpec lists four current specs and zero active changes; whitespace
+  and staged scope checks passed before commit.
+- Archive emitted only the non-blocking advisory to consider splitting changes
+  with more than 10 deltas. No missing prerequisites or blocking conflicts.
+
+**Independent review**
+
+Product implementation retains the recorded fresh `final_correctness` and
+`final_security` PASS results. This task changes only planning/documentation
+state. Fresh independent `archive_review`: PASS; confirmed exact spec preservation,
+unchanged archived artifacts, corrected links, completion gates, strict validation,
+zero active changes, and staged scope/whitespace with no runtime or user edits.
+
+**Deviations:** None. No redesign, runtime change or push.
+
+**Commit**
+
+`chore: archive control layer foundation baseline`
+
+Resolve the hash of the commit containing this entry from Git history.

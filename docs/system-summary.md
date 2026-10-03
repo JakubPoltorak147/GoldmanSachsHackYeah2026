@@ -117,5 +117,6 @@ reviews returning `PASS`. These are the recorded implementation results;
 this summary does not claim a new execution of those checks.
 
 Installation, policy selection, request examples, and verification commands are
-in the [README](../README.md). Approved requirements and design remain in the
-[active OpenSpec change](../openspec/changes/establish-control-layer-foundation/).
+in the [README](../README.md). Current requirements are in
+[OpenSpec specs](../openspec/specs/); the approved design and original deltas remain
+in the [archived OpenSpec change](../openspec/changes/archive/2026-10-03-establish-control-layer-foundation/).

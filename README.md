@@ -91,7 +91,8 @@ poetry run ruff check .
 poetry run ruff format --check .
 poetry run pytest tests/unit
 poetry run pytest tests/integration
-openspec validate establish-control-layer-foundation --strict
+openspec validate --all --strict
+openspec validate --archived --strict
 git diff --check
 ```
 

@@ -34,8 +34,12 @@
 
 ## Evidence
 
-- Group 1: [worklog](../../../docs/worklog.md#2026-10-03--group-1-runtime-and-decision-core); final verification and fresh correctness/security reviews PASS. Commit subject: `feat: establish immutable policy and decision core` (resolve hash from Git history).
+- Group 1: [worklog](../../../../docs/worklog.md#2026-10-03--group-1-runtime-and-decision-core); final verification and fresh correctness/security reviews PASS. Commit subject: `feat: establish immutable policy and decision core` (resolve hash from Git history).
 
-- Group 2: [worklog](../../../docs/worklog.md#2026-10-03--group-2-audited-execution-path); 133 unit tests and fresh correctness/security reviews PASS. Commit subject: `feat: add audit-gated local interaction execution` (resolve hash from Git history).
+- Group 2: [worklog](../../../../docs/worklog.md#2026-10-03--group-2-audited-execution-path); 133 unit tests and fresh correctness/security reviews PASS. Commit subject: `feat: add audit-gated local interaction execution` (resolve hash from Git history).
 
-- Group 3 and final gate: [worklog](../../../docs/worklog.md#2026-10-03--group-3-http-boundary-and-final-verification); 133 unit + 40 integration tests, Ruff, Poetry, strict OpenSpec validation, real local Uvicorn smoke and whitespace PASS. Fresh independent complete-change reviews `final_correctness` and `final_security`: PASS. Commit subject: `feat: expose validated policy-governed interaction API` (resolve hash from Git history). All required verification/review gates passed; do not archive or push in this apply session.
+- Group 3 and final gate: [worklog](../../../../docs/worklog.md#2026-10-03--group-3-http-boundary-and-final-verification); 133 unit + 40 integration tests, Ruff, Poetry, strict OpenSpec validation, real local Uvicorn smoke and whitespace PASS. Fresh independent complete-change reviews `final_correctness` and `final_security`: PASS. Commit subject: `feat: expose validated policy-governed interaction API` (resolve hash from Git history). All required verification/review gates passed; do not archive or push in this apply session.
+
+## Archive evidence
+
+The 2026-10-03 user instruction to make the completed foundation the current baseline authorizes archive after checking repository gates. Archived with spec synchronization and validation enabled; all four capabilities are now current specs. See [archive verification](../../../../docs/worklog.md#2026-10-03--archive-the-foundation-as-the-current-baseline). Earlier apply-session restrictions remain historical. No runtime behavior changed.
