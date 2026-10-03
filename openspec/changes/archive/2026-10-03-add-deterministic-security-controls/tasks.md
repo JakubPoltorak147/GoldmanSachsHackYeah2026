@@ -72,3 +72,17 @@ Reviewer scopes, checks and initial finding/repair are recorded in
 traceability/system documentation updated; all 41 owned paths inspected and staged
 whitespace PASS. Single authorized commit: `feat: add deterministic security controls`
 (resolve hash from the commit containing this evidence). No archive or push.
+
+## Finalization authorization and evidence
+
+The user instruction on 2026-10-03 explicitly requests “Finalize this change only”,
+“archive `add-deterministic-security-controls`” and “commit the archive/spec
+synchronization if repository rules authorize it.” This authorizes synchronization,
+archive and one finalization commit after the repository gates pass; no runtime
+changes, new feature or push. Implementation commit: `d11ffc3`. All 19 tasks and
+recorded final independent correctness/security PASS reviews remain complete.
+
+Fresh final verification and read-only conformity PASS, synchronized six deltas,
+archive integrity and current/archived validation are recorded in
+`docs/worklog.md`, entry “Deterministic security controls finalization and archive”.
+This completion entry supplements the historical implementation evidence above.
