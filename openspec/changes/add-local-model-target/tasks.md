@@ -34,13 +34,24 @@ Owner: primary applying agent/developer, responsible for implementation, integra
 
 ## 4. Integration verification and independent review
 
-- [ ] 4.1 Run poetry run ruff check ., poetry run ruff format --check ., poetry run pytest tests/unit, poetry run pytest tests/integration, openspec validate add-local-model-target --strict, openspec validate --all --strict, openspec validate --archived --strict and git diff --check; record exact outcomes in docs/worklog.md and link the entry here. All required checks must PASS without Ollama.
-- [ ] 4.2 Delegate fresh specification/correctness review and fresh security/bypass review to agents that did not implement; require concrete file-referenced findings/reproducers and PASS/FAIL, record evidence in docs/worklog.md and reference it here. Proposal review does not satisfy this implementation gate.
-- [ ] 4.3 Fix confirmed findings only within approved scope, first add reproducing regressions, rerun affected required checks and request fresh independent reviews until both PASS; verify final review evidence references the final code state.
-- [ ] 4.4 Record final verification/review references here and completed evidence in docs/worklog.md; commit this completed integration group exactly once after required PASS. Do not declare complete or archive before these gates. Archiving requires a later user request; never push without explicit instruction.
+- [x] 4.1 Run poetry run ruff check ., poetry run ruff format --check ., poetry run pytest tests/unit, poetry run pytest tests/integration, openspec validate add-local-model-target --strict, openspec validate --all --strict, openspec validate --archived --strict and git diff --check; record exact outcomes in docs/worklog.md and link the entry here. All required checks must PASS without Ollama.
+- [x] 4.2 Delegate fresh specification/correctness review and fresh security/bypass review to agents that did not implement; require concrete file-referenced findings/reproducers and PASS/FAIL, record evidence in docs/worklog.md and reference it here. Proposal review does not satisfy this implementation gate.
+- [x] 4.3 Fix confirmed findings only within approved scope, first add reproducing regressions, rerun affected required checks and request fresh independent reviews until both PASS; verify final review evidence references the final code state.
+- [x] 4.4 Record final verification/review references here and completed evidence in docs/worklog.md; commit this completed integration group exactly once after required PASS. Do not declare complete or archive before these gates. Archiving requires a later user request; never push without explicit instruction.
 
 Group 1 evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-1-bounded-adapter).
 
 Group 2 evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-2-governed-gateway).
 
 Group 3 and optional NOT RUN evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-3-optional-smoke).
+
+Final verification/review evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-final-verification-and-independent-review).
+
+Final acceptance: required checks PASS (1001 unit + 122 integration, Ruff,
+Poetry consistency, active/all/archived strict validation and whitespace).
+Fresh independent `/root/correctness_review` PASS and `/root/security_review` PASS
+on final implementation `a327fc0`; no confirmed findings or corrective code changes.
+Final task group changes only docs/evidence, preserving reviewed implementation.
+See final worklog link above for review verification and optional smoke **NOT RUN**
+(runtime executable absent and default port refused). Implementation is ready for
+archive, but this change remains active; no archive or push is authorized.

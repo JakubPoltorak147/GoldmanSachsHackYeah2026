@@ -871,3 +871,65 @@ Optional real Ollama smoke: **NOT RUN**. `command -v ollama` found no executable
 connection to default loopback port 11434 was refused. No runtime/model installation
 or download. Runtime version/model/hardware/inference latency: unavailable/not measured.
 One group commit: `test: add optional local model smoke`.
+
+### 2026-10-03 — Local model target final verification and independent review
+
+Final implementation state submitted to fresh reviewers: `a327fc0`, following
+adapter group `d1d1fc8` and integration group `cc3c977`. Required verification after
+all three groups (commands exit 0, no real Ollama/model):
+
+- `poetry check` — All set.
+- `poetry run ruff check .` — All checks passed.
+- `poetry run ruff format --check .` — 39 files already formatted.
+- `poetry run pytest tests/unit` — 1001 passed, 1 existing TestClient deprecation warning.
+- `poetry run pytest tests/integration` — 122 passed, 1 existing TestClient warning.
+- `openspec validate add-local-model-target --strict` — valid.
+- `openspec validate --all --strict` — 8 passed, 0 failed (existing long gateway
+  requirement informational hint only).
+- `openspec validate --archived --strict` — 3 passed, 0 failed.
+- `git diff --check` — PASS.
+
+HTTP/loopback TestClient checks used approved execution outside the sandbox. All
+normal tests are deterministic with client doubles/fake runtime or injected targets.
+Optional real smoke remains NOT RUN as recorded in group 3. No core policy/service/
+audit/registry/domain/control, policy config/catalog or historical fixture JSON edits.
+Fresh correctness and security review outcomes will be recorded below before
+completion; artifact/task readiness alone is not acceptance.
+
+**Fresh specification/correctness review — PASS:** `/root/correctness_review` did
+not implement this change and reviewed final code `a327fc0`, all approved artifacts,
+current specs and subsequent evidence/doc wording changes. No blocking findings or
+scope deviations. Confirmed settings, bounded one-call transport and parsing,
+central policy/audit/retained binding/zero-call gates, unchanged echo/protected
+files, public compatibility and optional smoke/privacy/limitations.
+Independent focused adapter/smoke/target/fake-runtime/compatibility run:
+`poetry run pytest tests/unit/test_ollama_target.py tests/unit/test_smoke_local_model.py tests/unit/test_targets.py tests/integration/test_local_model_target.py tests/integration/test_extensions.py -q`
+— 217 PASS, 1 existing warning (7.18s), outside sandbox; initial restricted
+TestClient attempt hung and was interrupted without a verification outcome.
+No required corrective regression was identified.
+
+**Fresh security/bypass review — PASS:** `/root/security_review`, a fresh reviewer
+that did not implement, reviewed final implementation
+`a327fc09fb3cd6a340eae012da11deeaaeed631c` and documentation-only updates against
+approved scope/current specs. No concrete bypass or mandatory fix. Independently
+ran 180 adapter/smoke/fake-runtime checks plus 47 existing routing/service regressions,
+all PASS, with no file edits. Verified fixed loopback destination/model, disabled
+proxies/redirects/retries, pre-parse bounds/strict scalar completion, central redaction,
+retained binding/audit gating, repeated poisoned-sink zero dispatch, identity and
+error/log privacy, concurrency isolation and smoke privacy. References included
+ollama_target.py settings/transport/parser and unchanged service.py retained dispatch.
+
+**Final disposition:** Both independent implementation reviews PASS. No confirmed
+findings, so no corrective code changes/regressions were needed under task 4.3.
+Final code/tests remain byte-identical to reviewed `a327fc0`; final group contains
+only documentation/evidence/task completion. Required checks above cover final code;
+strict validation/lint/format/whitespace were rechecked after evidence completion.
+All 23 tasks are complete; verification and review gates are satisfied. Real smoke
+NOT RUN is optional and does not weaken deterministic verification. Remaining limits:
+uninspected output, trusted cloud-disabled daemon without attestation, per-operation
+inactivity bounds rather than total deadline/cancellation, synchronous thread/queue
+latency and no semantic controls, full model authorization, budgets or reporting.
+One completed integration/evidence commit: `chore: record local model verification`;
+resolve its hash from the commit containing this entry. No archive, spec synchronization,
+installation/model download, push or new change. Implementation PASS, ready for later
+user-authorized archive.

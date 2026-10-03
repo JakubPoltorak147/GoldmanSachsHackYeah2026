@@ -155,9 +155,9 @@ unit and HTTP tests cover adversarial boundaries, mixed findings, selective reda
 fail-closed output validation, audit privacy/dispatch and concurrent state isolation.
 Final verification records 861 unit and 80 integration tests (941 normal tests),
 Poetry/Ruff/strict OpenSpec/whitespace PASS and fresh independent correctness and
-security PASS reviews. Exact evidence is in the active change and worklog; accepted
+security PASS reviews. Exact evidence is in the archived change and worklog; accepted
 challenge traceability records bounded coverage while keeping broader areas partial
-or deferred. The change is implemented and reviewed, awaiting archive authorization.
+or deferred. The deterministic-pack change was subsequently archived after authorized finalization.
 
 
 ## Local model integration and remaining limits
@@ -176,3 +176,11 @@ not end-to-end deadlines or cancellation guarantees; model/hardware/queue latenc
 can occupy threads. Output DLP, semantic security, budgets, reporting and runtime
 attestation remain absent. Normal suites use deterministic doubles/fake runtime;
 real smoke is optional and separately invoked. Final evidence is in worklog.
+
+
+The local-model implementation was accepted after 1001 unit and 122 integration
+checks, Ruff/Poetry/strict active/all/archived OpenSpec/whitespace PASS and fresh
+independent correctness/security PASS reviews. The optional real smoke was NOT RUN
+because Ollama was not on PATH and port 11434 was unavailable; nothing was installed
+or downloaded. This change remains active and unarchived. See the
+[final implementation evidence](worklog.md#2026-10-03--local-model-target-final-verification-and-independent-review).

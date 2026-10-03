@@ -115,10 +115,10 @@ span-optional codes allow spanless ALLOW/BLOCK. Central span redaction is unchan
 
 `create_app` accepts explicit control_registry/target_registry/sink injections
 through the same startup binder as defaults. Response finding_codes contains strict
-validated strings in evaluation order with multiplicity; OpenAPI removes only the
-former `pii.email` item constant. All other schemas and public statuses remain
-unchanged; public requests admit only local echo/local Ollama with the explicit target enum. Generated clients may need
-regeneration. The implementation keeps flat modules; no package migration is needed.
+validated strings in evaluation order with multiplicity. OpenAPI differences from
+the historical foundation are the former `pii.email` item constant removal and
+the explicit local-echo/local-ollama target enum. Other schemas and public statuses
+remain unchanged. Generated clients may need regeneration. The implementation keeps flat modules; no package migration is needed.
 
 Registrations freeze metadata and bindings, not evaluator/adapter internal state;
 extensions must be safe for concurrent invocation or synchronize internally. After

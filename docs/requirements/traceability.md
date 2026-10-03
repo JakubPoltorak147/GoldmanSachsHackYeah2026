@@ -25,7 +25,7 @@ repository.
 
 | Challenge area | Status | Current repository coverage |
 | --- | --- | --- |
-| Functional control-layer boundary | IMPLEMENTED | `POST /v1/interactions` intercepts requests before a target and applies centralized control and policy evaluation. Production targets are local echo and bounded loopback Ollama text generation; final review acceptance is recorded in worklog. |
+| Functional control-layer boundary | IMPLEMENTED | `POST /v1/interactions` intercepts requests before a target and applies centralized control and policy evaluation. Production targets are local echo and bounded loopback Ollama text generation; accepted after fresh correctness/security PASS; evidence is in worklog. |
 | Provider-independent integration boundary | PARTIAL | A `TargetAdapter` boundary exists and the foundation is independent of a commercial provider, with local echo and a bounded local Ollama adapter; remote/agent/MCP integrations remain deferred. |
 | Architecture documentation | PARTIAL | Implemented architecture is documented in `docs/architecture.md`, and conceptual product direction exists in `docs/project-context.md`. A final challenge-oriented architecture diagram is still required. |
 | Centralized policy engine | PARTIAL | Strict startup YAML policy controls enablement and finding-to-action mappings. Model restrictions, budgets, richer thresholds, and other planned policy domains are not implemented. |
@@ -96,4 +96,6 @@ transport/output caps are adapter defenses, not token/compute budget governance.
 Generated output is uninspected; reporting, semantic controls, authorization and
 budgets remain absent. README records settings, trusted cloud-disabled loopback
 runtime preparation, synchronous thread/latency limits and optional real smoke.
-Final acceptance is gated by the independent implementation reviews in worklog.
+Final acceptance is supported by fresh independent correctness/security PASS and
+1001 unit/122 integration tests; exact evidence is in worklog. The optional real
+Ollama smoke was NOT RUN because runtime prerequisites were absent.
