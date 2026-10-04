@@ -5,882 +5,674 @@
 <meta name="viewport" content="width=1280">
 <title>AI Control Layer — HackYeah 2026</title>
 <!--
-  Source of ai-control-layer-presentation.pdf (16:9, 10 slides).
+  Source of ai-control-layer-presentation.pdf (16:9, 12 slides).
+  Visual style follows docs/reference/MaydayMama-prezentacja.pdf: flat cream /
+  forest green / coral / mustard palette, Montserrat + Caveat, no gradients.
   Rebuild the PDF with:  py docs/presentation/ai-control-layer-presentation.py
-  Open this file in a browser to preview the slides.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Poppins:wght@500;600;700;800&display=block" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=JetBrains+Mono:wght@600&family=Montserrat:wght@500;600;700;800;900&display=block" rel="stylesheet">
 <style>
 @page { size: 1280px 720px; margin: 0; }
 
 :root {
-  --ink: #17133a;
-  --muted: #5f5b7a;
-  --soft: #8d89a8;
-  --paper: #f7f5fe;
-  --line: #ebe6fb;
-  --violet: #6c47ff;
-  --violet-t: #ece7ff;
-  --pink: #ff4f9a;
-  --pink-t: #ffe3ef;
-  --sky: #1c9ff0;
-  --sky-t: #def1fd;
-  --allow: #0fae7b;
-  --allow-t: #dcf6ec;
-  --redact: #f09a0e;
-  --redact-t: #fff0d4;
-  --block: #ef4452;
-  --block-t: #fde3e6;
-  --sun: #ffd166;
-  --night: #130d33;
-  --grad: linear-gradient(120deg, #3a1fc1 0%, #6c47ff 38%, #b43ff0 70%, #ff5f9e 100%);
-  --display: "Poppins", "Segoe UI", system-ui, sans-serif;
-  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --cream: #f8efe4;
+  --paper: #fff8ef;
+  --green: #2f4b3e;
+  --green-2: #3d5c4e;
+  --green-3: #4f6f60;
+  --coral: #e9825d;
+  --peach: #f4b59b;
+  --blush: #fbe0d4;
+  --gold: #e8b949;
+  --butter: #f5d98b;
+  --sage: #9dbaa7;
+  --mint: #dfe8de;
+  --line: #e4d4c1;
+  --display: "Montserrat", "Segoe UI", system-ui, sans-serif;
+  --script: "Caveat", "Segoe Print", cursive;
   --mono: "JetBrains Mono", Consolas, monospace;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-body { font-family: var(--body); color: var(--ink); background: #dcd7ee; }
+body { font-family: var(--display); color: var(--green); background: #d8cdbf; }
 
-.slide {
-  position: relative;
-  width: 1280px;
-  height: 720px;
-  overflow: hidden;
-  background: var(--paper);
-  isolation: isolate;
-  break-after: page;
-}
+.slide { position: relative; width: 1280px; height: 720px; overflow: hidden; isolation: isolate; background: var(--cream); break-after: page; }
 .slide:last-of-type { break-after: auto; }
 @media screen {
   body { padding: 40px 0; }
-  .slide { margin: 0 auto 40px; border-radius: 16px; box-shadow: 0 30px 60px -30px rgba(23, 19, 58, .45); }
+  .slide { margin: 0 auto 40px; border-radius: 14px; box-shadow: 0 26px 50px -28px rgba(47, 75, 62, .55); }
 }
+
+.bg-cream { background: var(--cream); }
+.bg-blush { background: var(--blush); }
+.bg-mint { background: var(--mint); }
+.bg-green { background: var(--green); color: var(--paper); }
+.bg-coral { background: var(--coral); color: var(--paper); }
+
+.abs { position: absolute; }
+.circle { border-radius: 50%; }
+.dots { background-image: radial-gradient(currentColor 3px, transparent 3.5px); background-size: 24px 24px; }
+p { text-wrap: pretty; }
 
 i[data-i] { display: inline-grid; place-items: center; width: 1em; height: 1em; flex: none; font-style: normal; }
 i[data-i] svg { width: 100%; height: 100%; }
-p { text-wrap: pretty; }
-h3, .statement, .why, .quote strong { text-wrap: balance; }
 
-/* ---------- backgrounds & decoration ---------- */
-.light {
-  background:
-    radial-gradient(520px 420px at 104% -8%, rgba(255, 79, 154, .16), transparent 70%),
-    radial-gradient(560px 460px at 92% -14%, rgba(108, 71, 255, .14), transparent 70%),
-    var(--paper);
-}
-.dark {
-  color: #fff;
-  background:
-    radial-gradient(720px 460px at 100% 0%, rgba(124, 77, 255, .5), transparent 70%),
-    radial-gradient(640px 420px at 0% 100%, rgba(255, 79, 154, .26), transparent 70%),
-    var(--night);
-}
-.grad {
-  color: #fff;
-  background:
-    radial-gradient(760px 560px at 88% 22%, rgba(255, 95, 158, .55), transparent 62%),
-    radial-gradient(640px 480px at 0% 108%, rgba(43, 179, 255, .38), transparent 62%),
-    linear-gradient(135deg, #1d0f5c 0%, #3b1fb8 45%, #7a2fe0 76%, #c9439f 100%);
-}
-.deco { position: absolute; pointer-events: none; z-index: -1; }
-.dots { background-image: radial-gradient(currentColor 1.6px, transparent 1.9px); background-size: 18px 18px; }
-.ring { border-radius: 50%; border: 2px solid currentColor; }
+.script { font-family: var(--script); font-weight: 700; line-height: 1; }
+.title { font-weight: 900; font-size: 60px; line-height: 1; letter-spacing: -.01em; }
+.kick { font-weight: 800; font-size: 15px; letter-spacing: .3em; text-transform: uppercase; }
+.lead { font-weight: 500; font-size: 16px; line-height: 1.55; }
+.pnum { position: absolute; right: 44px; bottom: 26px; font-weight: 800; font-size: 15px; letter-spacing: .18em; color: rgba(47, 75, 62, .42); }
+.bg-green .pnum, .bg-coral .pnum, .pnum.on-dark { color: rgba(255, 248, 239, .55); }
 
-/* ---------- header ---------- */
-.head {
-  position: absolute; left: 64px; right: 64px; top: 50px;
-  display: grid; grid-template-columns: 1fr 410px; column-gap: 48px; align-items: end;
+.c-coral { color: var(--coral); }
+.c-gold { color: var(--gold); }
+.c-sage { color: var(--sage); }
+.c-peach { color: var(--peach); }
+.c-paper { color: var(--paper); }
+.hlbar {
+  background: linear-gradient(transparent 52%, var(--butter) 52%, var(--butter) 94%, transparent 94%);
+  -webkit-box-decoration-break: clone; box-decoration-break: clone; padding: 0 8px;
 }
-.kicker {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 7px 14px 7px 11px; border-radius: 999px;
-  background: var(--violet-t); color: var(--violet);
-  font: 700 12px/1 var(--body); letter-spacing: .09em; text-transform: uppercase;
-}
-.kicker i { font-size: 15px; }
-.dark .kicker, .grad .kicker { background: rgba(255, 255, 255, .12); color: #ddd3ff; }
-h2 { margin-top: 16px; font: 700 40px/1.14 var(--display); letter-spacing: -.02em; word-spacing: .05em; }
-.lead { font: 400 16.5px/1.55 var(--body); color: var(--muted); padding-bottom: 4px; }
-.dark .lead { color: rgba(255, 255, 255, .72); }
-.hl {
-  color: var(--violet);
-  background: linear-gradient(transparent 66%, rgba(255, 196, 64, .5) 66%, rgba(255, 196, 64, .5) 92%, transparent 92%);
-  -webkit-box-decoration-break: clone; box-decoration-break: clone;
-}
-.dark .hl, .grad .hl { color: var(--sun); background: none; }
+svg.wave, svg.sine, svg.draw { overflow: visible; }
 
-.body { position: absolute; left: 64px; right: 64px; top: 226px; bottom: 84px; }
+/* decision tokens */
+.allow { background: var(--green); color: var(--paper); }
+.redact { background: var(--gold); color: var(--green); }
+.block { background: var(--coral); color: var(--paper); }
+.dot-i { display: grid; place-items: center; border-radius: 50%; flex: none; }
+.chip {
+  display: inline-flex; align-items: center; gap: 7px; padding: 8px 15px 8px 10px; border-radius: 999px;
+  font-weight: 800; font-size: 14px; letter-spacing: .04em; white-space: nowrap;
+}
+.chip i { font-size: 16px; }
 
-/* ---------- footer ---------- */
-.foot {
-  position: absolute; left: 64px; right: 64px; bottom: 26px;
-  display: flex; align-items: center; justify-content: space-between;
-  font: 600 12px/1 var(--body); color: var(--soft); letter-spacing: .02em;
+/* ================= 01 cover ================= */
+.s1-pill { left: 96px; top: 74px; padding: 11px 22px; border: 2.5px solid var(--green); border-radius: 999px; font-weight: 800; font-size: 14px; letter-spacing: .16em; text-transform: uppercase; }
+.s1-title { left: 92px; top: 142px; font-weight: 900; font-size: 86px; line-height: .96; letter-spacing: -.005em; }
+.s1-title span { display: block; }
+.s1-tag { left: 98px; top: 330px; font-size: 42px; }
+.s1-l1 { left: 98px; top: 424px; font-weight: 500; font-size: 21px; }
+.s1-big { left: 92px; top: 456px; font-weight: 900; font-size: 44px; line-height: 1.15; }
+.s1-l3 { left: 98px; top: 520px; font-weight: 500; font-size: 21px; }
+.pill-dark {
+  display: inline-flex; align-items: center; gap: 14px; padding: 16px 30px 16px 22px; border-radius: 999px;
+  background: var(--green); color: var(--paper); font-weight: 800; font-size: 21px;
 }
-.brand { display: flex; align-items: center; gap: 10px; }
-.brand b { color: var(--ink); font-weight: 700; }
-.brand .sep { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .6; }
-.logo { width: 26px; height: 26px; border-radius: 8px; background: var(--grad); color: #fff; display: grid; place-items: center; font-size: 15px; }
-.num { padding: 6px 11px; border-radius: 999px; background: #fff; border: 1px solid var(--line); color: var(--muted); }
-.dark .foot, .grad .foot { color: rgba(255, 255, 255, .62); }
-.dark .brand b, .grad .brand b { color: #fff; }
-.dark .num, .grad .num { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .2); color: #fff; }
-.grad .logo { background: #fff; color: var(--violet); }
+.pill-dark i { font-size: 30px; color: var(--gold); }
+.s1-card {
+  left: 806px; top: 252px; width: 372px; transform: rotate(6deg);
+  background: var(--paper); border-radius: 26px; padding: 22px 22px 20px;
+  box-shadow: 0 30px 50px -22px rgba(10, 25, 18, .65);
+}
+.s1-card .hd { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15px; }
+.s1-card .hd .lg { width: 34px; height: 34px; font-size: 18px; background: var(--green); color: var(--paper); }
+.s1-card .hd small { margin-left: auto; font-weight: 700; font-size: 11px; color: rgba(47, 75, 62, .55); letter-spacing: .08em; }
+.s1-card .lab { margin-top: 16px; font-weight: 800; font-size: 10.5px; letter-spacing: .16em; color: rgba(47, 75, 62, .55); }
+.s1-card .bub { margin-top: 7px; padding: 12px 14px; border-radius: 16px; font-weight: 600; font-size: 14px; line-height: 1.5; }
+.s1-card .em { background: var(--butter); padding: 1px 5px; border-radius: 6px; font-weight: 700; }
+.s1-card .dec { margin-top: 14px; display: flex; align-items: center; gap: 10px; }
+.s1-card .dec .dot-i { width: 38px; height: 38px; font-size: 19px; }
+.s1-card .dec b { font-weight: 900; font-size: 22px; letter-spacing: .02em; }
+.s1-card .code { margin-left: auto; padding: 6px 11px; border-radius: 999px; background: var(--mint); font: 600 12px/1 var(--mono); }
+.s1-card .ft { margin-top: 14px; display: flex; gap: 8px; }
+.s1-card .ft span { white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 999px; border: 1.5px solid var(--line); font-weight: 700; font-size: 11.5px; }
 
-/* ---------- shared components ---------- */
-.card {
-  background: #fff; border-radius: 24px; border: 1px solid #eee9fc;
-  box-shadow: 0 1px 2px rgba(23, 19, 58, .04), 0 18px 40px -22px rgba(76, 52, 180, .38);
-}
-.glass { background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .14); border-radius: 24px; }
-.ib { width: 54px; height: 54px; border-radius: 17px; display: grid; place-items: center; font-size: 27px; flex: none; }
-.t-allow { background: var(--allow-t); color: var(--allow); }
-.t-redact { background: var(--redact-t); color: var(--redact); }
-.t-block { background: var(--block-t); color: var(--block); }
-.t-violet { background: var(--violet-t); color: var(--violet); }
-.t-pink { background: var(--pink-t); color: var(--pink); }
-.t-sky { background: var(--sky-t); color: var(--sky); }
-.t-ink { background: #e9e7f2; color: var(--ink); }
-.s-allow { background: var(--allow); color: #fff; }
-.s-redact { background: var(--redact); color: #fff; }
-.s-block { background: var(--block); color: #fff; }
-.s-sky { background: var(--sky); color: #fff; }
-.s-violet { background: var(--violet); color: #fff; }
-.s-pink { background: var(--pink); color: #fff; }
-.c-allow { color: var(--allow); }
-.c-redact { color: var(--redact); }
-.c-block { color: var(--block); }
-.c-violet { color: var(--violet); }
-.c-pink { color: var(--pink); }
-.c-sky { color: var(--sky); }
-.eyebrow { font: 700 12px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; }
-.badge {
-  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 8px; border-radius: 999px;
-  font: 700 12px/1 var(--body); letter-spacing: .05em;
-}
-.badge i { font-size: 14px; }
+/* ================= 02 threat ================= */
+.note { position: absolute; padding: 36px 28px 24px; box-shadow: 0 20px 30px -20px rgba(90, 50, 25, .55); }
+.note .tape { position: absolute; top: -14px; left: 50%; width: 104px; height: 30px; transform: translateX(-50%) rotate(-3deg); background: rgba(255, 255, 255, .55); }
+.note h3 { font-family: var(--script); font-weight: 700; font-size: 40px; line-height: 1; }
+.note p { margin-top: 12px; font-weight: 600; font-size: 15.5px; line-height: 1.5; }
+.s2-right { left: 770px; top: 64px; width: 420px; }
+.s2-right h2 { font-weight: 900; font-size: 40px; line-height: 1.12; }
+.checks { margin-top: 28px; list-style: none; }
+.checks li { display: flex; align-items: center; gap: 14px; height: 50px; font-weight: 800; font-size: 22px; }
+.checks i { font-size: 30px; color: var(--coral); }
+.s2-right .small { margin-top: 18px; font-weight: 600; font-size: 15.5px; line-height: 1.55; }
+.band { position: absolute; left: 0; right: 0; bottom: 0; background: var(--green); color: var(--paper); display: flex; align-items: center; gap: 28px; padding: 0 160px 0 92px; }
+.band > i { font-size: 54px; color: var(--gold); }
+.band p { font-weight: 800; font-size: 25px; line-height: 1.35; }
 
-/* ---------- 01 cover ---------- */
-.cover-left { position: absolute; left: 72px; top: 92px; width: 610px; }
-.chip-glass {
-  display: inline-flex; align-items: center; gap: 9px; padding: 9px 16px 9px 12px; border-radius: 999px;
-  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .28);
-  font: 600 13px/1 var(--body); letter-spacing: .04em; color: #fff;
-}
-.chip-glass i { font-size: 16px; color: var(--sun); }
-.cover h1 { margin-top: 28px; font: 800 70px/1.02 var(--display); letter-spacing: -.035em; word-spacing: .06em; }
-.cover h1 .hl { color: var(--sun); }
-.cover-lead { margin-top: 26px; font: 400 21px/1.5 var(--body); color: rgba(255, 255, 255, .82); max-width: 560px; }
-.trio { margin-top: 14px; display: flex; gap: 10px; align-items: center; font: 600 16px/1 var(--body); color: #fff; }
-.trio .sep { width: 5px; height: 5px; border-radius: 50%; background: var(--sun); }
-.pills { margin-top: 34px; display: flex; gap: 12px; }
-.pill {
-  display: inline-flex; align-items: center; gap: 10px; padding: 7px 18px 7px 7px; border-radius: 999px;
-  background: #fff; color: var(--ink); font: 700 14px/1 var(--display); letter-spacing: .04em;
-  box-shadow: 0 12px 26px -14px rgba(10, 4, 40, .7);
-}
-.pill .dot { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 17px; }
+/* ================= 03 how it works ================= */
+.steps { position: absolute; left: 90px; right: 70px; top: 196px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 18px; }
+.step .bubble { position: relative; width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font-size: 40px; color: var(--green); }
+.step .no { position: absolute; left: -6px; top: -6px; width: 32px; height: 32px; border-radius: 50%; background: var(--paper); color: var(--green); display: grid; place-items: center; font-weight: 900; font-size: 15px; box-shadow: 0 0 0 3px var(--green); }
+.step h3 { margin-top: 26px; font-weight: 800; font-size: 20px; line-height: 1.15; }
+.step p { margin-top: 9px; font-weight: 500; font-size: 14.5px; line-height: 1.5; color: rgba(255, 248, 239, .8); }
+.fail { left: 96px; top: 528px; display: flex; align-items: center; gap: 12px; }
+.fail b { font-weight: 800; font-size: 20px; margin-right: 6px; }
+.fail .o { padding: 11px 18px; border-radius: 999px; border: 2px solid rgba(255, 248, 239, .7); font-weight: 700; font-size: 15px; }
+.fail .arrow { font-size: 26px; color: var(--gold); }
+.fail .z { padding: 13px 22px; border-radius: 999px; background: var(--coral); font-weight: 800; font-size: 16px; }
+.s3-foot { left: 96px; top: 612px; width: 940px; font-weight: 500; font-size: 15px; line-height: 1.5; color: rgba(255, 248, 239, .7); }
 
-.art { position: absolute; left: 690px; top: 116px; width: 540px; height: 470px; }
-.art svg.wires { position: absolute; inset: 0; overflow: visible; }
-.art .cap { position: absolute; top: 40px; font: 700 11px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: rgba(255, 255, 255, .7); }
-.in-chip, .out-chip { white-space: nowrap;
-  position: absolute; width: 150px; height: 52px; border-radius: 16px;
-  display: flex; align-items: center; gap: 10px; padding: 0 14px 0 9px;
-  font: 600 14.5px/1 var(--display);
+/* ================= 04 architecture ================= */
+.lane-label { font-family: var(--script); font-weight: 700; font-size: 32px; color: var(--coral); }
+.mini-card {
+  display: flex; align-items: center; gap: 11px; height: 56px; padding: 0 12px; border-radius: 16px;
+  background: var(--paper); border: 2px solid var(--line); font-weight: 700; font-size: 14.5px; line-height: 1.2;
 }
-.in-chip { left: 0; width: 160px; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .3); color: #fff; }
-.in-chip .ib, .out-chip .ib { width: 34px; height: 34px; border-radius: 11px; font-size: 18px; }
-.in-chip .ib { background: rgba(255, 255, 255, .18); color: #fff; }
-.out-chip { left: 390px; background: #fff; color: var(--ink); box-shadow: 0 16px 30px -16px rgba(10, 4, 40, .75); letter-spacing: .03em; font-weight: 700; }
-.core-ring { position: absolute; border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, .2); }
-.core {
-  position: absolute; left: 200px; top: 165px; width: 140px; height: 140px; border-radius: 50%;
-  background: #fff; display: grid; place-items: center;
-  box-shadow: 0 0 0 10px rgba(255, 255, 255, .12), 0 26px 50px -20px rgba(10, 4, 40, .8);
-}
-.core-inner { width: 108px; height: 108px; border-radius: 50%; background: var(--grad); display: grid; place-items: center; color: #fff; font-size: 54px; }
-.core-label {
-  position: absolute; left: 270px; top: 326px; transform: translateX(-50%); white-space: nowrap;
-  padding: 7px 13px; border-radius: 999px; background: var(--sun); color: var(--ink);
-  font: 700 12.5px/1 var(--display); letter-spacing: .03em;
-}
+.mini-card .dot-i { width: 34px; height: 34px; font-size: 17px; }
+.mini-card.dashed { border-style: dashed; border-color: var(--coral); background: transparent; height: auto; padding: 12px; }
+.core { left: 282px; top: 176px; width: 716px; height: 436px; border-radius: 32px; background: var(--green); color: var(--paper); padding: 20px 20px; }
+.core-head { display: flex; align-items: baseline; justify-content: space-between; height: 26px; }
+.core-head .kick { font-size: 13px; color: var(--gold); letter-spacing: .26em; }
+.core-head .script { font-size: 26px; color: rgba(255, 248, 239, .85); }
+.tiles { margin-top: 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; position: relative; }
+.tile { position: relative; height: 132px; border-radius: 18px; background: var(--green-2); padding: 14px 14px 12px; }
+.tile .trow { display: flex; align-items: center; justify-content: space-between; }
+.tile .dot-i { width: 40px; height: 40px; font-size: 20px; color: var(--green); }
+.tile h4 { margin-top: 10px; font-weight: 800; font-size: 14.5px; white-space: nowrap; }
+.tile p { margin-top: 4px; font-weight: 500; font-size: 12.5px; line-height: 1.38; color: rgba(255, 248, 239, .78); }
+.tile code { font: 600 11px/1 var(--mono); color: var(--gold); }
+.tile + .tile::before { content: "›"; position: absolute; left: -13px; top: 48px; font-weight: 900; font-size: 24px; color: var(--gold); }
+.reg { margin-top: 12px; border-radius: 18px; border: 2px dashed rgba(232, 185, 73, .6); padding: 9px 14px 11px; }
+.reg-head { display: flex; align-items: center; gap: 9px; height: 24px; font-weight: 800; font-size: 14.5px; }
+.reg-head i { font-size: 18px; color: var(--gold); }
+.reg-head .script { margin-left: auto; font-size: 24px; color: var(--gold); }
+.reg-chips { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.reg-chips span { padding: 6px 11px; border-radius: 999px; background: var(--green-3); font-weight: 700; font-size: 12px; line-height: 1.2; white-space: nowrap; }
+.reg-chips span.add { background: var(--gold); color: var(--green); }
+.reg-chips span.opt { background: transparent; border: 1.5px solid rgba(255, 248, 239, .5); }
+.side-chip { display: inline-flex; align-items: center; gap: 10px; padding: 10px 16px 10px 10px; border-radius: 999px; background: var(--paper); border: 2px solid var(--line); font-weight: 700; font-size: 13.5px; }
+.side-chip .dot-i { width: 30px; height: 30px; font-size: 15px; }
+.side-chip code { font: 600 12.5px/1 var(--mono); }
 
-/* ---------- 02 problem ---------- */
-.threats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.threat { position: relative; height: 232px; padding: 28px 28px 26px; }
-.threat .bignum { position: absolute; right: 26px; top: 20px; font: 800 56px/1 var(--display); color: #f0ecfd; letter-spacing: -.03em; }
-.threat h3 { margin-top: 22px; font: 600 22px/1.2 var(--display); }
-.threat p { margin-top: 10px; font: 400 15.5px/1.55 var(--body); color: var(--muted); }
-.banner {
-  position: relative; overflow: hidden; margin-top: 28px; height: 134px; border-radius: 28px;
-  background: var(--grad); color: #fff; display: flex; align-items: center; gap: 26px; padding: 0 40px;
-}
-.banner .ib { background: rgba(255, 255, 255, .18); color: #fff; width: 64px; height: 64px; border-radius: 20px; font-size: 32px; }
-.banner .eyebrow { color: rgba(255, 255, 255, .78); }
-.statement { margin-top: 8px; font: 700 26px/1.25 var(--display); letter-spacing: -.01em; max-width: 860px; }
-.banner .ring { position: absolute; color: rgba(255, 255, 255, .22); }
+/* ================= 05 reuse ================= */
+.proof { left: 860px; top: 50px; width: 328px; padding: 18px 20px; border-radius: 22px; background: var(--green); color: var(--paper); display: flex; gap: 14px; transform: rotate(2deg); }
+.proof i { font-size: 30px; color: var(--gold); margin-top: 2px; }
+.proof p { font-weight: 700; font-size: 14.5px; line-height: 1.45; }
+.proof b { color: var(--gold); }
+.arches { left: 96px; right: 96px; top: 190px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.arch { height: 300px; border-radius: 127px 127px 26px 26px; padding: 46px 22px 20px; text-align: center; }
+.arch h3 { font-family: var(--script); font-weight: 700; font-size: 44px; line-height: 1; }
+.arch .what { margin-top: 4px; font-weight: 800; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
+.arch ul { margin-top: 16px; list-style: none; display: grid; gap: 9px; }
+.arch li { padding: 8px 10px; border-radius: 999px; font-weight: 700; font-size: 13.5px; border: 1.5px solid currentColor; }
+.a-coral { background: var(--coral); color: var(--paper); }
+.a-coral li { background: rgba(255, 255, 255, .16); border-color: rgba(255, 248, 239, .85); }
+.a-green { background: var(--green); color: var(--paper); }
+.a-green li { background: var(--green-3); border-color: rgba(255, 248, 239, .6); }
+.a-gold { background: var(--gold); color: var(--green); }
+.a-gold li { background: rgba(255, 255, 255, .25); }
+.a-paper { background: var(--paper); color: var(--green); }
+.uses { left: 96px; right: 96px; top: 522px; display: grid; grid-template-columns: 130px repeat(4, 1fr); gap: 16px; align-items: center; }
+.uses .script { font-size: 34px; color: var(--coral); transform: rotate(-6deg); }
+.use { display: flex; gap: 12px; align-items: center; height: 96px; padding: 0 14px; border-radius: 20px; background: var(--paper); }
+.use .dot-i { width: 44px; height: 44px; font-size: 21px; }
+.use b { display: block; font-weight: 800; font-size: 14.5px; line-height: 1.25; }
+.use div > span { display: block; margin-top: 4px; font-weight: 500; font-size: 12.5px; line-height: 1.4; color: rgba(47, 75, 62, .8); }
+.s5-note { left: 96px; top: 636px; font-weight: 600; font-size: 13px; color: rgba(47, 75, 62, .62); }
 
-/* ---------- 03 architecture ---------- */
-.flow { margin-top: 14px; display: flex; align-items: center; justify-content: space-between; }
-.node {
-  width: 170px; height: 196px; padding: 22px 12px 18px; text-align: center;
-  display: flex; flex-direction: column; align-items: center;
-}
-.node.ext { width: 132px; }
-.node b { margin-top: 14px; font: 600 17px/1.2 var(--display); }
-.node > span { margin-top: 6px; font: 400 13.5px/1.4 var(--body); color: var(--muted); }
-.minis { margin-top: 9px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
-.mini { padding: 4px 7px; border-radius: 7px; font: 700 10.5px/1 var(--body); letter-spacing: .04em; }
-.arr { font-size: 30px; color: #b5a6ff; }
-.arr.sm { font-size: 24px; color: var(--violet); }
-.layer {
-  position: relative; display: flex; align-items: center; gap: 0; justify-content: space-between;
-  width: 800px; padding: 32px 18px 18px; border-radius: 30px;
-  border: 2px dashed #bfaeff; background: linear-gradient(135deg, #efe9ff 0%, #fbe8f4 100%);
-}
-.layer-tag {
-  position: absolute; top: -17px; left: 50%; transform: translateX(-50%);
-  display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px 8px 12px; border-radius: 999px;
-  background: var(--grad); color: #fff; font: 700 13px/1 var(--display); letter-spacing: .04em; white-space: nowrap;
-  box-shadow: 0 10px 22px -12px rgba(76, 52, 180, .8);
-}
-.layer-tag i { font-size: 16px; }
-.callout {
-  margin: 40px auto 0; width: fit-content; display: flex; align-items: center; gap: 14px;
-  padding: 14px 26px 14px 14px; border-radius: 999px; font: 600 17px/1.3 var(--display);
-}
-.callout .ib { width: 40px; height: 40px; border-radius: 50%; font-size: 21px; }
+/* ================= 06 live ================= */
+.stats { left: 96px; right: 96px; top: 190px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.stat { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.stat .big { width: 214px; height: 214px; border-radius: 50%; display: grid; place-content: center; }
+.stat .big b { font-weight: 900; font-size: 84px; line-height: .95; letter-spacing: -.02em; }
+.stat .big span { margin-top: 6px; font-weight: 800; font-size: 15px; line-height: 1.25; }
+.stat p { margin-top: 20px; max-width: 236px; font-weight: 600; font-size: 14.5px; line-height: 1.5; }
 
-/* ---------- 04 live ---------- */
-.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-.stat { position: relative; overflow: hidden; isolation: isolate; height: 236px; padding: 24px 26px; }
-.stat .top { display: flex; justify-content: space-between; align-items: flex-start; }
-.stat .n { font: 800 72px/.95 var(--display); letter-spacing: -.04em; }
-.stat h3 { margin-top: 18px; font: 600 19px/1.2 var(--display); }
-.stat p { margin-top: 8px; font: 400 14.5px/1.5 var(--body); color: var(--muted); }
-.stat .glow { position: absolute; width: 260px; height: 260px; right: -110px; bottom: -130px; z-index: -1; opacity: .2; background: radial-gradient(closest-side, var(--g), transparent); }
-.principles { margin-top: 24px; padding: 20px 26px 22px; }
-.p-head { display: flex; align-items: center; gap: 10px; font: 600 17px/1.2 var(--display); }
-.p-head i { font-size: 20px; color: var(--violet); }
-.p-grid { margin-top: 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-.p-grid span {
-  display: flex; align-items: center; gap: 9px; padding: 12px 12px; border-radius: 14px;
-  background: var(--paper); font: 600 13.5px/1.3 var(--body); white-space: nowrap;
-}
-.p-grid i { font-size: 13px; width: 24px; height: 24px; padding: 5px; border-radius: 50%; background: var(--allow); color: #fff; }
+/* ================= 07 decisions ================= */
+.dcards { left: 96px; right: 96px; top: 238px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.dcard { height: 300px; border-radius: 28px; background: var(--paper); color: var(--green); padding: 26px 28px; box-shadow: 0 22px 34px -24px rgba(90, 40, 15, .7); }
+.dcard .top { display: flex; align-items: center; gap: 14px; }
+.dcard .top .dot-i { width: 60px; height: 60px; font-size: 29px; }
+.dcard .top b { font-weight: 900; font-size: 34px; letter-spacing: .02em; }
+.dcard .script { display: block; margin-top: 18px; font-size: 30px; color: var(--coral); }
+.dcard .why { margin-top: 4px; font-weight: 700; font-size: 16.5px; line-height: 1.4; }
+.dcard .then { margin-top: 4px; font-weight: 500; font-size: 15px; line-height: 1.45; }
+.prec { left: 96px; top: 574px; display: flex; align-items: center; gap: 12px; }
+.prec > b { font-weight: 800; font-size: 20px; margin-right: 6px; }
+.prec .gt { font-weight: 900; font-size: 24px; }
 
-/* ---------- 05 decisions ---------- */
-.dcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
-.dcard { position: relative; overflow: hidden; isolation: isolate; height: 300px; padding: 30px 30px 28px; }
-.dcard .glow { position: absolute; left: -110px; top: -150px; width: 400px; height: 340px; z-index: -1; opacity: .45; background: radial-gradient(closest-side, var(--g), transparent); }
-.dtop { display: flex; align-items: center; gap: 16px; }
-.dtop .ib { width: 58px; height: 58px; border-radius: 50%; font-size: 28px; }
-.act { font: 800 32px/1 var(--display); letter-spacing: .01em; }
-.dcard .eyebrow { display: block; margin-top: 28px; }
-.why { margin-top: 8px; font: 600 18px/1.4 var(--display); color: #fff; }
-.what { margin-top: 8px; font: 400 15.5px/1.5 var(--body); color: rgba(255, 255, 255, .72); }
-.prec {
-  margin-top: 28px; display: flex; align-items: center; gap: 14px; width: fit-content;
-  padding: 12px 22px 12px 12px; border-radius: 999px;
-}
-.prec .lab { display: flex; align-items: center; gap: 10px; padding-right: 8px; font: 600 15px/1 var(--display); color: rgba(255, 255, 255, .85); }
-.prec .lab i { width: 36px; height: 36px; padding: 9px; border-radius: 50%; background: rgba(255, 255, 255, .12); color: var(--sun); }
-.prec .badge { padding: 9px 14px 9px 11px; font-size: 13.5px; }
-.prec .gt { font-size: 18px; color: rgba(255, 255, 255, .5); }
-.prec .note { margin-left: 8px; font: 400 14px/1 var(--body); color: rgba(255, 255, 255, .6); }
+/* ================= 08 coverage ================= */
+.panel { left: 836px; top: 0; bottom: 0; right: 0; background: var(--green); color: var(--paper); padding: 60px 48px 0 48px; }
+.panel h2 { font-weight: 900; font-size: 40px; line-height: 1.05; }
+.sp-list { margin-top: 28px; list-style: none; display: grid; gap: 17px; }
+.sp-list li { display: flex; gap: 12px; font-weight: 500; font-size: 15.5px; line-height: 1.45; }
+.sp-list i { font-size: 20px; color: var(--gold); margin-top: 1px; }
+.sp-list b { color: var(--gold); font-weight: 800; }
+.tbl { left: 96px; top: 252px; width: 700px; }
+.tbl .hd, .tbl .row { display: grid; grid-template-columns: 290px 150px 1fr; align-items: center; }
+.tbl .hd { height: 30px; font-weight: 800; font-size: 12px; letter-spacing: .16em; color: rgba(47, 75, 62, .5); }
+.tbl .row { height: 66px; border-top: 2px dashed var(--line); }
+.tbl .row b { display: block; font-weight: 800; font-size: 17px; }
+.tbl .row code { display: block; margin-top: 4px; font: 600 12.5px/1 var(--mono); color: rgba(47, 75, 62, .6); }
+.tbl .row .bd { font-weight: 500; font-size: 15px; }
+.tbl .chip { font-size: 12.5px; padding: 7px 13px 7px 9px; }
+.tbl .chip i { font-size: 14px; }
 
-/* ---------- 06 coverage ---------- */
-.cov { display: grid; grid-template-columns: 1fr 330px; gap: 28px; align-items: start; }
-.tbl-head, .tbl-row { display: grid; grid-template-columns: 206px 172px 132px 1fr; align-items: center; padding: 0 22px; }
-.tbl-head { height: 26px; color: var(--soft); }
-.tbl-row { height: 56px; margin-top: 10px; border-radius: 16px; }
-.tbl-row b { font: 600 15.5px/1.2 var(--display); }
-.code { width: fit-content; padding: 5px 9px; border-radius: 8px; background: var(--violet-t); color: var(--violet); font: 600 13px/1 var(--mono); }
-.tbl-row .bound { font: 400 14.5px/1.3 var(--body); color: var(--muted); }
-.limits { height: 356px; padding: 26px 26px 24px; border: 2px dashed #d6cbff; box-shadow: none; display: flex; flex-direction: column; }
-.limits h3 { display: flex; align-items: center; gap: 12px; font: 600 21px/1.2 var(--display); }
-.limits h3 .ib { width: 44px; height: 44px; border-radius: 14px; font-size: 22px; }
-.limits .sub { margin-top: 6px; font: 400 14px/1.45 var(--body); color: var(--muted); }
-.lchips { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
-.lchips span { padding: 7px 11px; border-radius: 10px; background: var(--paper); border: 1px solid var(--line); font: 600 13px/1.2 var(--body); color: var(--ink); }
-.limits .end { margin-top: auto; padding-top: 14px; display: flex; align-items: center; gap: 8px; font: 600 14.5px/1.3 var(--display); color: var(--violet); }
-.limits .end i { font-size: 18px; }
+/* ================= 09 evidence ================= */
+.paper-card { left: 100px; top: 194px; width: 440px; height: 296px; border-radius: 22px; background: var(--paper); padding: 22px 28px; transform: rotate(-2deg); box-shadow: -8px 8px 0 var(--peach), 0 24px 36px -26px rgba(90, 50, 25, .6); }
+.paper-card h3 { font-family: var(--script); font-weight: 700; font-size: 38px; line-height: 1; }
+.paper-card ul { margin-top: 10px; list-style: none; }
+.paper-card li { display: flex; align-items: center; gap: 12px; height: 38px; border-bottom: 2px solid #efe3d3; font-weight: 600; font-size: 15px; }
+.paper-card li i { width: 24px; height: 24px; padding: 5px; border-radius: 50%; background: var(--green); color: var(--paper); }
+.dash { left: 584px; top: 190px; width: 600px; height: 316px; border-radius: 28px; background: var(--green); color: var(--paper); padding: 24px 26px; }
+.dash .hd { display: flex; align-items: baseline; justify-content: space-between; }
+.dash .hd b { font-weight: 900; font-size: 24px; }
+.dash .hd .script { font-size: 28px; color: var(--gold); }
+.dash .grid { margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.dtile { position: relative; height: 100px; border-radius: 18px; padding: 18px 20px; }
+.dtile b { display: block; font-weight: 900; font-size: 23px; letter-spacing: .02em; }
+.dtile span { display: block; margin-top: 6px; font-weight: 600; font-size: 14.5px; }
+.dtile i { position: absolute; right: 18px; top: 28px; width: 44px; height: 44px; padding: 11px; border-radius: 50%; background: rgba(255, 255, 255, .35); }
+.never { left: 96px; right: 96px; top: 574px; height: 88px; border-radius: 28px; background: var(--coral); color: var(--paper); display: flex; align-items: center; justify-content: space-between; padding: 0 30px; }
+.never span { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 14.5px; }
+.never i { width: 30px; height: 30px; padding: 7px; border-radius: 50%; background: var(--paper); color: var(--coral); }
 
-/* ---------- 07 evidence ---------- */
-.ev { display: grid; grid-template-columns: 500px 1fr; gap: 24px; height: 282px; }
-.audit { padding: 22px 28px; }
-.ph { display: flex; align-items: center; gap: 14px; }
-.ph .ib { width: 44px; height: 44px; border-radius: 14px; font-size: 22px; }
-.ph b { font: 600 20px/1.2 var(--display); }
-.ph small { display: block; margin-top: 3px; font: 400 13px/1.2 var(--body); color: var(--muted); }
-.alist { margin-top: 12px; list-style: none; }
-.alist li { display: flex; align-items: center; gap: 12px; height: 30px; font: 500 15px/1.2 var(--body); }
-.alist i { font-size: 20px; color: var(--allow); }
-.dash { overflow: hidden; background: var(--night); border-radius: 24px; color: #fff; box-shadow: 0 24px 46px -24px rgba(23, 13, 70, .8); }
-.dash-bar { height: 46px; display: flex; align-items: center; gap: 8px; padding: 0 20px; border-bottom: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .04); }
-.dash-bar .w { width: 11px; height: 11px; border-radius: 50%; }
-.dash-bar b { margin-left: 10px; font: 600 14px/1 var(--display); }
-.dash-bar .badge { margin-left: auto; background: rgba(255, 255, 255, .1); color: rgba(255, 255, 255, .8); }
-.tiles { padding: 18px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.tile { position: relative; height: 86px; border-radius: 16px; background: rgba(255, 255, 255, .06); padding: 18px 18px 0 22px; overflow: hidden; }
-.tile::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: currentColor; }
-.tile .k { font: 700 21px/1 var(--display); letter-spacing: .02em; }
-.tile .v { margin-top: 9px; font: 400 14px/1 var(--body); color: rgba(255, 255, 255, .66); }
-.tile i { position: absolute; right: 16px; top: 22px; width: 46px; height: 46px; padding: 12px; border-radius: 50%; background: rgba(255, 255, 255, .08); }
-.privacy {
-  margin-top: 22px; height: 104px; padding: 0 26px; border-radius: 24px;
-  display: flex; align-items: center; gap: 20px;
-  background: linear-gradient(120deg, #ece6ff 0%, #fbe6f2 100%); border: 1px solid #e3dafd;
-}
-.privacy .ib { background: var(--grad); color: #fff; }
-.privacy .txt { width: 300px; flex: none; }
-.privacy .txt b { font: 600 19px/1.2 var(--display); }
-.privacy .txt p { margin-top: 5px; font: 400 14px/1.45 var(--body); color: var(--muted); }
-.never { display: flex; flex-wrap: wrap; gap: 8px; }
-.never span { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px 8px 9px; border-radius: 10px; background: #fff; font: 600 13.5px/1 var(--body); }
-.never i { font-size: 15px; color: var(--block); }
+/* ================= 10 operator ================= */
+.big19 { left: 110px; top: 212px; width: 384px; height: 384px; border-radius: 50%; background: var(--coral); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.big19 b { font-weight: 900; font-size: 128px; line-height: .9; letter-spacing: -.03em; }
+.big19 strong { margin-top: 12px; font-weight: 800; font-size: 21px; }
+.big19 span { margin-top: 6px; max-width: 250px; font-weight: 600; font-size: 14.5px; line-height: 1.45; color: rgba(255, 248, 239, .9); }
+.groups { left: 800px; top: 206px; width: 388px; }
+.grp { padding: 14px 0 15px; border-bottom: 1.5px solid rgba(255, 248, 239, .22); }
+.grp:last-child { border-bottom: 0; }
+.grp b { display: block; font-weight: 900; font-size: 30px; line-height: 1.05; }
+.grp span { display: block; margin-top: 6px; font-weight: 600; font-size: 15.5px; }
+.grp em { font-style: normal; color: rgba(255, 248, 239, .6); }
 
-/* ---------- 08 operator ---------- */
-.scen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.sc { position: relative; overflow: hidden; height: 206px; padding: 24px 24px 22px; }
-.sc .ib { width: 48px; height: 48px; border-radius: 15px; font-size: 24px; }
-.sc .eyebrow { display: block; margin-top: 18px; }
-.sc .a { margin-top: 8px; font: 700 23px/1.15 var(--display); }
-.sc .d { margin-top: 8px; font: 400 14.5px/1.45 var(--body); color: rgba(255, 255, 255, .7); }
-.sc .bar { position: absolute; left: 0; right: 0; top: 0; height: 4px; }
-.op-row { margin-top: 24px; display: grid; grid-template-columns: 420px 1fr; gap: 20px; height: 160px; }
-.big19 { position: relative; overflow: hidden; border-radius: 24px; background: var(--grad); display: flex; align-items: center; gap: 22px; padding: 0 30px; }
-.big19 .n { font: 800 92px/1 var(--display); letter-spacing: -.05em; }
-.big19 p { font: 600 16px/1.45 var(--display); }
-.big19 .ring { position: absolute; color: rgba(255, 255, 255, .2); }
-.quote { display: flex; align-items: center; gap: 22px; padding: 0 32px; }
-.quote .ib { width: 58px; height: 58px; border-radius: 18px; font-size: 28px; }
-.quote p { font: 400 15px/1.5 var(--body); color: rgba(255, 255, 255, .72); }
-.quote strong { display: block; margin-top: 8px; font: 600 20px/1.3 var(--display); color: #fff; }
+/* ================= 11 scale ================= */
+.road { left: 96px; right: 96px; top: 246px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.road .n { width: 92px; height: 92px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 38px; }
+.road h3 { margin-top: 20px; font-weight: 800; font-size: 22px; }
+.road p { margin-top: 6px; font-weight: 500; font-size: 15px; line-height: 1.5; color: rgba(47, 75, 62, .85); }
+.clean { left: 96px; right: 96px; top: 506px; height: 84px; border-radius: 26px; background: var(--green); color: var(--paper); display: flex; align-items: center; gap: 12px; padding: 0 26px; }
+.clean .script { font-size: 32px; color: var(--gold); margin-right: 8px; white-space: nowrap; }
+.clean span.o { padding: 9px 15px; border-radius: 999px; border: 2px solid rgba(255, 248, 239, .75); font-weight: 700; font-size: 14px; white-space: nowrap; }
+.s11-foot { left: 96px; top: 610px; width: 980px; font-weight: 500; font-size: 14.5px; line-height: 1.5; color: rgba(47, 75, 62, .72); }
 
-/* ---------- 09 scale ---------- */
-.road { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
-.track { position: absolute; left: 32px; right: 240px; top: 30px; height: 6px; border-radius: 6px; background: linear-gradient(90deg, var(--sky), var(--violet), var(--pink), var(--redact)); opacity: .9; }
-.ms { position: relative; }
-.ms .dot { width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; font-size: 28px; color: #fff; border: 5px solid var(--paper); box-shadow: 0 12px 24px -12px rgba(76, 52, 180, .8); }
-.ms .mcard { margin-top: 16px; height: 148px; padding: 18px 20px; }
-.ms .step { font: 700 12px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; }
-.ms h3 { margin-top: 7px; font: 700 21px/1.1 var(--display); }
-.ms ul { margin-top: 9px; list-style: none; }
-.ms li { position: relative; padding-left: 14px; font: 400 14px/1.45 var(--body); color: var(--muted); }
-.ms li::before { content: ""; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .55; }
-.sticker {
-  position: absolute; left: 84px; top: 6px; transform: rotate(-6deg);
-  padding: 8px 12px; border-radius: 10px; background: var(--sun); color: var(--ink);
-  font: 700 13px/1 var(--display); box-shadow: 0 10px 18px -10px rgba(120, 80, 0, .6);
-}
-.clean {
-  position: relative; overflow: hidden; margin-top: 26px; height: 88px; border-radius: 24px; background: var(--grad); color: #fff;
-  display: flex; align-items: center; gap: 22px; padding: 0 28px;
-}
-.clean .eyebrow { width: 120px; line-height: 1.35; color: rgba(255, 255, 255, .85); flex: none; }
-.clean .chips { display: flex; gap: 10px; }
-.clean .chips span {
-  display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px 10px 10px; border-radius: 12px;
-  background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .25); font: 600 14.5px/1 var(--display); white-space: nowrap;
-}
-.clean .chips i { font-size: 17px; color: var(--sun); }
-.foot-note { margin-top: 16px; display: flex; gap: 10px; font: 400 13.5px/1.5 var(--body); color: var(--muted); }
-.foot-note i { font-size: 17px; margin-top: 2px; color: var(--soft); }
-
-/* ---------- 10 close ---------- */
-.close-head { position: absolute; left: 72px; top: 56px; width: 900px; }
-.close-head h2 { font-size: 46px; line-height: 1.12; }
-.close-head .lead { margin-top: 16px; max-width: 700px; font-size: 18px; color: rgba(255, 255, 255, .8); }
-.proof { position: absolute; left: 72px; right: 72px; top: 326px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
-.pf { height: 146px; padding: 20px 22px; border-radius: 24px; background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .24); }
-.pf .row { display: flex; align-items: center; justify-content: space-between; }
-.pf .n { font: 800 50px/1 var(--display); letter-spacing: -.03em; }
-.pf .row i { width: 40px; height: 40px; padding: 10px; border-radius: 50%; background: rgba(255, 255, 255, .16); color: var(--sun); }
-.pf p { margin-top: 14px; font: 500 15px/1.4 var(--body); color: rgba(255, 255, 255, .86); }
-.pillars { position: absolute; left: 72px; right: 72px; top: 506px; display: flex; gap: 14px; }
-.pillars span {
-  display: inline-flex; align-items: center; gap: 12px; padding: 10px 22px 10px 10px; border-radius: 999px;
-  background: #fff; color: var(--ink); font: 700 18px/1 var(--display);
-  box-shadow: 0 14px 28px -16px rgba(10, 4, 40, .8);
-}
-.pillars i { width: 38px; height: 38px; padding: 9px; border-radius: 50%; color: #fff; }
-.tagline { position: absolute; left: 72px; top: 590px; font: 600 13px/1 var(--body); letter-spacing: .06em; color: rgba(255, 255, 255, .7); text-transform: uppercase; }
-.thanks {
-  position: absolute; right: 78px; top: 62px; width: 132px; height: 132px; border-radius: 50%; transform: rotate(10deg);
-  background: var(--sun); color: var(--ink); display: grid; place-items: center; text-align: center;
-  font: 800 22px/1.05 var(--display); box-shadow: 0 18px 34px -16px rgba(10, 4, 40, .8);
-}
+/* ================= 12 close ================= */
+.proofrow { left: 96px; right: 96px; top: 292px; display: grid; grid-template-columns: repeat(4, 1fr); }
+.proofrow div { padding: 0 24px; border-left: 1.5px solid rgba(255, 248, 239, .22); }
+.proofrow div:first-child { padding-left: 0; border-left: 0; }
+.proofrow b { display: block; font-weight: 900; font-size: 58px; line-height: 1; letter-spacing: -.02em; }
+.proofrow span { display: block; margin-top: 10px; font-weight: 700; font-size: 15.5px; line-height: 1.4; color: rgba(255, 248, 239, .88); }
+.motto { left: 0; right: 0; top: 432px; text-align: center; font-size: 50px; color: var(--gold); line-height: 1.1; }
+.links { left: 0; right: 0; top: 566px; display: flex; justify-content: center; gap: 16px; }
+.links span { padding: 12px 24px; border-radius: 999px; font-weight: 800; font-size: 16px; }
+.links .f { background: var(--paper); color: var(--green); }
+.links .o { border: 2.5px solid var(--paper); }
+.s12-small { left: 0; right: 0; top: 636px; text-align: center; font-weight: 500; font-size: 14.5px; color: rgba(255, 248, 239, .65); }
 </style>
 </head>
 <body>
 
 <!-- 01 · Cover -->
-<section class="slide grad cover">
-  <div class="deco dots" style="color:rgba(255,255,255,.22); left:-20px; bottom:70px; width:200px; height:126px;"></div>
-  <div class="deco ring" style="color:rgba(255,255,255,.09); right:-210px; top:-250px; width:520px; height:520px;"></div>
+<section class="slide bg-cream">
+  <div class="abs circle" style="left:-120px; top:-160px; width:430px; height:430px; background:var(--blush);"></div>
+  <div class="abs dots" style="left:672px; top:52px; width:190px; height:124px; color:var(--sage);"></div>
+  <div class="abs" style="left:744px; top:150px; width:470px; height:640px; border-radius:235px 235px 0 0; background:var(--green);"></div>
+  <div class="abs circle" style="left:836px; top:212px; width:300px; height:300px; background:var(--coral);"></div>
 
-  <div class="cover-left">
-    <span class="chip-glass"><i data-i="sparkles"></i>HackYeah 2026 · AI safety infrastructure</span>
-    <h1>Govern every<br>AI interaction<br><span class="hl">before it acts.</span></h1>
-    <p class="cover-lead">A provider-independent control layer for model, agent, tool and API traffic.</p>
-    <div class="trio"><span>Built locally.</span><span class="sep"></span><span>Enforced centrally.</span><span class="sep"></span><span>Explained clearly.</span></div>
-    <div class="pills">
-      <span class="pill"><span class="dot s-allow"><i data-i="check"></i></span>ALLOW</span>
-      <span class="pill"><span class="dot s-redact"><i data-i="redact"></i></span>REDACT</span>
-      <span class="pill"><span class="dot s-block"><i data-i="ban"></i></span>BLOCK</span>
-    </div>
+  <div class="abs s1-card">
+    <div class="hd"><span class="dot-i lg"><i data-i="shield-check"></i></span>AI Control Layer<small>POLICY DECISION</small></div>
+    <div class="lab">INCOMING INTERACTION</div>
+    <div class="bub" style="background:var(--blush);">Please follow up with <span class="em">jane@example.com</span> about the refund.</div>
+    <div class="dec"><span class="dot-i redact"><i data-i="redact"></i></span><b>REDACT</b><span class="code">pii.email</span></div>
+    <div class="lab">FORWARDED TO TARGET</div>
+    <div class="bub" style="background:var(--mint);">Please follow up with <span class="em">[REDACTED]</span> about the refund.</div>
+    <div class="ft"><span><i data-i="check"></i>audited first</span><span><i data-i="check"></i>forwarded once</span></div>
   </div>
+  <i data-i="spark" class="abs" style="left:776px; top:200px; font-size:62px; color:var(--gold);"></i>
+  <i data-i="spark" class="abs" style="left:1200px; top:420px; font-size:44px; color:var(--peach);"></i>
+  <i data-i="spark" class="abs" style="left:1166px; top:640px; font-size:30px; color:var(--gold);"></i>
 
-  <div class="art">
-    <div class="core-ring" style="left:155px; top:120px; width:230px; height:230px;"></div>
-    <div class="core-ring" style="left:105px; top:70px; width:330px; height:330px; border-style:dashed;"></div>
-    <svg class="wires" viewBox="0 0 540 470" fill="none" stroke-linecap="round">
-      <g stroke="rgba(255,255,255,.6)" stroke-width="2.5" stroke-dasharray="2 7">
-        <path d="M160 106 C188 106 176 235 200 235"/>
-        <path d="M160 235 L200 235"/>
-        <path d="M160 364 C188 364 176 235 200 235"/>
-      </g>
-      <g stroke-width="3">
-        <path d="M340 235 C368 235 355 106 390 106" stroke="#5ff0bf"/>
-        <path d="M340 235 L390 235" stroke="#ffc861"/>
-        <path d="M340 235 C368 235 355 364 390 364" stroke="#ff8a95"/>
-      </g>
-    </svg>
-    <span class="cap" style="left:0;">Every interaction</span>
-    <span class="cap" style="left:390px;">One decision</span>
-    <div class="in-chip" style="top:80px;"><span class="ib"><i data-i="message"></i></span>Prompt</div>
-    <div class="in-chip" style="top:209px;"><span class="ib"><i data-i="wrench"></i></span>Tool call</div>
-    <div class="in-chip" style="top:338px;"><span class="ib"><i data-i="code"></i></span>API request</div>
-    <div class="core"><div class="core-inner"><i data-i="shield-check"></i></div></div>
-    <span class="core-label">AI Control Layer</span>
-    <div class="out-chip" style="top:80px;"><span class="ib s-allow"><i data-i="check"></i></span>ALLOW</div>
-    <div class="out-chip" style="top:209px;"><span class="ib s-redact"><i data-i="redact"></i></span>REDACT</div>
-    <div class="out-chip" style="top:338px;"><span class="ib s-block"><i data-i="ban"></i></span>BLOCK</div>
-  </div>
+  <span class="abs s1-pill">HackYeah 2026 · AI safety infrastructure</span>
+  <h1 class="abs s1-title"><span>AI CONTROL</span><span class="c-coral">LAYER</span></h1>
+  <p class="abs script s1-tag">built locally, enforced centrally</p>
+  <svg class="abs wave" data-w="560" style="left:98px; top:384px;" width="560" height="18"></svg>
+  <p class="abs s1-l1">A provider-independent control layer that checks</p>
+  <p class="abs s1-big"><span class="hlbar">every AI interaction</span></p>
+  <p class="abs s1-l3">before it reaches a model, agent, tool or API.</p>
+  <div class="abs pill-dark" style="left:96px; top:588px;"><i data-i="spark"></i>Every decision is explained clearly.</div>
 </section>
 
-<!-- 02 · Problem -->
-<section class="slide light">
-  <div class="deco dots" style="color:rgba(108,71,255,.16); left:-30px; bottom:60px; width:150px; height:130px;"></div>
-  <header class="head">
-    <div>
-      <span class="kicker"><i data-i="alert"></i>The threat</span>
-      <h2>AI traffic is the new<br><span class="hl">production boundary.</span></h2>
-    </div>
-    <p class="lead">Every prompt, tool call and model response can carry sensitive data or risky instructions. The control point must sit between intent and execution.</p>
-  </header>
-  <div class="body">
-    <div class="threats">
-      <article class="card threat">
-        <span class="bignum">01</span>
-        <div class="ib t-block"><i data-i="key"></i></div>
-        <h3>Sensitive data</h3>
-        <p>PII, credentials and private-key material can move into model or tool paths.</p>
-      </article>
-      <article class="card threat">
-        <span class="bignum">02</span>
-        <div class="ib t-redact"><i data-i="alert"></i></div>
-        <h3>Unsafe intent</h3>
-        <p>Prompt injection, instruction override and exfiltration intent need policy decisions.</p>
-      </article>
-      <article class="card threat">
-        <span class="bignum">03</span>
-        <div class="ib t-violet"><i data-i="eye-off"></i></div>
-        <h3>Blind operations</h3>
-        <p>Without safe evidence, operators cannot explain what happened or scale trust.</p>
-      </article>
-    </div>
-    <div class="banner">
-      <div class="ring" style="right:-60px; top:-90px; width:260px; height:260px;"></div>
-      <div class="ring" style="right:60px; top:40px; width:150px; height:150px;"></div>
-      <div class="ib"><i data-i="sparkles"></i></div>
-      <div>
-        <span class="eyebrow">The opportunity</span>
-        <p class="statement">Make security a reusable service<br>between every caller and every target.</p>
-      </div>
-    </div>
+<!-- 02 · Threat -->
+<section class="slide bg-blush">
+  <p class="abs script" style="left:96px; top:52px; font-size:62px;">What can go wrong:</p>
+  <div class="note" style="left:92px; top:160px; width:290px; height:236px; background:var(--butter); transform:rotate(-3deg);">
+    <span class="tape"></span><h3>Sensitive data</h3>
+    <p>PII, credentials and private-key material can move into model or tool paths.</p>
   </div>
+  <div class="note" style="left:412px; top:148px; width:290px; height:236px; background:var(--paper); transform:rotate(3deg);">
+    <span class="tape"></span><h3>Unsafe intent</h3>
+    <p>Prompt injection, instruction override and exfiltration intent need policy decisions.</p>
+  </div>
+  <div class="note" style="left:256px; top:372px; width:290px; height:200px; background:var(--peach); transform:rotate(-1.5deg);">
+    <span class="tape"></span><h3>Blind operations</h3>
+    <p>Without safe evidence, operators cannot explain what happened or scale trust.</p>
+  </div>
+
+  <div class="abs s2-right">
+    <h2>AI traffic is the new <span class="c-coral">production boundary.</span></h2>
+    <ul class="checks">
+      <li><i data-i="check-circle"></i>every prompt</li>
+      <li><i data-i="check-circle"></i>every tool call</li>
+      <li><i data-i="check-circle"></i>every model response</li>
+    </ul>
+    <p class="small">…can carry <b class="c-coral">sensitive data</b> or <b class="c-coral">risky instructions</b>. The control point must sit between intent and execution.</p>
+  </div>
+
+  <div class="band" style="height:124px;">
+    <i data-i="spark"></i>
+    <p>The opportunity: make security <span class="c-gold">a reusable service</span> between every caller and every target.</p>
+  </div>
+  <span class="pnum on-dark">02</span>
 </section>
 
-<!-- 03 · Architecture -->
-<section class="slide light">
-  <header class="head">
-    <div>
-      <span class="kicker"><i data-i="layers"></i>The product</span>
-      <h2>One control point.<br><span class="hl">One decision model.</span></h2>
-    </div>
-    <p class="lead">The system normalizes an interaction, evaluates registered controls, applies central policy, records safe evidence and forwards only what is eligible.</p>
-  </header>
-  <div class="body">
-    <div class="flow">
-      <div class="card node ext"><div class="ib t-ink"><i data-i="bot"></i></div><b>Caller</b><span>app / agent</span></div>
-      <i data-i="arrow" class="arr"></i>
-      <div class="layer">
-        <span class="layer-tag"><i data-i="shield"></i>AI Control Layer</span>
-        <div class="card node"><div class="ib t-sky"><i data-i="plug"></i></div><b>Adapter</b><span>normalized interaction</span></div>
-        <i data-i="chev" class="arr sm"></i>
-        <div class="card node"><div class="ib t-violet"><i data-i="sliders"></i></div><b>Controls</b><span>deterministic + semantic</span></div>
-        <i data-i="chev" class="arr sm"></i>
-        <div class="card node"><div class="ib t-redact"><i data-i="scale"></i></div><b>Policy</b>
-          <div class="minis"><span class="mini t-allow">ALLOW</span><span class="mini t-redact">REDACT</span><span class="mini t-block">BLOCK</span></div>
-        </div>
-        <i data-i="chev" class="arr sm"></i>
-        <div class="card node"><div class="ib t-allow"><i data-i="file"></i></div><b>Audit</b><span>stdout + SQLite</span></div>
-      </div>
-      <i data-i="arrow" class="arr"></i>
-      <div class="card node ext"><div class="ib t-ink"><i data-i="target"></i></div><b>Target</b><span>echo / local model</span></div>
-    </div>
-    <div class="card callout"><span class="ib t-violet"><i data-i="shield-check"></i></span>Every decision is structured, explainable and auditable before eligible dispatch.</div>
+<!-- 03 · How it works -->
+<section class="slide bg-green">
+  <h2 class="abs title" style="left:96px; top:58px; font-size:66px;">How it works</h2>
+  <p class="abs script c-gold" style="left:660px; top:70px; font-size:48px; transform:rotate(-3deg);">one request, step by step</p>
+  <svg class="abs sine" style="left:0; top:0;" width="1280" height="720" data-y="244" data-amp="22" data-period="372" data-phase="40" data-color="#9dbaa7"></svg>
+  <div class="steps">
+    <div class="step"><div class="bubble" style="background:var(--peach);"><span class="no">1</span><i data-i="lock"></i></div>
+      <h3>Validate</h3><p>Strict HTTP boundary: exact fields, bounded text, server-owned ID.</p></div>
+    <div class="step"><div class="bubble" style="background:var(--coral);"><span class="no">2</span><i data-i="sliders"></i></div>
+      <h3>Evaluate</h3><p>Registered controls read the original text and return findings, never actions.</p></div>
+    <div class="step"><div class="bubble" style="background:var(--gold);"><span class="no">3</span><i data-i="scale"></i></div>
+      <h3>Decide</h3><p>Central policy maps findings: BLOCK › REDACT › ALLOW, with safe reasons.</p></div>
+    <div class="step"><div class="bubble" style="background:var(--sage);"><span class="no">4</span><i data-i="file"></i></div>
+      <h3>Record</h3><p>A content-free audit event is flushed to stdout and committed to SQLite.</p></div>
+    <div class="step"><div class="bubble" style="background:var(--paper);"><span class="no">5</span><i data-i="send"></i></div>
+      <h3>Dispatch</h3><p>ALLOW once, REDACT transformed once, BLOCK zero target calls.</p></div>
+    <div class="step"><div class="bubble" style="background:var(--blush);"><span class="no">6</span><i data-i="activity"></i></div>
+      <h3>Observe</h3><p>Completion is recorded; the dashboard reads safe evidence only.</p></div>
   </div>
+  <div class="abs fail">
+    <b>If anything fails:</b>
+    <span class="o">invalid input</span><span class="o">evaluation error</span><span class="o">audit error</span>
+    <i data-i="arrow" class="arrow"></i>
+    <span class="z">zero target calls</span>
+  </div>
+  <p class="abs script c-gold" style="left:1010px; top:520px; font-size:46px; transform:rotate(-5deg);">fail closed!</p>
+  <p class="abs s3-foot">Every decision is structured, explainable and audited before eligible dispatch. Error responses carry fixed codes, never submitted text or exception details.</p>
+  <span class="pnum">03</span>
 </section>
 
-<!-- 04 · What is live -->
-<section class="slide light">
-  <header class="head">
-    <div>
-      <span class="kicker"><i data-i="zap"></i>What is live</span>
-      <h2>A focused security pack,<br><span class="hl">working end to end.</span></h2>
+<!-- 04 · Architecture -->
+<section class="slide bg-cream">
+  <h2 class="abs title" style="left:96px; top:54px;">Architecture</h2>
+  <p class="abs script c-coral" style="left:640px; top:66px; font-size:40px; transform:rotate(-3deg);">a small core with plug-in edges</p>
+  <p class="abs lead" style="left:96px; top:122px; width:820px; color:rgba(47,75,62,.8);">Concrete detectors and targets are chosen only in <b>composition.py</b>. Policy, orchestration and audit have no provider-specific defaults.</p>
+
+  <!-- callers -->
+  <p class="abs lane-label" style="left:64px; top:184px;">callers</p>
+  <div class="abs" style="left:64px; top:230px; width:182px; display:grid; gap:12px;">
+    <div class="mini-card"><span class="dot-i" style="background:var(--peach);"><i data-i="window"></i></span>Apps &amp; services</div>
+    <div class="mini-card"><span class="dot-i" style="background:var(--butter);"><i data-i="bot"></i></span>AI agents</div>
+    <div class="mini-card"><span class="dot-i" style="background:var(--mint);"><i data-i="layout"></i></span>Demo workbench</div>
+  </div>
+  <p class="abs" style="left:64px; top:432px; width:200px; font:600 12px/1.4 var(--mono); color:rgba(47,75,62,.7);">POST /v1/interactions</p>
+  <svg class="abs draw" style="left:251px; top:316px;" width="28" height="24" viewBox="0 0 28 24"><path d="M2 12h20M15 4l8 8-8 8" fill="none" stroke="#2f4b3e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+
+  <!-- core -->
+  <div class="abs core">
+    <div class="core-head"><span class="kick">AI Control Layer · core</span><span class="script">one audited path</span></div>
+    <div class="tiles">
+      <div class="tile"><div class="trow"><span class="dot-i" style="background:var(--peach);"><i data-i="lock"></i></span><code>api.py</code></div><h4>HTTP boundary</h4><p>strict input, safe error codes</p></div>
+      <div class="tile"><div class="trow"><span class="dot-i" style="background:var(--coral);"><i data-i="workflow"></i></span><code>service.py</code></div><h4>Orchestrator</h4><p>evaluate, decide, audit, dispatch</p></div>
+      <div class="tile"><div class="trow"><span class="dot-i" style="background:var(--gold);"><i data-i="scale"></i></span><code>policy.py</code></div><h4>Policy engine</h4><p>strict YAML, digest, central precedence</p></div>
+      <div class="tile"><div class="trow"><span class="dot-i" style="background:var(--sage);"><i data-i="database"></i></span><code>audit.py</code></div><h4>Audit gate</h4><p>stdout + SQLite, content-free</p></div>
     </div>
-    <p class="lead">The current build is deliberately bounded: it proves the control-layer pattern with local targets, strict startup policy and deterministic tests.</p>
-  </header>
-  <div class="body">
-    <div class="stats">
-      <article class="card stat">
-        <div class="glow" style="--g:var(--violet);"></div>
-        <div class="top"><span class="n c-violet">6</span><div class="ib t-violet"><i data-i="sliders"></i></div></div>
-        <h3>registered controls</h3>
-        <p>email, bearer, PEM, GitHub, labelled SSN, known attacks</p>
-      </article>
-      <article class="card stat">
-        <div class="glow" style="--g:var(--pink);"></div>
-        <div class="top"><span class="n c-pink">3</span><div class="ib t-pink"><i data-i="scale"></i></div></div>
-        <h3>central actions</h3>
-        <p>ALLOW preserves, REDACT transforms, BLOCK stops</p>
-      </article>
-      <article class="card stat">
-        <div class="glow" style="--g:var(--sky);"></div>
-        <div class="top"><span class="n c-sky">2</span><div class="ib t-sky"><i data-i="target"></i></div></div>
-        <h3>target boundaries</h3>
-        <p>local echo and operator-configured loopback Ollama</p>
-      </article>
-      <article class="card stat">
-        <div class="glow" style="--g:var(--redact);"></div>
-        <div class="top"><span class="n c-redact">19</span><div class="ib t-redact"><i data-i="play"></i></div></div>
-        <h3>demo scenarios</h3>
-        <p>benign, deterministic, semantic and failure modes</p>
-      </article>
+    <div class="reg">
+      <div class="reg-head"><i data-i="plug"></i>Control registry<span class="script">plug in what to detect</span></div>
+      <div class="reg-chips"><span>email</span><span>bearer</span><span>PEM key</span><span>GitHub token</span><span>labelled SSN</span><span>known attacks</span><span class="opt">semantic (opt-in)</span><span class="add">+ your control</span></div>
     </div>
-    <div class="card principles">
-      <div class="p-head"><i data-i="layers"></i>Provider-independent by construction</div>
-      <div class="p-grid">
-        <span><i data-i="check"></i>Controls return findings</span>
-        <span><i data-i="check"></i>Policy owns enforcement</span>
-        <span><i data-i="check"></i>Adapters own protocol behavior</span>
-        <span><i data-i="check"></i>Targets remain replaceable</span>
-      </div>
+    <div class="reg">
+      <div class="reg-head"><i data-i="plug"></i>Target registry<span class="script">plug in where it goes</span></div>
+      <div class="reg-chips"><span>local-echo</span><span>local-ollama</span><span class="add">+ your adapter</span></div>
     </div>
   </div>
+
+  <!-- targets -->
+  <svg class="abs draw" style="left:1003px; top:316px;" width="28" height="24" viewBox="0 0 28 24"><path d="M2 12h20M15 4l8 8-8 8" fill="none" stroke="#2f4b3e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+  <p class="abs lane-label" style="left:1034px; top:184px;">targets</p>
+  <div class="abs" style="left:1034px; top:230px; width:182px; display:grid; gap:12px;">
+    <div class="mini-card"><span class="dot-i" style="background:var(--mint);"><i data-i="target"></i></span>Local echo</div>
+    <div class="mini-card"><span class="dot-i" style="background:var(--butter);"><i data-i="cpu"></i></span>Local Ollama model</div>
+    <div class="mini-card dashed"><span class="dot-i" style="background:var(--blush);"><i data-i="plus"></i></span><span>LLM APIs, MCP, external APIs<br><small style="font-weight:600; font-size:12px; color:var(--coral);">next adapters</small></span></div>
+  </div>
+
+  <!-- side inputs / outputs -->
+  <div class="abs" style="left:282px; top:630px; display:flex; gap:14px;">
+    <span class="side-chip"><span class="dot-i" style="background:var(--butter);"><i data-i="file"></i></span><code>policy.yaml</code>chosen per deployment</span>
+    <span class="side-chip"><span class="dot-i" style="background:var(--mint);"><i data-i="chart"></i></span><code>/dashboard</code>read-only evidence</span>
+  </div>
+  <span class="pnum">04</span>
 </section>
 
-<!-- 05 · Decisions -->
-<section class="slide dark">
-  <div class="deco dots" style="color:rgba(255,255,255,.12); right:50px; top:50px; width:130px; height:90px;"></div>
-  <header class="head">
-    <div>
-      <span class="kicker"><i data-i="scale"></i>The moment of control</span>
-      <h2>A simple outcome<br><span class="hl">users can trust.</span></h2>
-    </div>
-    <p class="lead">The decision engine makes the security posture visible in one line, while retaining the structured reasons behind it.</p>
-  </header>
-  <div class="body">
-    <div class="dcards">
-      <article class="glass dcard">
-        <div class="glow" style="--g:var(--allow);"></div>
-        <div class="dtop"><div class="ib s-allow"><i data-i="check"></i></div><span class="act">ALLOW</span></div>
-        <span class="eyebrow c-allow">When</span>
-        <p class="why">No finding maps to a stronger action.</p>
-        <span class="eyebrow c-allow">Then</span>
-        <p class="what">Forward the original interaction exactly once.</p>
-      </article>
-      <article class="glass dcard">
-        <div class="glow" style="--g:var(--redact);"></div>
-        <div class="dtop"><div class="ib s-redact"><i data-i="redact"></i></div><span class="act">REDACT</span></div>
-        <span class="eyebrow c-redact">When</span>
-        <p class="why">A supported PII finding needs protection.</p>
-        <span class="eyebrow c-redact">Then</span>
-        <p class="what">Replace selected spans with [REDACTED] before forwarding.</p>
-      </article>
-      <article class="glass dcard">
-        <div class="glow" style="--g:var(--block);"></div>
-        <div class="dtop"><div class="ib s-block"><i data-i="ban"></i></div><span class="act">BLOCK</span></div>
-        <span class="eyebrow c-block">When</span>
-        <p class="why">A credential or known attack indicator is detected.</p>
-        <span class="eyebrow c-block">Then</span>
-        <p class="what">Make zero target calls and return a safe reason.</p>
-      </article>
-    </div>
-    <div class="glass prec">
-      <span class="lab"><i data-i="layers"></i>Central precedence</span>
-      <span class="badge s-block"><i data-i="ban"></i>BLOCK</span><i data-i="chev" class="gt"></i>
-      <span class="badge s-redact"><i data-i="redact"></i>REDACT</span><i data-i="chev" class="gt"></i>
-      <span class="badge s-allow"><i data-i="check"></i>ALLOW</span>
-      <span class="note">the stronger action always wins</span>
-    </div>
+<!-- 05 · Reuse -->
+<section class="slide bg-mint">
+  <h2 class="abs title" style="left:96px; top:54px; font-size:58px;">Built to be reused</h2>
+  <p class="abs script c-coral" style="left:100px; top:122px; font-size:42px; transform:rotate(-2deg);">swap the edges, keep the core</p>
+  <div class="abs proof"><i data-i="spark"></i><p><b>Proven in this repo:</b> five more controls and the local model target plugged in without a core redesign.</p></div>
+
+  <div class="abs arches">
+    <div class="arch a-coral"><h3>Controls</h3><p class="what">what to detect</p>
+      <ul><li>own finding codes</li><li>return findings only</li><li>registered at startup</li></ul></div>
+    <div class="arch a-green"><h3>Policy</h3><p class="what">what to do</p>
+      <ul><li>one YAML per deployment</li><li>ALLOW · REDACT · BLOCK</li><li>validated, no fallback</li></ul></div>
+    <div class="arch a-gold"><h3>Targets</h3><p class="what">where it goes</p>
+      <ul><li>TargetAdapter contract</li><li>exact registered ID</li><li>called only after audit</li></ul></div>
+    <div class="arch a-paper"><h3>Core</h3><p class="what">stays the same</p>
+      <ul><li>validation + decisions</li><li>audit gate</li><li>reporting + dashboard</li></ul></div>
   </div>
+
+  <div class="abs uses">
+    <p class="script">for example:</p>
+    <div class="use"><span class="dot-i" style="background:var(--peach);"><i data-i="headset"></i></span><div><b>Support chatbot → LLM</b><span>redact customer PII, block injection</span></div></div>
+    <div class="use"><span class="dot-i" style="background:var(--butter);"><i data-i="terminal"></i></span><div><b>Coding agent → tools</b><span>block leaked keys and tokens</span></div></div>
+    <div class="use"><span class="dot-i" style="background:var(--mint);"><i data-i="book"></i></span><div><b>Internal knowledge assistant</b><span>keep PII out of model prompts</span></div></div>
+    <div class="use"><span class="dot-i" style="background:var(--blush);"><i data-i="globe"></i></span><div><b>Agent → external API</b><span>audit and gate every call</span></div></div>
+  </div>
+  <p class="abs s5-note">Example deployments reuse the same core; remote LLM, MCP and external API adapters are the next integrations, not part of today's build.</p>
+  <span class="pnum">05</span>
 </section>
 
-<!-- 06 · Coverage -->
-<section class="slide light">
-  <header class="head">
-    <div>
-      <span class="kicker"><i data-i="shield"></i>Control coverage</span>
-      <h2>Protection with<br><span class="hl">honest boundaries.</span></h2>
-    </div>
-    <p class="lead">The pack recognizes precise supported shapes and keeps its claims narrow. That makes the behavior testable, explainable and safe to extend.</p>
-  </header>
-  <div class="body">
-    <div class="cov">
-      <div>
-        <div class="tbl-head eyebrow"><span>Control</span><span>Finding family</span><span>Default</span><span>Boundary</span></div>
-        <div class="card tbl-row"><b>Email address</b><span class="code">pii.email</span><span><span class="badge t-redact"><i data-i="redact"></i>REDACT</span></span><span class="bound">bounded ASCII dot-atom</span></div>
-        <div class="card tbl-row"><b>Labelled US SSN</b><span class="code">pii.us_ssn</span><span><span class="badge t-redact"><i data-i="redact"></i>REDACT</span></span><span class="bound">labelled, fictional syntax</span></div>
-        <div class="card tbl-row"><b>Bearer / PEM / GitHub</b><span class="code">secret.*</span><span><span class="badge t-block"><i data-i="ban"></i>BLOCK</span></span><span class="bound">supported token / key shapes</span></div>
-        <div class="card tbl-row"><b>Known attack literals</b><span class="code">attack.*</span><span><span class="badge t-block"><i data-i="ban"></i>BLOCK</span></span><span class="bound">5 exact inert signatures</span></div>
-        <div class="card tbl-row"><b>Semantic security</b><span class="code">semantic.*</span><span><span class="badge t-block"><i data-i="ban"></i>BLOCK</span></span><span class="bound">optional local evaluator</span></div>
-      </div>
-      <aside class="card limits">
-        <h3><span class="ib t-pink"><i data-i="flag"></i></span>Current limits</h3>
-        <p class="sub">Deliberately not claimed by today's build:</p>
-        <div class="lchips">
-          <span>output inspection</span><span>auth</span><span>budgets</span><span>policy reload</span><span>remote provider</span><span>general secret / jailbreak detection</span>
-        </div>
-        <p class="end"><i data-i="rocket"></i>Product expansion points, not hidden claims.</p>
-      </aside>
-    </div>
+<!-- 06 · Live today -->
+<section class="slide bg-cream">
+  <div class="abs dots" style="left:1040px; top:44px; width:170px; height:100px; color:var(--peach);"></div>
+  <h2 class="abs title" style="left:96px; top:54px;">Live today</h2>
+  <p class="abs script c-coral" style="left:520px; top:66px; font-size:42px; transform:rotate(-3deg);">a focused pack, working end to end</p>
+  <div class="abs stats">
+    <div class="stat"><div class="big" style="background:var(--coral); color:var(--paper);"><b>7</b><span>registered<br>controls</span></div>
+      <p>6 deterministic (email, bearer, PEM, GitHub, labelled SSN, known attacks) + 1 opt-in semantic evaluator</p></div>
+    <div class="stat"><div class="big" style="background:var(--gold);"><b>3</b><span>central<br>actions</span></div>
+      <p>ALLOW preserves, REDACT transforms, BLOCK stops</p></div>
+    <div class="stat"><div class="big" style="background:var(--sage);"><b>2</b><span>target<br>boundaries</span></div>
+      <p>local echo and operator-configured loopback Ollama</p></div>
+    <div class="stat"><div class="big" style="background:var(--green); color:var(--paper);"><b>19</b><span>demo<br>scenarios</span></div>
+      <p>benign, deterministic, semantic and failure modes</p></div>
   </div>
+  <div class="abs pill-dark" style="left:96px; top:588px; font-size:17px; font-weight:700;"><i data-i="spark"></i>Deliberately bounded: local targets, strict startup policy and deterministic tests.</div>
+  <span class="pnum">06</span>
 </section>
 
-<!-- 07 · Evidence -->
-<section class="slide light">
-  <div class="deco dots" style="color:rgba(255,79,154,.16); right:-20px; bottom:120px; width:120px; height:150px;"></div>
-  <header class="head">
-    <div>
-      <span class="kicker"><i data-i="activity"></i>Safe operations</span>
-      <h2>Evidence that helps<br><span class="hl">operators move fast.</span></h2>
-    </div>
-    <p class="lead">Every relevant decision becomes safe telemetry. The dashboard turns that evidence into a living view of posture, timing and outcomes.</p>
-  </header>
-  <div class="body">
-    <div class="ev">
-      <div class="card audit">
-        <div class="ph"><div class="ib t-violet"><i data-i="file"></i></div><div><b>Audit event</b><small>structured record per decision</small></div></div>
-        <ul class="alist">
-          <li><i data-i="check-circle"></i>server interaction ID</li>
-          <li><i data-i="check-circle"></i>UTC timestamp</li>
-          <li><i data-i="check-circle"></i>target + policy digest</li>
-          <li><i data-i="check-circle"></i>evaluated controls + enablement</li>
-          <li><i data-i="check-circle"></i>action + finding codes</li>
-          <li><i data-i="check-circle"></i>evaluation / invocation / total timing</li>
-        </ul>
-      </div>
-      <div class="dash">
-        <div class="dash-bar">
-          <span class="w" style="background:#ff6b6b;"></span><span class="w" style="background:#ffc94d;"></span><span class="w" style="background:#3ddc97;"></span>
-          <b>Security dashboard</b>
-          <span class="badge"><i data-i="eye"></i>read-only overview</span>
-        </div>
-        <div class="tiles">
-          <div class="tile c-allow"><div class="k">ALLOW</div><div class="v">posture</div><i data-i="check"></i></div>
-          <div class="tile c-redact"><div class="k">REDACT</div><div class="v">protected</div><i data-i="redact"></i></div>
-          <div class="tile c-block"><div class="k">BLOCK</div><div class="v">stopped</div><i data-i="ban"></i></div>
-          <div class="tile" style="color:#c9c3ef;"><div class="k">UNKNOWN</div><div class="v">evidence gap</div><i data-i="help"></i></div>
-        </div>
-      </div>
-    </div>
-    <div class="privacy">
-      <div class="ib"><i data-i="lock"></i></div>
-      <div class="txt"><b>Privacy by design</b><p>Audit and reporting retain safe metadata only. They never keep:</p></div>
-      <div class="never">
-        <span><i data-i="x"></i>raw prompt content</span><span><i data-i="x"></i>matched values</span><span><i data-i="x"></i>spans</span>
-        <span><i data-i="x"></i>hashes</span><span><i data-i="x"></i>scores</span><span><i data-i="x"></i>exception text</span>
-      </div>
-    </div>
+<!-- 07 · Decisions -->
+<section class="slide bg-coral">
+  <div class="abs" style="left:-140px; top:430px; width:620px; height:420px; border-radius:58% 42% 50% 50% / 55% 45% 55% 45%; background:var(--peach);"></div>
+  <p class="abs kick" style="left:96px; top:60px;">The moment of control</p>
+  <h2 class="abs title" style="left:96px; top:96px; font-size:58px;">A simple outcome</h2>
+  <p class="abs script" style="left:720px; top:98px; font-size:54px; color:var(--green); transform:rotate(-4deg);">users can trust</p>
+  <p class="abs lead" style="left:96px; top:170px; width:780px; font-weight:600;">The decision engine makes the security posture visible in one line, while retaining the structured reasons behind it.</p>
+  <div class="abs dcards">
+    <div class="dcard"><div class="top"><span class="dot-i allow"><i data-i="check"></i></span><b>ALLOW</b></div>
+      <span class="script">when</span><p class="why">No finding maps to a stronger action.</p>
+      <span class="script">then</span><p class="then">Forward the original interaction exactly once.</p></div>
+    <div class="dcard"><div class="top"><span class="dot-i redact"><i data-i="redact"></i></span><b>REDACT</b></div>
+      <span class="script">when</span><p class="why">A supported PII finding needs protection.</p>
+      <span class="script">then</span><p class="then">Replace selected spans with [REDACTED] before forwarding.</p></div>
+    <div class="dcard"><div class="top"><span class="dot-i block"><i data-i="ban"></i></span><b>BLOCK</b></div>
+      <span class="script">when</span><p class="why">A credential or known attack indicator is detected.</p>
+      <span class="script">then</span><p class="then">Make zero target calls and return a safe reason.</p></div>
   </div>
+  <div class="abs prec">
+    <b>Central precedence:</b>
+    <span class="chip" style="background:var(--paper); color:var(--coral);"><i data-i="ban"></i>BLOCK</span><span class="gt">›</span>
+    <span class="chip redact"><i data-i="redact"></i>REDACT</span><span class="gt">›</span>
+    <span class="chip allow"><i data-i="check"></i>ALLOW</span>
+  </div>
+  <p class="abs script" style="left:860px; top:572px; font-size:44px; color:var(--green); transform:rotate(-4deg);">the stronger action wins!</p>
+  <span class="pnum">07</span>
 </section>
 
-<!-- 08 · Operator experience -->
-<section class="slide dark">
-  <header class="head">
-    <div>
-      <span class="kicker"><i data-i="window"></i>The operator experience</span>
-      <h2>From live walkthrough<br><span class="hl">to repeatable evidence.</span></h2>
-    </div>
-    <p class="lead">The local dashboard combines a read-only security overview with an interaction workbench for custom input and prepared scenarios.</p>
-  </header>
-  <div class="body">
-    <div class="scen">
-      <article class="glass sc"><span class="bar" style="background:var(--allow);"></span>
-        <div class="ib s-allow"><i data-i="check-circle"></i></div>
-        <span class="eyebrow c-allow">Benign</span><p class="a">ALLOW</p><p class="d">safe request</p></article>
-      <article class="glass sc"><span class="bar" style="background:var(--redact);"></span>
-        <div class="ib s-redact"><i data-i="sliders"></i></div>
-        <span class="eyebrow c-redact">Deterministic</span><p class="a">REDACT / BLOCK</p><p class="d">PII, token, key, attack</p></article>
-      <article class="glass sc"><span class="bar" style="background:var(--block);"></span>
-        <div class="ib s-block"><i data-i="sparkles"></i></div>
-        <span class="eyebrow c-block">Semantic</span><p class="a">BLOCK</p><p class="d">injection, override, exfiltration</p></article>
-      <article class="glass sc"><span class="bar" style="background:var(--sky);"></span>
-        <div class="ib s-sky"><i data-i="alert-circle"></i></div>
-        <span class="eyebrow c-sky">Failure</span><p class="a">EXPLAIN</p><p class="d">evaluator / target unavailable</p></article>
-    </div>
-    <div class="op-row">
-      <div class="big19">
-        <div class="ring" style="right:-50px; top:-60px; width:180px; height:180px;"></div>
-        <span class="n">19</span>
-        <p>code-owned scenarios with expected explanations and actual-result reporting</p>
-      </div>
-      <div class="glass quote">
-        <div class="ib s-pink"><i data-i="eye"></i></div>
-        <p>The operator can see what was expected, what happened, why policy chose the action and whether the target completed.
-          <strong>A mismatch stays visible instead of being rewritten as success.</strong></p>
-      </div>
-    </div>
+<!-- 08 · Coverage -->
+<section class="slide bg-cream">
+  <h2 class="abs title" style="left:96px; top:54px;">Coverage</h2>
+  <p class="abs script c-coral" style="left:100px; top:118px; font-size:42px; transform:rotate(-2deg);">with honest boundaries</p>
+  <p class="abs lead" style="left:96px; top:176px; width:700px;">The pack recognizes precise supported shapes and keeps its claims narrow: testable, explainable and safe to extend.</p>
+  <div class="abs tbl">
+    <div class="hd"><span>CONTROL</span><span>DEFAULT</span><span>BOUNDARY</span></div>
+    <div class="row"><div><b>Email address</b><code>pii.email</code></div><span><span class="chip redact"><i data-i="redact"></i>REDACT</span></span><span class="bd">bounded ASCII dot-atom</span></div>
+    <div class="row"><div><b>Labelled US SSN</b><code>pii.us_ssn</code></div><span><span class="chip redact"><i data-i="redact"></i>REDACT</span></span><span class="bd">labelled, fictional syntax</span></div>
+    <div class="row"><div><b>Bearer / PEM / GitHub</b><code>secret.*</code></div><span><span class="chip block"><i data-i="ban"></i>BLOCK</span></span><span class="bd">supported token / key shapes</span></div>
+    <div class="row"><div><b>Known attack literals</b><code>attack.*</code></div><span><span class="chip block"><i data-i="ban"></i>BLOCK</span></span><span class="bd">5 exact inert signatures</span></div>
+    <div class="row"><div><b>Semantic security</b><code>semantic.*</code></div><span><span class="chip block"><i data-i="ban"></i>BLOCK</span></span><span class="bd">optional local evaluator</span></div>
   </div>
+  <div class="abs panel">
+    <h2>Current<br>limits</h2>
+    <ul class="sp-list">
+      <li><i data-i="spark"></i><span><b>Output inspection</b> is not part of today's build.</span></li>
+      <li><i data-i="spark"></i><span><b>Auth and budgets</b> are not enforced yet.</span></li>
+      <li><i data-i="spark"></i><span><b>Policy reload</b> is not available; policy is fixed until restart.</span></li>
+      <li><i data-i="spark"></i><span><b>Remote providers</b> are not integrated yet.</span></li>
+      <li><i data-i="spark"></i><span><b>General secret and jailbreak detection</b> is not claimed.</span></li>
+    </ul>
+    <p class="script c-peach" style="margin-top:34px; font-size:38px; transform:rotate(-3deg);">expansion points,<br>not hidden claims</p>
+  </div>
+  <span class="pnum on-dark">08</span>
 </section>
 
-<!-- 09 · Scalability -->
-<section class="slide light">
-  <header class="head">
-    <div>
-      <span class="kicker"><i data-i="rocket"></i>Scalability</span>
-      <h2>Scale the boundary first;<br><span class="hl">scale the adapters next.</span></h2>
-    </div>
-    <p class="lead">The architecture keeps the security decision core small and composable. That gives the product a credible path from local proof to platform service.</p>
-  </header>
-  <div class="body">
-    <div class="road">
-      <div class="track"></div>
-      <div class="ms">
-        <div class="dot s-sky"><i data-i="server"></i></div>
-        <span class="sticker">We are here</span>
-        <div class="card mcard"><span class="step c-sky">01</span><h3>Today</h3>
-          <ul class="c-sky"><li>in-process FastAPI</li><li>local SQLite reporting</li></ul></div>
-      </div>
-      <div class="ms">
-        <div class="dot s-violet"><i data-i="layers"></i></div>
-        <div class="card mcard"><span class="step c-violet">02</span><h3>Next</h3>
-          <ul class="c-violet"><li>stateless control workers</li><li>shared policy distribution</li></ul></div>
-      </div>
-      <div class="ms">
-        <div class="dot s-pink"><i data-i="cloud"></i></div>
-        <div class="card mcard"><span class="step c-pink">03</span><h3>Platform</h3>
-          <ul class="c-pink"><li>remote adapters</li><li>central event pipeline</li></ul></div>
-      </div>
-      <div class="ms">
-        <div class="dot s-redact"><i data-i="building"></i></div>
-        <div class="card mcard"><span class="step c-redact">04</span><h3>Enterprise</h3>
-          <ul class="c-redact"><li>identity, budgets, output DLP</li><li>model / tool / resource governance</li></ul></div>
-      </div>
-    </div>
-    <div class="clean">
-      <div class="ring" style="position:absolute; right:-40px; top:-70px; width:160px; height:160px; color:rgba(255,255,255,.2);"></div>
-      <span class="eyebrow">What scales cleanly</span>
-      <div class="chips">
-        <span><i data-i="sliders"></i>stateless controls</span>
-        <span><i data-i="lock"></i>immutable registrations</span>
-        <span><i data-i="scale"></i>policy-owned decisions</span>
-        <span><i data-i="plug"></i>replaceable target adapters</span>
-      </div>
-    </div>
-    <p class="foot-note"><i data-i="info"></i><span>Intentionally local today: synchronous request handling, loopback Ollama, single-node SQLite and no distributed queue. These are clear deployment boundaries, not architecture dead ends.</span></p>
+<!-- 09 · Evidence -->
+<section class="slide bg-blush">
+  <h2 class="abs title" style="left:96px; top:54px;">Evidence</h2>
+  <p class="abs script c-coral" style="left:470px; top:64px; font-size:44px; transform:rotate(-3deg);">that helps operators move fast</p>
+  <p class="abs lead" style="left:96px; top:128px; width:900px;">Every relevant decision becomes safe telemetry; the dashboard turns it into a living view of posture, timing and outcomes.</p>
+  <div class="abs paper-card">
+    <h3>Audit event</h3>
+    <ul>
+      <li><i data-i="check"></i>server interaction ID</li>
+      <li><i data-i="check"></i>UTC timestamp</li>
+      <li><i data-i="check"></i>target + policy digest</li>
+      <li><i data-i="check"></i>evaluated controls + enablement</li>
+      <li><i data-i="check"></i>action + finding codes</li>
+      <li style="border-bottom:0;"><i data-i="check"></i>evaluation / invocation / total timing</li>
+    </ul>
   </div>
+  <div class="abs dash">
+    <div class="hd"><b>Security dashboard</b><span class="script">read-only overview</span></div>
+    <div class="grid">
+      <div class="dtile" style="background:var(--sage); color:var(--green);"><b>ALLOW</b><span>posture</span><i data-i="check"></i></div>
+      <div class="dtile" style="background:var(--gold); color:var(--green);"><b>REDACT</b><span>protected</span><i data-i="redact"></i></div>
+      <div class="dtile" style="background:var(--coral); color:var(--paper);"><b>BLOCK</b><span>stopped</span><i data-i="ban"></i></div>
+      <div class="dtile" style="background:var(--green-3); color:var(--paper);"><b>UNKNOWN</b><span>evidence gap</span><i data-i="help"></i></div>
+    </div>
+  </div>
+  <p class="abs script c-coral" style="left:100px; top:530px; font-size:36px; transform:rotate(-1deg);">privacy by design: audit keeps safe metadata only, never</p>
+  <div class="abs never">
+    <span><i data-i="x"></i>raw prompt content</span><span><i data-i="x"></i>matched values</span><span><i data-i="x"></i>spans</span>
+    <span><i data-i="x"></i>hashes</span><span><i data-i="x"></i>scores</span><span><i data-i="x"></i>exception text</span>
+  </div>
+  <span class="pnum">09</span>
 </section>
 
-<!-- 10 · Close -->
-<section class="slide grad">
-  <div class="deco ring" style="color:rgba(255,255,255,.12); right:-120px; bottom:-260px; width:560px; height:560px;"></div>
-  <div class="deco dots" style="color:rgba(255,255,255,.2); right:250px; top:40px; width:150px; height:90px;"></div>
-  <div class="close-head">
-    <span class="kicker"><i data-i="trophy"></i>Why this wins</span>
-    <h2>A control layer people can adopt<br><span class="hl">before they trust it at scale.</span></h2>
-    <p class="lead">It starts with a narrow, testable promise: no eligible AI interaction reaches a target without a policy decision and safe evidence.</p>
+<!-- 10 · Operator experience -->
+<section class="slide bg-green">
+  <h2 class="abs title" style="left:96px; top:54px; font-size:56px; line-height:1.05;">From live walkthrough<br><span class="c-gold">to repeatable evidence</span></h2>
+  <div class="abs big19"><b>19</b><strong>code-owned scenarios</strong><span>with expected explanations and actual-result reporting</span></div>
+  <p class="abs script c-gold" style="left:532px; top:236px; width:250px; font-size:38px; transform:rotate(-4deg);">a mismatch stays visible, never rewritten as success</p>
+  <svg class="abs draw" style="left:450px; top:424px;" width="140" height="120" viewBox="0 0 140 120" fill="none" stroke="#e8b949" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M128 4 C 134 46, 100 84, 40 90"/><path d="M54 76 L38 90 L56 102"/>
+  </svg>
+  <div class="abs groups">
+    <div class="grp"><b class="c-sage">ALLOW</b><span><em>benign:</em> safe request</span></div>
+    <div class="grp"><b class="c-gold">REDACT / BLOCK</b><span><em>deterministic:</em> PII, token, key, attack</span></div>
+    <div class="grp"><b class="c-coral">BLOCK</b><span><em>semantic:</em> injection, override, exfiltration</span></div>
+    <div class="grp"><b class="c-peach">EXPLAIN</b><span><em>failure:</em> evaluator / target unavailable</span></div>
   </div>
-  <div class="thanks">Thank<br>you!</div>
-  <div class="proof">
-    <div class="pf"><div class="row"><span class="n">1,614</span><i data-i="flask"></i></div><p>unit + integration checks</p></div>
-    <div class="pf"><div class="row"><span class="n">9</span><i data-i="window"></i></div><p>Chromium journeys</p></div>
-    <div class="pf"><div class="row"><span class="n">PASS</span><i data-i="users"></i></div><p>fresh correctness + security reviews</p></div>
-    <div class="pf"><div class="row"><span class="n">0</span><i data-i="ban"></i></div><p>target calls after BLOCK</p></div>
+  <p class="abs" style="left:96px; top:626px; width:1000px; font-weight:500; font-size:14.5px; line-height:1.5; color:rgba(255,248,239,.7);">The local dashboard pairs a read-only security overview with an interaction workbench: operators see what was expected, what happened, why policy chose the action and whether the target completed.</p>
+  <span class="pnum">10</span>
+</section>
+
+<!-- 11 · Scale -->
+<section class="slide bg-cream">
+  <h2 class="abs title" style="left:96px; top:54px; font-size:56px;">Scale the boundary first</h2>
+  <p class="abs script c-coral" style="left:100px; top:118px; font-size:42px; transform:rotate(-2deg);">then scale the adapters</p>
+  <p class="abs lead" style="left:620px; top:126px; width:560px;">The decision core stays small and composable: a credible path from local proof to platform service.</p>
+  <svg class="abs sine" style="left:0; top:0;" width="1280" height="720" data-y="292" data-amp="18" data-period="544" data-phase="60" data-color="#9dbaa7"></svg>
+  <p class="abs script c-coral" style="left:206px; top:212px; font-size:32px; transform:rotate(-6deg);">we are here</p>
+  <svg class="abs draw" style="left:178px; top:232px;" width="40" height="40" viewBox="0 0 40 40" fill="none" stroke="#e9825d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M34 6 C 22 8, 12 16, 8 30"/><path d="M4 22 L8 32 L17 27"/></svg>
+  <div class="abs road">
+    <div><div class="n" style="background:var(--coral); color:var(--paper);">1</div><h3>Today</h3><p>in-process FastAPI<br>local SQLite reporting</p></div>
+    <div><div class="n" style="background:var(--gold);">2</div><h3>Next</h3><p>stateless control workers<br>shared policy distribution</p></div>
+    <div><div class="n" style="background:var(--sage);">3</div><h3>Platform</h3><p>remote adapters<br>central event pipeline</p></div>
+    <div><div class="n" style="background:var(--green); color:var(--paper);">4</div><h3>Enterprise</h3><p>identity, budgets, output DLP<br>model / tool / resource governance</p></div>
   </div>
-  <div class="pillars">
-    <span><i data-i="shield" class="s-violet"></i>Protect the interaction.</span>
-    <span><i data-i="file" class="s-pink"></i>Preserve the evidence.</span>
-    <span><i data-i="plug" class="s-sky"></i>Earn the next integration.</span>
+  <div class="abs clean">
+    <span class="script">scales cleanly:</span>
+    <span class="o">stateless controls</span><span class="o">immutable registrations</span><span class="o">policy-owned decisions</span><span class="o">replaceable target adapters</span>
   </div>
-  <p class="tagline">Local proof today · scalable policy boundary tomorrow</p>
+  <p class="abs s11-foot">Intentionally local today: synchronous request handling, loopback Ollama, single-node SQLite and no distributed queue. These are clear deployment boundaries, not architecture dead ends.</p>
+  <span class="pnum">11</span>
+</section>
+
+<!-- 12 · Close -->
+<section class="slide bg-green">
+  <i data-i="spark" class="abs" style="left:60px; top:420px; font-size:52px; color:var(--gold);"></i>
+  <i data-i="spark" class="abs" style="left:1186px; top:444px; font-size:38px; color:var(--peach);"></i>
+  <p class="abs kick c-gold" style="left:96px; top:58px;">Why this wins</p>
+  <h2 class="abs title" style="left:96px; top:92px; font-size:48px; line-height:1.08;">A control layer people can adopt<br><span class="c-gold">before they trust it at scale.</span></h2>
+  <p class="abs lead" style="left:96px; top:212px; width:900px; font-size:17px; color:rgba(255,248,239,.82);">It starts with a narrow, testable promise: no eligible AI interaction reaches a target without a policy decision and safe evidence.</p>
+  <div class="abs proofrow">
+    <div><b class="c-coral">1,614</b><span>unit + integration checks</span></div>
+    <div><b class="c-gold">9</b><span>Chromium journeys</span></div>
+    <div><b class="c-sage">PASS</b><span>fresh correctness + security reviews</span></div>
+    <div><b class="c-peach">0</b><span>target calls after BLOCK</span></div>
+  </div>
+  <p class="abs script motto">Protect the interaction. Preserve the evidence.<br>Earn the next integration.</p>
+  <div class="abs links"><span class="f">AI Control Layer</span><span class="o">github.com/JakubPoltorak147/GoldmanSachsHackYeah2026</span></div>
+  <p class="abs s12-small">Local proof today · scalable policy boundary tomorrow · HackYeah 2026</p>
+  <span class="pnum">12</span>
 </section>
 
 <script>
-// Lucide-style 24px stroke icons (redact is a custom glyph).
+// Lucide-style 24px stroke icons; "redact" and "spark" are custom glyphs.
 const ICONS = {
   "activity": '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
-  "alert": '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
-  "alert-circle": '<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
   "arrow": '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
   "ban": '<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>',
+  "book": '<path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/>',
   "bot": '<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',
-  "building": '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
+  "chart": '<path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M18 17V9"/><path d="M13 17V5"/><path d="M8 17v-3"/>',
   "check": '<path d="M20 6 9 17l-5-5"/>',
   "check-circle": '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
-  "chev": '<path d="m9 18 6-6-6-6"/>',
-  "cloud": '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>',
-  "code": '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
-  "eye": '<path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/>',
-  "eye-off": '<path d="M10.73 5.08a10.74 10.74 0 0 1 11.2 6.57 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-1.44 2.49"/><path d="M14.08 14.16a3 3 0 0 1-4.24-4.24"/><path d="M17.48 17.5a10.75 10.75 0 0 1-15.42-5.15 1 1 0 0 1 0-.7 10.75 10.75 0 0 1 4.45-5.14"/><path d="m2 2 20 20"/>',
+  "cpu": '<rect width="16" height="16" x="4" y="4" rx="2"/><rect width="6" height="6" x="9" y="9" rx="1"/><path d="M15 2v2"/><path d="M15 20v2"/><path d="M2 15h2"/><path d="M2 9h2"/><path d="M20 15h2"/><path d="M20 9h2"/><path d="M9 2v2"/><path d="M9 20v2"/>',
+  "database": '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
   "file": '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>',
-  "flag": '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
-  "flask": '<path d="M14 2v6a2 2 0 0 0 .25.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.76-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.45 15h11.1"/><path d="M8.5 2h7"/>',
+  "globe": '<circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/>',
+  "headset": '<path d="M3 11h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5Zm0 0a9 9 0 1 1 18 0m0 0v5a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3Z"/><path d="M21 16v2a4 4 0 0 1-4 4h-5"/>',
   "help": '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
-  "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
-  "key": '<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>',
-  "layers": '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+  "layout": '<rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>',
   "lock": '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
-  "message": '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
-  "play": '<circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4Z"/>',
   "plug": '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
+  "plus": '<path d="M5 12h14"/><path d="M12 5v14"/>',
   "redact": '<path d="M4 6.5h10"/><rect x="3" y="10" width="18" height="4.5" rx="1.2" fill="currentColor" stroke="none"/><path d="M4 18.5h7"/>',
-  "rocket": '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
   "scale": '<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
-  "server": '<rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01"/><path d="M6 18h.01"/>',
-  "shield": '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+  "send": '<path d="M14.54 21.69a.5.5 0 0 0 .94-.03l6.5-19a.5.5 0 0 0-.64-.63l-19 6.5a.5.5 0 0 0-.02.93l7.93 3.18a2 2 0 0 1 1.11 1.11z"/><path d="m21.85 2.15-10.94 10.94"/>',
   "shield-check": '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
   "sliders": '<path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><path d="M14 2v4"/><path d="M8 10v4"/><path d="M16 18v4"/>',
-  "sparkles": '<path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0l1.58 6.14a2 2 0 0 0 1.44 1.44l6.14 1.58a.5.5 0 0 1 0 .96l-6.14 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/>',
+  "spark": '<path d="M12 1.5c.9 5.6 3.4 8.6 10.5 10.5-7.1 1.9-9.6 4.9-10.5 10.5C11.1 16.9 8.6 13.9 1.5 12c7.1-1.9 9.6-4.9 10.5-10.5z" fill="currentColor" stroke="none"/>',
   "target": '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
-  "trophy": '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
-  "users": '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/>',
+  "terminal": '<path d="m4 17 6-6-6-6"/><path d="M12 19h8"/>',
   "window": '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 4v4"/><path d="M2 8h20"/><path d="M6 4v4"/>',
-  "wrench": '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
-  "x": '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
-  "zap": '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>'
+  "workflow": '<rect width="8" height="8" x="3" y="3" rx="2"/><path d="M7 11v4a2 2 0 0 0 2 2h4"/><rect width="8" height="8" x="13" y="13" rx="2"/>',
+  "x": '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>'
 };
-
-const slides = [...document.querySelectorAll(".slide")];
-const pad = n => String(n).padStart(2, "0");
-slides.forEach((slide, index) => {
-  const foot = document.createElement("div");
-  foot.className = "foot";
-  foot.innerHTML =
-    '<div class="brand"><span class="logo"><i data-i="shield"></i></span><b>AI Control Layer</b>' +
-    '<span class="sep"></span><span>HackYeah 2026</span></div>' +
-    `<span class="num">${pad(index + 1)} / ${pad(slides.length)}</span>`;
-  slide.appendChild(foot);
-});
 
 document.querySelectorAll("i[data-i]").forEach(el => {
   const body = ICONS[el.dataset.i];
@@ -888,6 +680,36 @@ document.querySelectorAll("i[data-i]").forEach(el => {
   el.innerHTML =
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
     `stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+});
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+function path(svg, d, attrs) {
+  const p = document.createElementNS(SVG_NS, "path");
+  p.setAttribute("d", d);
+  p.setAttribute("fill", "none");
+  for (const [k, v] of Object.entries(attrs)) p.setAttribute(k, v);
+  svg.appendChild(p);
+}
+
+// Hand-drawn style wavy underline.
+document.querySelectorAll("svg.wave").forEach(svg => {
+  const w = Number(svg.dataset.w);
+  let d = "M2 10 Q8 2 14 10";
+  for (let x = 14; x + 12 <= w; x += 12) d += ` T${x + 12} 10`;
+  path(svg, d, { stroke: "#e8b949", "stroke-width": 4, "stroke-linecap": "round" });
+});
+
+// Dotted sine connector drawn behind step circles.
+document.querySelectorAll("svg.sine").forEach(svg => {
+  const { y, amp, period, phase, color } = svg.dataset;
+  const pts = [];
+  for (let x = -20; x <= 1300; x += 6) {
+    pts.push(`${x} ${(Number(y) + Number(amp) * Math.sin((2 * Math.PI * (x + Number(phase))) / Number(period))).toFixed(1)}`);
+  }
+  path(svg, "M" + pts.join(" L"), {
+    stroke: color, "stroke-width": 5, "stroke-linecap": "round", "stroke-dasharray": "0 14"
+  });
+  svg.style.zIndex = "-1";
 });
 </script>
 </body>
