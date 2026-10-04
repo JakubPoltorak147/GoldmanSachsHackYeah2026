@@ -13,6 +13,17 @@ When Demo is enabled, GET /v1/demo/workspace SHALL return only version, applicat
 - **WHEN** Demo metadata receives unknown/duplicate query parameters, an unsupported method, an unavailable service or a noncanonical trailing-slash path
 - **THEN** it returns respectively fixed 422/invalid_request, 405/method_not_allowed, 503/service_unavailable or 404/not_found with Cache-Control no-store, without reflecting supplied values or redirecting
 
+### Requirement: Safe scenario explanation metadata
+The version-1 scenario catalog SHALL preserve existing fields and add code-owned expected_explanation text and unique ordered runtime_requirements labels limited to generation and semantic. The closed metadata MUST describe test expectations, not runtime readiness or actual outcomes, and MUST exclude payloads, transformed content, output, scores, endpoints, paths and raw diagnostics.
+
+#### Scenario: Frozen explanation metadata
+- **WHEN** enabled Demo receives a valid catalog GET
+- **THEN** all nineteen entries expose safe test descriptions, expected explanations and runtime-purpose requirements from immutable definitions without runtime calls or history writes; existing request variants and interaction/workspace/reporting response schemas remain unchanged
+
+#### Scenario: Synthetic values and readiness remain private
+- **WHEN** catalog metadata is read before or after a synthetic scenario or a failed runtime request
+- **THEN** descriptions do not reveal fixture tokens, numbers, email values or attack literals, and runtime requirements remain the same configured-purpose labels rather than readiness, raw failure causes or recorded interaction outcomes
+
 ### Requirement: Same-origin browser execution
 Scenario requests SHALL require one valid same-origin Origin. Ordinary requests with Origin SHALL require the same validation in either Demo mode; ordinary requests without Origin MUST remain supported. Foreign, null, malformed or duplicate Origin MUST produce fixed 422/invalid_request before evaluation. No browser field SHALL select policy/model/runtime or fault behavior.
 

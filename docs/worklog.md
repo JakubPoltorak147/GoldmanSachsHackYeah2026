@@ -1511,3 +1511,38 @@ Task-group commits: `e88300e feat(demo): add immutable scenarios and startup pro
 `a92d5e5 test(demo): verify governed interaction boundaries`.
 Console group commit subject: `feat(dashboard): add interaction workspace and operator console`.
 The incomplete live/acceptance group is not committed as complete.
+
+## 2026-10-04 — workbench explanation and scenario-coverage planning revision
+
+Authorization: “Update it. Lets go” replied to the explicit request to revise
+the existing workbench proposal, design, specs and tasks. This grants planning
+revision only; revised-scope implementation approval remains NOT GRANTED.
+
+Revised five existing planning files for nineteen scenarios (original eleven
+plus GitHub PAT/OAuth, labelled SSN, pickle OS/POSIX, base64 execution indicator,
+multiple PII and PII/credential precedence). Defined safe additive catalog
+expectation/runtime-purpose metadata, readable control/finding/outcome labels,
+inspectable disabled cards, custom application-policy guidance and evidence-based
+expected versus actual completion. Runtime diagnosis preserves strict validation,
+thresholds and fail-closed behavior; missing models require administrator
+provisioning and do not satisfy live acceptance. Adapter/core fixes require a
+separate reviewed scope amendment. Prior live failures remain recorded.
+
+Retained historical completed implementation tasks and reopened integrated
+verification/reviews for the revision. Added unchecked catalog, presentation and
+prerequisite-diagnosis groups in the same authoritative OpenSpec task list.
+No code, current specs, architecture, challenge traceability or local environment
+configuration changed. No application or live-model tests ran for this revision.
+
+Verification: `openspec validate add-demo-scenario-workbench --strict` PASS;
+`openspec validate --all --strict` 12 PASS, 0 FAIL; `git diff --check` PASS.
+Fresh independent read-only planning correctness reviewer
+`/root/updated_workbench_correctness` PASS on final artifacts and security/bypass
+reviewer `/root/updated_workbench_security` PASS, with no material findings.
+An optional stopped-runtime wording clarification was resolved to an isolated
+unavailable endpoint, then correctness review reconfirmed PASS. Scope and evidence
+are referenced from the change's tasks.md. These planning results establish
+neither revised implementation correctness nor live semantic success.
+
+Planning group commit subject: `docs(openspec): clarify scenarios and workbench outcomes`.
+The workbench remains incomplete; no apply, archive, spec sync or push.

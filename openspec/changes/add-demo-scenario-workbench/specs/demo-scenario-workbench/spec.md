@@ -47,6 +47,17 @@ The workspace SHALL display startup-bound application policy identity, enabled/d
 - **WHEN** workspace metadata cannot be read
 - **THEN** Run is disabled and configured controls/targets are unavailable; history is not used to infer current configuration
 
+### Requirement: Understandable custom interaction guidance
+The composer SHALL explain Local echo, Local model, ALLOW, REDACT and BLOCK in plain language. It MUST state that target selection and semantic scenario enablement do not change the custom application's checks. Current semantic enablement SHALL derive only from workspace metadata, and ALLOW MUST NOT be described as a guarantee of safety.
+
+#### Scenario: First custom interaction
+- **WHEN** the operator opens a configured workspace before submitting text
+- **THEN** visible guidance explains that echo returns approved text, the model generates from approved text, redaction occurs before forwarding, BLOCK prevents invocation, and the displayed application policy governs either target
+
+#### Scenario: Separate semantic configuration
+- **WHEN** semantic scenarios are enabled but custom metadata records semantic inspection disabled, or workspace metadata fails
+- **THEN** the composer respectively explains that semantic scenarios do not enable custom inspection or marks the current checks unavailable without asserting they are disabled
+
 ### Requirement: Transient custom draft and echo result
 Custom drafts and immediate results SHALL stay in current-page memory and render as text. They MUST NOT enter browser storage, URLs, reporting/history, application logs or metadata. Leaving Interactions SHALL clear draft/output; a new run SHALL clear prior output. Echo result SHALL be labelled approved input returned by Local echo; generated result SHALL be labelled uninspected model response.
 
@@ -69,6 +80,17 @@ An explicitly enabled Demo view SHALL expose a fixed server-owned scenario catal
 - **WHEN** credential, email and private-key scenarios are inspected by automated tests
 - **THEN** fixed values are synthetic detector fixtures, no usable private key or real credential is present, and attack signature text is never executed
 
+### Requirement: Readable scenario expectations and prerequisites
+Every scenario SHALL explain its test, why its expected action follows its fixed profile and which runtime purposes are needed. Safe explanations MUST contain no payloads or configuration endpoints. Disabled scenarios SHALL remain selectable for explanation while execution stays disabled. Prerequisites MUST describe configuration needs without asserting runtime readiness.
+
+#### Scenario: Scenario selection before execution
+- **WHEN** the operator selects any enabled or disabled scenario
+- **THEN** its title, safe test explanation, expected action/error with readable reason, synthetic/simulation label and configuration/runtime prerequisites are visible without copying its hidden payload into the composer or dispatching any interaction
+
+#### Scenario: Runtime independence of expected blocking
+- **WHEN** a deterministic blocking scenario is selected with no local model runtime
+- **THEN** its explanation states that expected BLOCK needs no generation call; it does not promise availability or change the configured target if actual enforcement permits forwarding
+
 ### Requirement: Real governed scenario execution
 Every scenario SHALL enter the existing interaction boundary and control pipeline with a server-generated UUID. Deterministic controls, enabled semantic evaluation, validated findings, central policy, redaction and required audit/reporting MUST precede any eligible target invocation. Browser clients MUST NOT call Ollama or set profile, runtime, policy, model, target or content for a scenario.
 
@@ -81,7 +103,7 @@ Every scenario SHALL enter the existing interaction boundary and control pipelin
 - **THEN** each retains its own policy/model/control bindings and UUID, shares required reporting health and cannot alter another run or ordinary interaction service
 
 ### Requirement: Deterministic live demonstrations
-The catalog SHALL include benign ALLOW, email/PII REDACT, supported credential/API-secret BLOCK, private-key BLOCK and known historical signature BLOCK scenarios. Eligible live runs MUST use the real existing local-ollama target; BLOCK MUST invoke zero generation calls. Automated tests SHALL verify exact centrally redacted target input without real Ollama.
+The catalog SHALL retain the eleven original scenarios and add github-pat, github-oauth, labelled-ssn, pickle-os, pickle-posix, encoded-exec, multiple-pii and pii-and-secret for nineteen total. Each existing deterministic finding code MUST have a prepared example. Eligible live runs SHALL use the existing local model target; BLOCK MUST make zero target calls. Runtime-free tests SHALL verify exact redacted target input.
 
 #### Scenario: Benign real response
 - **WHEN** the benign scenario runs with a provisioned available local target
@@ -94,6 +116,26 @@ The catalog SHALL include benign ALLOW, email/PII REDACT, supported credential/A
 #### Scenario: Three deterministic attack families
 - **WHEN** supported synthetic credential, complete private-key envelope and historical signature scenarios run
 - **THEN** their existing registered findings centrally map to BLOCK and each has zero target calls
+
+#### Scenario: GitHub credential shapes
+- **WHEN** github-pat or github-oauth runs with its fabricated supported token shape
+- **THEN** secret.github_pat or secret.github_oauth respectively centrally maps to BLOCK with zero target calls, without claiming provider authentication or coverage of unsupported token forms
+
+#### Scenario: Labelled SSN redaction
+- **WHEN** labelled-ssn runs under its fixed deterministic policy
+- **THEN** pii.us_ssn maps to REDACT, the fictional number alone is replaced before one audited target call, the label is retained and no identity verification is claimed
+
+#### Scenario: Remaining inert attack indicators
+- **WHEN** pickle-os, pickle-posix or encoded-exec runs with its supported literal
+- **THEN** the corresponding attack.pickle_os_system, attack.pickle_posix_system or attack.python_exec_base64 finding maps to BLOCK, zero target calls occur and no literal is executed, unpickled or decoded for execution
+
+#### Scenario: Multiple sensitive values
+- **WHEN** multiple-pii runs with a synthetic email and fictional labelled SSN
+- **THEN** both pii.email and pii.us_ssn map to REDACT, only centrally transformed text with both values removed reaches one audited target call and reporting contains neither original nor transformed text
+
+#### Scenario: Deterministic blocking precedence
+- **WHEN** pii-and-secret runs with a synthetic email plus a supported separately framed bearer header line
+- **THEN** pii.email and secret.bearer are both recorded, central BLOCK wins over REDACT and the target is not invoked
 
 ### Requirement: Real semantic and hybrid demonstrations
 Enabled semantic demo runs SHALL use the existing real local evaluator and existing threshold/mappings. The catalog SHALL include prompt injection, indirect instruction override, exfiltration intent and combined deterministic/semantic scenarios. Expected outcomes MUST be distinguished from actual results; only validated observations SHALL determine displayed findings and decisions.
@@ -135,6 +177,62 @@ The Demo SHALL show input, deterministic controls, semantic attempt, findings, c
 #### Scenario: Completion ambiguity
 - **WHEN** a durable eligible decision has unknown completion but the immediate interaction response was received
 - **THEN** immediate outcome and historical unknown evidence are shown separately and generation is not retried
+
+### Requirement: Plain-language observed reasons
+The workspace, overview finding labels and event detail SHALL show readable control/finding meanings with technical identifiers retained as supporting text. Actual reasons MUST derive only from the interaction response and matching recorded evidence, never scenario expectations. Unknown codes SHALL retain neutral labels and literal identities. No explanation SHALL expose content, scores or raw diagnostics.
+
+#### Scenario: Actual decision explanation
+- **WHEN** recorded findings produce REDACT or BLOCK
+- **THEN** the result identifies their readable meanings, recorded mapped actions and resulting forwarding consequence while the matching overview/detail uses consistent labels; detection limits are described without identity, credential-authenticity or general safety claims
+
+#### Scenario: Recorded details unavailable
+- **WHEN** only an immediate response is available
+- **THEN** its actual codes/action/result remain explainable but recorded counts, mapped actions, audit persistence and completion are unavailable rather than reconstructed from expected findings
+
+### Requirement: Separate failures from security decisions
+The result SHALL explain what happened, why it can be established and a relevant next step. Evaluation failure MUST show no policy decision and no target invocation. Target failure SHALL retain an eligible action only when recorded evidence supplies it. Validation, audit, service and connection failures MUST stay distinct from BLOCK. No error alone SHALL identify an unrecorded runtime cause.
+
+#### Scenario: Evaluation failure explanation
+- **WHEN** evaluation_failed is returned
+- **THEN** the UI says a safety check could not finish and nothing was sent to the target, attributes a failed semantic attempt only if recorded, and suggests checking configured evaluator/runtime without claiming a specific missing-model, transport or schema cause
+
+#### Scenario: Generation failure explanation
+- **WHEN** target_failed is returned with a matching audited ALLOW or REDACT decision
+- **THEN** the UI shows both the eligible policy action and unsuccessful target execution, recommends checking the configured runtime/model and neither declares full success nor retries or switches targets
+
+#### Scenario: Validation and audit failures
+- **WHEN** invalid_request or audit_failed is returned
+- **THEN** the UI respectively explains request rejection without invented control findings or failure of required auditing with zero target dispatch, and supplies a relevant input/configuration or reporting-health next step
+
+#### Scenario: Unknown connection outcome
+- **WHEN** connectivity is lost after submission or historical completion is unknown
+- **THEN** the UI separates available immediate and historical facts, explains the uncertainty and directs the operator to evidence without promising cancellation or repeating the POST
+
+### Requirement: Full expected versus observed comparison
+Scenario results SHALL compare expected action/error and required findings against actual evidence. Full success MUST also establish expected target/semantic completion. Missing evidence SHALL yield an unverifiable expectation, not invented success or failure. Extra valid semantic categories MUST remain visible and SHALL NOT fail an otherwise satisfied required-category expectation.
+
+#### Scenario: Eligible action with unsuccessful target
+- **WHEN** a normal ALLOW or REDACT scenario records its expected action but target execution fails
+- **THEN** the UI shows the action match and execution failure separately, and does not claim that the scenario fully matched its expectation
+
+#### Scenario: Blocking and fault outcomes
+- **WHEN** a BLOCK scenario or labelled transport-failure scenario completes
+- **THEN** full match requires the expected action/error and findings plus respectively durable not_invoked, failed semantic with not_invoked, or retained eligible decision with failed target completion evidence; missing detail is labelled cannot verify full expectation
+
+### Requirement: Live semantic acceptance of the workbench
+Workbench acceptance SHALL require separate live rehearsal of nineteen scenarios and custom input with preprovisioned generation/evaluator runtimes. Mock scores MUST NOT establish live semantic success. Missing prerequisites or valid contrary outcomes SHALL leave acceptance incomplete. Strict classifier validation, fixed thresholds and failure behavior MUST remain intact; normal tests MUST remain runtime-independent.
+
+#### Scenario: Required live semantic observations
+- **WHEN** the configured preprovisioned evaluator is rehearsed
+- **THEN** custom benign input under semantic policy is actually allowed, each semantic attack emits its required category and BLOCK, hybrid records both deterministic and semantic findings with no target dispatch, and only safe status/identity/timing evidence is retained
+
+#### Scenario: Missing model or failed live evaluation
+- **WHEN** a required model/runtime is absent, evaluation fails, or actual findings do not satisfy a required category
+- **THEN** rehearsal records NOT RUN or FAIL as appropriate and workbench acceptance remains incomplete without automatic provisioning, repaired scores, weaker validation, lowered thresholds or fabricated decisions
+
+#### Scenario: Precise cause not established
+- **WHEN** historical evidence contains only evaluation_failed
+- **THEN** the operator instructions distinguish configuration/prerequisite verification from an unproven cause, retain prior failure evidence and require separate reviewed scope authorization for any confirmed adapter/core contract fix
 
 ### Requirement: Transient result and deterministic verification
 Successful target text SHALL be delivered only via the existing interaction result and displayed transiently as plain text with echo/model labels. It MUST NOT enter reporting/catalog/workspace APIs, historical detail, logs or browser storage. Required automated tests SHALL use deterministic doubles without Ollama; real evaluator/generation SHALL be exercised separately for live rehearsal.
