@@ -202,3 +202,62 @@ runtime port at application startup rather than stopping another user's daemon.
 This is distinct from the labelled injected transport cases. Required live
 rehearsal is recorded PASS/FAIL/NOT RUN separately from the automated suite;
 missing runtime or model prerequisites leave acceptance incomplete.
+
+## Diagnose live prerequisites
+
+Run administrator checks separately from the browser. This read-only check prints
+only the configured evaluator identity and presence; it does not print runtime
+responses, prompts, scores, or model output:
+
+```bash
+poetry run python - <<'PY'
+import httpx
+from app.control_layer.ollama_semantic import load_semantic_settings
+settings = load_semantic_settings()
+try:
+    with httpx.Client(timeout=2, trust_env=False, follow_redirects=False) as client:
+        response = client.get(settings.base_url.rstrip('/') + '/api/tags')
+        response.raise_for_status()
+        installed = {item['name'] for item in response.json()['models']}
+    print({'purpose': 'semantic', 'model': settings.model,
+           'status': 'present' if settings.model in installed else 'NOT RUN: absent'})
+except Exception:
+    print({'purpose': 'semantic', 'model': settings.model,
+           'status': 'NOT RUN: metadata unavailable'})
+PY
+```
+
+Generation and evaluation have separate bindings. Generation defaults to
+`qwen2.5:0.5b`; evaluation defaults to `qwen2.5:3b`. The semantic adapter uses
+the local `CONTROL_LAYER_SEMANTIC_BASE_URL` (default
+`http://127.0.0.1:11434`). Dashboard target selection cannot change these
+bindings. The adapter limits are 2-second connect, 30-second read inactivity,
+16,384 input characters / 65,536 UTF-8 bytes, an 8,192-byte response and 1,024
+output characters. A completed response must contain exactly three finite numeric
+scores in [0, 1]: `prompt_injection`, `instruction_override` and
+`exfiltration_intent`. Missing/extra/duplicate fields, booleans, malformed JSON,
+nonfinite or out-of-range scores fail closed. Never weaken this validation to make
+a demonstration pass; the UI's `evaluation_failed` does not identify its cause.
+
+Repeat the deterministic adapter checks with:
+
+```bash
+poetry run pytest tests/unit/test_ollama_semantic.py tests/unit/test_semantic_control.py
+```
+
+For a live rehearsal, run deterministic cases first, then the generation-dependent
+benign/redaction cases, semantic attack/hybrid cases, and both labelled fault
+simulations. Separately check baseline custom echo, custom generation, and custom
+benign/attack input with the semantic application policy selected at startup.
+For genuine unavailability, use a separate temporary application and an unused
+loopback runtime port; never stop the operator's daemon. Record only case IDs,
+actions/codes/statuses, model IDs, fixed stage labels and timings. Missing models
+are `NOT RUN`, operational failures are `FAIL`, and classifier mismatches are
+`FAIL`; do not retain raw envelopes, exceptions, input, output or scores.
+
+On 2026-10-04, metadata showed only `qwen2.5:0.5b` installed while the configured
+`qwen2.5:3b` evaluator was absent. A separate diagnostic of the installed 0.5b
+model succeeded for benign input but failed at classifier score validation for the
+synthetic prompt-injection case. This establishes a validation failure, not an
+adapter defect or accepted semantic enforcement. Provisioning a suitable evaluator
+remains an administrator prerequisite outside this change's scope.

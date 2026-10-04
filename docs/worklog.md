@@ -1600,3 +1600,25 @@ primary evidence. Historical tasks footer was reconciled after their minor note.
 No core, policy, reporting, adapter or local environment changes. Live semantic
 acceptance remains incomplete. Commit subject:
 feat(dashboard): explain scenarios and observed interaction outcomes.
+
+## 2026-10-04 — runtime diagnosis and safe live rehearsal (group 7)
+
+Read-only runtime metadata found generation `qwen2.5:0.5b` installed and the
+configured `qwen2.5:3b` evaluator absent. Existing semantic adapter tests pass,
+including settings, request bounds, timeout, no-proxy/no-retry and strict score
+validation checks. A bounded diagnostic retained only fixed case/model/status/stage
+metadata: benign succeeded with 0.5b, while prompt-injection failed at classifier
+score validation. The cause remains sanitized/unknown and no parser or transport
+change was made.
+
+Sanitized isolated rehearsal evidence recorded 15 available catalog cases PASS,
+four semantic-live cases NOT RUN for the absent evaluator, baseline custom echo and
+generation PASS, genuine isolated generation/evaluator unavailability PASS, and
+custom semantic benign/attack NOT RUN. No model was downloaded, no daemon was
+stopped, and no production or environment files changed. Raw inputs, outputs,
+envelopes, scores and exceptions were not retained. The result is sufficient for
+groups 7.1/7.2 and deterministic verification, but required live semantic
+acceptance remains incomplete, so 4.2 and 4.4 stay open.
+
+The repeatable diagnosis and rehearsal guide is in docs/demo.md. Commit subject:
+docs(demo): document runtime diagnosis and live rehearsal limits.
