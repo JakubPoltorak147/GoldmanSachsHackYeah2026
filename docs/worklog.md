@@ -934,6 +934,37 @@ resolve its hash from the commit containing this entry. No archive, spec synchro
 installation/model download, push or new change. Implementation PASS, ready for later
 user-authorized archive.
 
+
+### 2026-10-03 — Local model target finalization and archive
+
+**Authorization:** User requested finalization and archive of `add-local-model-target`
+only, required final verification and no new scope/refactors/cleanup. Started clean
+at `8b54bce`. Implementation/tests/scripts/config/dependencies match independently
+reviewed `a327fc0` exactly. All 23 tasks are complete; the recorded fresh correctness
+and security/bypass reviews are PASS with no unresolved findings.
+
+**Fresh final verification:** `poetry check` PASS; `poetry run ruff check .` PASS;
+`poetry run ruff format --check .` PASS (39 files); `poetry run pytest tests/unit -q`
+1001 PASS; `poetry run pytest tests/integration -q` 122 PASS; active-change strict
+validation PASS; before sync all strict validation 8 PASS and archived strict
+validation 3 PASS; after sync current-spec strict validation 8 PASS, all strict
+validation 9 PASS and active-change strict validation PASS; `git diff --check` PASS.
+All successful commands exit 0. Restricted unit run stalled at the documented
+TestClient boundary and was interrupted (130), not counted as PASS. Approved
+outside-sandbox unit/integration runs passed with only the existing TestClient/httpx
+deprecation warning. OpenSpec long-description hints are informational; approved
+whole requirements were retained. Real-runtime smoke remains optional NOT RUN,
+runtime absent/default port refused as recorded previously; no installation/download.
+
+**Independent conformity:** Fresh read-only `/root/finalization_review` returned
+PASS for unchanged reviewed implementation, completion/review evidence and no
+unresolved correctness/security findings; subsequent sync preservation review PASS.
+Four gateway requirements synchronized, keeping original title/Purpose and all
+unmentioned requirement blocks; new local-model-target spec carries every approved
+requirement/scenario and verbatim delta Purpose. No application changes.
+
+**Archive execution and blocker:** Normal CLI archive reported success at `openspec/changes/archive/2026-10-03-add-local-model-target/`. Post-archive full suite passed 1123 tests (one existing warning); all/current strict validation passed 8 items each; archived strict validation passed 4; active list is empty. However direct filesystem reads, including approved outside-sandbox attempts by primary and independent reviewer, cannot access the listed archive directory (ENOENT). Archive artifact integrity and evidence-link repair could not be verified/completed. Finalization remains blocked on archive filesystem visibility; no finalization commit was created. The CLI result alone is not claimed as fully verified archival completion.
+
 ## 2026-10-04 — Security reporting foundation implementation verification
 
 Change: `add-security-reporting-foundation`. The user's 2026-10-04 instruction
@@ -1024,3 +1055,69 @@ Final review/verification after schema fix:
   blocker. The broad unexcluded formatter still encounters the unrelated missing
   archive path; its files/staged state remain preserved. One reporting task-group
   commit is required; no push, spec synchronization or archival is performed.
+
+## 2026-10-04 — Reporting and pending archive finalization
+
+**Authorization:** The user requested “Ok so now everything necessary to archive
+and commit all the necessarry changes”, superseding the earlier instruction to
+leave reporting unarchived. This authorizes current-spec synchronization, reporting
+archive and a finalization commit including the previously staged local-model
+closure. No push is authorized or performed.
+
+**Gates:** Reporting implementation is committed at `b801527`. All six tasks are
+complete; final full suite 1207 PASS and fresh correctness/security reviews PASS
+with no remaining findings are recorded above. Application, tests, configuration,
+scripts and dependencies remain byte-identical to `b801527` during finalization
+(`git diff HEAD --exit-code -- app tests config scripts pyproject.toml poetry.lock`
+PASS). The deterministic suite was not redundantly rerun for documentation-only
+archive/spec changes; real Ollama remains optional NOT RUN.
+
+**Spec synchronization:** Added two durable-audit requirements, two target/model
+and storage-lifecycle gateway requirements, and the eight-requirement
+security-reporting capability; modified only the named local-model output/governance
+requirement. Existing main-spec titles/Purpose and unmentioned requirements/scenarios
+were preserved. New security-reporting main spec has canonical Requirements format
+and verbatim delta Purpose. Every reporting delta block was checked present after
+sync, with no delta headers remaining in main specs.
+
+**Archive integrity and recovery:** Reporting artifacts were copied into
+`openspec/changes/archive/2026-10-04-add-security-reporting-foundation/`, every one
+of nine files verified by SHA-256 before removing the active directory. The tasks
+file records the new archive authorization and archive-relative worklog link.
+
+The earlier `2026-10-03-add-local-model-target` directory is listed but remains
+unreadable (ENOENT), and recreation fails EEXIST, both inside and outside sandbox.
+That filesystem entry was preserved. To safely commit the pending local-model
+finalization without losing planning/evidence, all eight original tracked files
+were recovered from Git HEAD into the readable
+`openspec/changes/archive/2026-10-04-add-local-model-target/` directory. Recovered
+bytes were checked against Git, including .openspec.yaml; only tasks worklog link
+depth and a recovery/finalization note were then changed. Original reviewed code
+and completed test/review evidence are unchanged. No unavailable archive contents
+were invented. The old 2026-10-03 worklog blocker is historical; the readable
+recovery completes preservation for this commit. The unreadable old entry is still
+an environment limitation, not a claimed repaired directory.
+
+**Finalization checks:** `poetry check` PASS; `openspec validate --specs --strict`
+9 PASS; reporting active validation PASS before moving; post-archive
+`openspec validate --all --strict` 9 PASS and
+`openspec validate --archived --strict` 6 PASS (CLI includes the unreadable older
+entry); `openspec list --json` returns no active changes. Ruff lint/format PASS,
+44 formatted files, excluding only the unchanged unreadable old archive path.
+`git diff --check` PASS. No code changes or new scope.
+
+Fresh independent archive/spec-conformity review and commit result are recorded
+below once complete.
+
+**Fresh independent finalization review:** `/root/archive_finalization_review`
+returned **PASS**, no findings. Independently verified all nine reporting artifacts
+and all eight local-model recovered artifacts against Git, delta/main equality,
+untouched requirement/Purpose preservation, unchanged implementation, current/all
+9 PASS, archived 6 PASS, no active changes and whitespace PASS. The older unreadable
+entry is explicitly documented; readable recovery preserves tracked evidence and
+does not block this finalization commit.
+
+**Finalization commit:** `chore(openspec): finalize reporting and local model archives`
+(resolve its hash from the commit containing this entry). Includes synced current
+specs, verified readable archives, prior staged local-model finalization and this
+evidence. No implementation changes, push or new OpenSpec change.

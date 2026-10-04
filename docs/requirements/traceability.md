@@ -109,4 +109,5 @@ obtained target outcomes on storage failure and close later gates. Typed queries
 and summaries support later dashboard work without direct SQLite reads. This is
 partial challenge reporting coverage: budget/resource consumption, broader
 management visualizations and the interactive dashboard remain unimplemented.
-The reporting OpenSpec change remains unarchived at the user's request.
+The reporting OpenSpec change was synchronized and archived on 2026-10-04 after
+explicit user authorization; finalization evidence is in worklog.

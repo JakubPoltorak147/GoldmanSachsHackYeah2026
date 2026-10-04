@@ -7,7 +7,7 @@ explicit APPLY approval”, authorizing scope reduction followed immediately by
 implementation. Revised scope is recorded in proposal/design/specs. Primary agent
 owns all edits; fresh agents review read-only. Preserve staged local-model work.
 One integrated task group and one commit after verification and both reviews PASS.
-Do not archive.
+Initially do not archive; superseded by the 2026-10-04 archive authorization below.
 
 ## 1. Demo-ready reporting foundation
 
@@ -41,4 +41,14 @@ security/bypass PASS (104 independent unit tests), no remaining findings. Review
 agents did not implement or edit. Evidence and final verdicts are in worklog.
 
 One integrated task-group commit follows verified implementation and reviews. Do
-not include pre-existing staged archival/spec/worklog edits. No push or archive.
+not include pre-existing staged archival/spec/worklog edits. No push. Archive authorization follows below.
+
+
+## Archive authorization and finalization
+
+The subsequent 2026-10-04 user instruction, “Ok so now everything necessary to
+archive and commit all the necessarry changes”, authorizes spec synchronization,
+archive and finalization commit. Implementation commit: b801527. All required
+verification and independent correctness/security reviews PASS, with no unresolved
+findings. Delta requirements synchronized to main specs and strict validation PASS.
+Archive-relative worklog: [finalization evidence](../../../../docs/worklog.md).
