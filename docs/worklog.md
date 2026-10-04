@@ -1636,3 +1636,31 @@ and its audit event recorded `semantic_status=succeeded` with model
 `qwen2.5:3b`. No parser relaxation, model download, daemon change or raw
 content/score logging was introduced. Full nineteen-case live rehearsal remains
 separate acceptance work for the active workbench change.
+
+## 2026-10-04 — restore Interactions evaluation runtime
+
+The user requested restoration of missing evaluation in Interactions, minimal
+changes, then a commit and push. The running gateway had no Demo startup flags;
+both Demo metadata routes returned 404, so the existing UI correctly hid
+Interactions. The separately administered Ollama daemon was also stopped.
+
+Restored the existing services using the installed generation/evaluator models,
+the existing reporting database and these documented startup settings:
+
+```sh
+OLLAMA_NO_CLOUD=1 OLLAMA_HOST=127.0.0.1:11434 ollama serve
+CONTROL_LAYER_DEMO_ENABLED=true CONTROL_LAYER_DEMO_SEMANTIC_ENABLED=true CONTROL_LAYER_POLICY=config/policy-semantic-demo.yaml poetry run uvicorn app.control_layer.api:create_app --factory --host 127.0.0.1 --port 8000 --no-access-log --no-proxy-headers
+```
+
+Verification: dashboard, workspace, scenario catalog and reporting summary return
+200; all nineteen scenarios are enabled and custom semantic inspection is enabled.
+Real local smoke passed for benign echo (200 ALLOW, semantic succeeded, target
+succeeded) and prompt injection (403 BLOCK, semantic succeeded, target not invoked).
+History remains readable. No application code, policy file or model download changed.
+This bounded repair does not complete the outstanding full live rehearsal.
+
+Fresh independent correctness review `/root/restoration_correctness`: PASS.
+Fresh security review `/root/restoration_security`: PASS after correcting the
+daemon's initial cloud-enabled default; final startup evidence confirms cloud
+disabled and loopback binding. Runtime evidence is local under
+`/tmp/control-layer-restoration-smoke.json` and `/tmp/ollama-restoration.json`.
