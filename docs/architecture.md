@@ -59,8 +59,8 @@ A decision event records eligibility, without claiming target completion.
 
 The sink serializes a complete JSON line, then writes and flushes under a lock.
 Exceptions, short writes and flush failures poison the sink permanently; subsequent
-requests cannot dispatch behind a damaged stream. There is no durable retention.
-The HTTP application wires one stdout sink for its lifespan.
+requests cannot dispatch behind a damaged stream. The HTTP application composes this stdout sink with required SQLite persistence
+for its lifespan; see durable reporting below.
 
 
 ## HTTP boundary and startup
@@ -82,7 +82,7 @@ evaluation/audit failure to 503, and target failure to 502.
 The synchronous endpoint runs through FastAPI's thread pool. A shared sink lock
 keeps per-request records complete under concurrency without promising request
 ordering. Uvicorn is documented with access logs disabled. There is no response
-inspection, remote target, verified identity, reload, durable audit, database or UI.
+inspection, remote target, verified identity, reload, UI. SQLite reporting is described below.
 Integration tests use httpx at the HTTP boundary; security logic remains covered
 by deterministic unit tests. README contains installation, policy and run commands.
 
@@ -187,10 +187,44 @@ Connect/write/pool and read inactivity timeouts are explicit, with no total dead
 or guaranteed runtime cancellation. Synchronous thread-pool calls may queue/occupy
 threads for hardware/load-dependent durations. Evaluation audit duration excludes
 inference, and eligibility does not imply execution success. There is no output
-inspection, centralized model authorization, semantic control, budget or reporting
+inspection, centralized model authorization, semantic control or budget
 addition. Deployment trusts the separately administered loopback daemon, with
 cloud disabled. No runtime/model installation, download or lifecycle handling exists.
 
 Unit tests inject client doubles; integration uses a deterministic threaded loopback
 runtime and real HTTPX plus the full gateway. The optional separately invoked smoke
 is documented in README and is excluded from normal test discovery.
+
+
+## Durable security reporting
+
+`reporting.py` defines closed frozen reporting/query DTOs and startup-bound safe
+projection. `reporting_store.py` implements version-1 SQLite audit/control/finding
+and separate outcome tables, transactional appends, typed list/detail/summary and
+the composed `PersistentAuditSink`. Projection validates digest, identities,
+enablement, evaluated order, finding counts, mapped action and final precedence
+against retained policy/target metadata. It accepts no request/output content.
+
+The composed sink flushes stdout and commits SQLite before service dispatch.
+Required failure poisons the shared gate; completion is appended after valid
+result or target failure and leaves the original decision unchanged. Missing
+completion derives unknown, while BLOCK and operational errors derive not_invoked.
+Completion failure preserves target response, performs no retry and closes later
+gates. Timing separates evaluation, invocation and total service-to-completion.
+The service's low-level injectable audit protocol remains available for unit tests;
+the default HTTP composition always requires persistent reporting.
+
+`TargetDefinition.model_id` optionally records validated administrative identity;
+default Ollama adapter and registration share one loaded immutable settings object.
+Reporting does not inspect returned model metadata. History retains startup identity.
+Application lifespan initializes/owns/closes default file storage; explicitly
+injected stores remain caller-owned. WAL/FULL commits and a bounded busy timeout
+support local durability. New storage uses private defaults; operators administer
+existing directory permissions. Runtime history is not committed to Git.
+
+The in-process typed boundary offers sequence pagination, UUID detail, time/action/
+target/status filtering and distinct totals with basic action/target grouping.
+Finding multiplicities and completed timing samples aggregate independently of
+event totals. Reads use consistent transactions. No CLI, export or reporting HTTP
+endpoint is implemented. Storage access requires trusted local filesystem access.
+See `docs/reporting.md` for deployment, query contracts and limitations.

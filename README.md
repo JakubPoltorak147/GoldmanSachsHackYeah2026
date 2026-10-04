@@ -101,7 +101,7 @@ and dispatch; unknown internal targets fail with safe audit ID `unresolved`, whi
 cannot be registered. Registration does not grant public access: HTTP accepts
 only `local-echo` and `local-ollama`.
 
-Tests can pass `control_registry`, `target_registry`, `audit_sink` and `policy_path`
+Tests can pass `control_registry`, `target_registry`, `audit_sink`, `reporting_store` and `policy_path`
 to `create_app`. Both defaults and injections use the same startup binder; invalid
 injections fail without fallback. The internal service accepts a bound policy,
 sink and target registry. Previous Python fixture constructors have changed; these
@@ -169,7 +169,8 @@ eligible dispatch. They include safe identifiers, policy digest, control status,
 action, finding counts, eligibility and duration. They exclude input content,
 matched values, snippets, source spans, content hashes and exception text. A failed
 or short write or flush failure permanently poisons the sink and stops dispatch.
-Events record eligibility; durable retention and target-completion records are out
+Stdout events record eligibility; SQLite stores durable decisions and separate completion
+records. See [reporting](docs/reporting.md). Exports and the dashboard are out
 of scope. Run without access logs to avoid logging untrusted query strings.
 
 ## Verify
@@ -326,7 +327,8 @@ or truncate inference internally; the submitted prompt field remains exact.
 Generated output is untrusted and **not security-inspected**. It may repeat sensitive
 input or contain unsafe text. Input approval does not certify output safety. One
 fixed operator model is a deployment restriction; centralized model authorization,
-semantic controls, budgets, output DLP and reporting remain deferred. Audit evaluation
+semantic controls, budgets and output DLP remain deferred. Durable content-free
+reporting is available through the typed in-process boundary. Audit evaluation
 duration excludes generation time; eligibility audit does not claim execution success.
 
 ## Optional real Ollama smoke
@@ -349,3 +351,19 @@ nonzero failure. Record runtime version, configured model tag, hardware and obse
 latency when executed; otherwise record NOT RUN with the missing prerequisite.
 The optional run is outside the required verification gate. Deterministic tests of
 script checks inject fake targets and require no real runtime.
+
+
+## Durable reporting storage
+
+Startup requires a private writable local SQLite file selected by
+`CONTROL_LAYER_REPORTING_DB` (default `var/security-reporting.sqlite3`). Persistence
+is required after JSONL flush and before target dispatch; unavailable storage fails
+startup or closes the audit gate. Completion is recorded separately as succeeded,
+failed or unknown; BLOCK and operational failures are not_invoked. Completion-write
+failure preserves the target response and prevents later dispatch in that process.
+
+The typed in-process listing/detail/summary API is ready for a later dashboard.
+See [docs/reporting.md](docs/reporting.md) for schema, query examples, identity
+provenance, timings, setup and backup requirements. No reporting HTTP routes, CLI,
+exports, output inspection or token/cost telemetry are added. Automated tests need
+no Ollama. Injected stores remain caller-owned and still use the validated gate.

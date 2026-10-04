@@ -14,6 +14,8 @@ from app.control_layer.policy import (
     forwarded_interaction,
     validate_findings,
 )
+from app.control_layer.reporting import InvocationStatus
+from app.control_layer.reporting_store import PersistentAuditSink
 from app.control_layer.targets import TargetRegistry, TargetResult
 
 
@@ -105,12 +107,29 @@ class InteractionService:
             return ServiceOutcome(interaction.id, error_code="audit_failed")
         if forwarded is None:
             return ServiceOutcome(interaction.id, decision=decision)
+        invocation_started = perf_counter()
         try:
             result = binding.adapter.invoke(forwarded)
             if type(result) is not TargetResult or type(result.content) is not str:
                 raise EvaluationError()
         except Exception:
+            self._complete(
+                interaction.id, InvocationStatus.FAILED, invocation_started, started
+            )
             return ServiceOutcome(
                 interaction.id, decision=decision, error_code="target_failed"
             )
+        self._complete(
+            interaction.id, InvocationStatus.SUCCEEDED, invocation_started, started
+        )
         return ServiceOutcome(interaction.id, decision=decision, target_result=result)
+
+    def _complete(self, identity, status, invocation_started, started):
+        finished = perf_counter()
+        if isinstance(self.audit_sink, PersistentAuditSink):
+            self.audit_sink.complete(
+                identity,
+                status,
+                max(0, (finished - invocation_started) * 1000),
+                max(0, (finished - started) * 1000),
+            )

@@ -39,13 +39,13 @@ Owner: primary applying agent/developer, responsible for implementation, integra
 - [x] 4.3 Fix confirmed findings only within approved scope, first add reproducing regressions, rerun affected required checks and request fresh independent reviews until both PASS; verify final review evidence references the final code state.
 - [x] 4.4 Record final verification/review references here and completed evidence in docs/worklog.md; commit this completed integration group exactly once after required PASS. Do not declare complete or archive before these gates. Archiving requires a later user request; never push without explicit instruction.
 
-Group 1 evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-1-bounded-adapter).
+Group 1 evidence: [worklog](../../../../docs/worklog.md#2026-10-03--local-model-target-group-1-bounded-adapter).
 
-Group 2 evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-2-governed-gateway).
+Group 2 evidence: [worklog](../../../../docs/worklog.md#2026-10-03--local-model-target-group-2-governed-gateway).
 
-Group 3 and optional NOT RUN evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-group-3-optional-smoke).
+Group 3 and optional NOT RUN evidence: [worklog](../../../../docs/worklog.md#2026-10-03--local-model-target-group-3-optional-smoke).
 
-Final verification/review evidence: [worklog](../../../docs/worklog.md#2026-10-03--local-model-target-final-verification-and-independent-review).
+Final verification/review evidence: [worklog](../../../../docs/worklog.md#2026-10-03--local-model-target-final-verification-and-independent-review).
 
 Final acceptance: required checks PASS (1001 unit + 122 integration, Ruff,
 Poetry consistency, active/all/archived strict validation and whitespace).
@@ -55,3 +55,12 @@ Final task group changes only docs/evidence, preserving reviewed implementation.
 See final worklog link above for review verification and optional smoke **NOT RUN**
 (runtime executable absent and default port refused). Implementation is ready for
 archive, but this change remains active; no archive or push is authorized.
+
+
+Archive finalization authorized by the 2026-10-04 user instruction to archive and
+commit all necessary changes. The previously attempted 2026-10-03 destination is
+unreadable (ENOENT even outside sandbox; recreation gives EEXIST). This readable
+archive restores all eight tracked planning/evidence files from reviewed Git HEAD,
+with only archive-relative worklog links and this finalization note updated.
+Implementation/tests remain unchanged; final reporting suite 1207 PASS also covers
+local-model integration. See worklog finalization evidence for the recovery.

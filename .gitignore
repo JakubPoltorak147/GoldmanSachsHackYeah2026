@@ -31,3 +31,9 @@ Thumbs.db
 # Local scratch
 .tmp/
 tmp/
+
+# Local security reporting (database and SQLite sidecars)
+var/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm

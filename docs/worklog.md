@@ -933,3 +933,191 @@ One completed integration/evidence commit: `chore: record local model verificati
 resolve its hash from the commit containing this entry. No archive, spec synchronization,
 installation/model download, push or new change. Implementation PASS, ready for later
 user-authorized archive.
+
+
+### 2026-10-03 — Local model target finalization and archive
+
+**Authorization:** User requested finalization and archive of `add-local-model-target`
+only, required final verification and no new scope/refactors/cleanup. Started clean
+at `8b54bce`. Implementation/tests/scripts/config/dependencies match independently
+reviewed `a327fc0` exactly. All 23 tasks are complete; the recorded fresh correctness
+and security/bypass reviews are PASS with no unresolved findings.
+
+**Fresh final verification:** `poetry check` PASS; `poetry run ruff check .` PASS;
+`poetry run ruff format --check .` PASS (39 files); `poetry run pytest tests/unit -q`
+1001 PASS; `poetry run pytest tests/integration -q` 122 PASS; active-change strict
+validation PASS; before sync all strict validation 8 PASS and archived strict
+validation 3 PASS; after sync current-spec strict validation 8 PASS, all strict
+validation 9 PASS and active-change strict validation PASS; `git diff --check` PASS.
+All successful commands exit 0. Restricted unit run stalled at the documented
+TestClient boundary and was interrupted (130), not counted as PASS. Approved
+outside-sandbox unit/integration runs passed with only the existing TestClient/httpx
+deprecation warning. OpenSpec long-description hints are informational; approved
+whole requirements were retained. Real-runtime smoke remains optional NOT RUN,
+runtime absent/default port refused as recorded previously; no installation/download.
+
+**Independent conformity:** Fresh read-only `/root/finalization_review` returned
+PASS for unchanged reviewed implementation, completion/review evidence and no
+unresolved correctness/security findings; subsequent sync preservation review PASS.
+Four gateway requirements synchronized, keeping original title/Purpose and all
+unmentioned requirement blocks; new local-model-target spec carries every approved
+requirement/scenario and verbatim delta Purpose. No application changes.
+
+**Archive execution and blocker:** Normal CLI archive reported success at `openspec/changes/archive/2026-10-03-add-local-model-target/`. Post-archive full suite passed 1123 tests (one existing warning); all/current strict validation passed 8 items each; archived strict validation passed 4; active list is empty. However direct filesystem reads, including approved outside-sandbox attempts by primary and independent reviewer, cannot access the listed archive directory (ENOENT). Archive artifact integrity and evidence-link repair could not be verified/completed. Finalization remains blocked on archive filesystem visibility; no finalization commit was created. The CLI result alone is not claimed as fully verified archival completion.
+
+## 2026-10-04 — Security reporting foundation implementation verification
+
+Change: `add-security-reporting-foundation`. The user's 2026-10-04 instruction
+explicitly approved APPLY after a focused scope reduction. Proposal/design/delta
+specs/tasks were revised before implementation and strict validation passed.
+Exports/manifest/snapshot work, operator CLI, exhaustive filters/groupings,
+platform permission auditing and extensive acknowledgement fault matrices were
+deferred. The typed reporting boundary and core security guarantees remain.
+
+Implemented closed content-free reporting DTOs and startup-bound projection;
+trusted optional configured model metadata; file-backed schema-v1 SQLite event,
+control/finding and separate outcome records; typed list/detail/basic summaries;
+required JSONL-flush then durable-commit gate; monotonic evaluation/invocation/total
+timings; completion-write poisoning with preserved original target outcome; default
+startup/storage shutdown and caller-owned injection. HTTP DTOs and policy config
+are unchanged. README, reporting documentation, architecture and system summary
+record implemented behavior and limits. Current specs remain unsynchronized and
+the change is unarchived.
+
+Verification:
+
+- `poetry run pytest tests/unit/test_reporting.py tests/integration/test_reporting_http.py tests/unit/test_service.py tests/unit/test_targets.py tests/unit/test_routing.py tests/integration/test_api.py tests/integration/test_local_model_target.py -q -o faulthandler_timeout=30`: **224 PASS** (outside sandbox).
+- Initial full run: 1203 PASS, one compatibility regression for invalid injected
+  target-registry startup error type. Existing ValueError behavior restored.
+- `poetry run pytest tests/integration/test_extensions.py tests/unit/test_reporting.py tests/integration/test_reporting_http.py -q`: **104 PASS** after fix (outside sandbox).
+- Final `poetry run pytest -q`: **1204 PASS**, one pre-existing Starlette/httpx
+  deprecation warning, 27.52 seconds (outside sandbox).
+- `poetry run ruff check .`: checks PASS, with a traversal warning for the
+  pre-existing missing `openspec/changes/archive/2026-10-03-add-local-model-target`
+  directory. `poetry run ruff format --check .`: 44 files formatted but traversal
+  exits nonzero for that same missing directory. Existing staged archival work
+  was preserved, not repaired or included in this change.
+- `poetry run ruff check . --extend-exclude openspec/changes/archive/2026-10-03-add-local-model-target`: **PASS**.
+- `poetry run ruff format --check . --extend-exclude openspec/changes/archive/2026-10-03-add-local-model-target`: **PASS**, 44 files already formatted.
+- `openspec validate add-security-reporting-foundation --strict`: **PASS**.
+- `git diff --check`: **PASS**.
+- Real Ollama smoke: **NOT RUN**; deterministic verification requires no Ollama.
+
+Sandboxed HTTP tests stalled with asyncio selector/worker waits; reruns outside
+the sandbox passed. The new tests cover all actions, safe operational failures,
+target success/exception/invalid result, pre-dispatch committed evidence, latency,
+unknown completion, restart, distinct aggregate totals/finding multiplicities,
+pagination/time bounds, invalid identities/query inputs, sensitive input/output
+non-leakage, concurrency, duplicate/orphan/ineligible outcomes, rollback, required
+write-lock failure, completion failure, and committed-then-raised acknowledgement.
+
+Independent review is a separate required gate. Fresh correctness reviewer
+`/root/reporting_correctness_review` failed to start because the agent service
+reported a usage limit; no review verdict was produced. Security reviewer
+`/root/reporting_security_review` was requested separately. Review verdicts and
+remaining gate status are recorded below when available. This verification entry
+does not declare the change complete and does not authorize archival.
+
+Fresh independent security review `/root/reporting_security_review`: **PASS**, no
+concrete findings. Independently ran reporting 71 PASS and reporting/service
+101 PASS; checked trusted projection, dual gate, completion poisoning, privacy,
+parameterized queries and restart semantics. No files modified by reviewer.
+
+Fresh independent correctness review `/root/reporting_correctness_review` resumed
+after the initial service limit and returned **FAIL** with one confirmed medium
+finding: schema version 1 plus expected table names with wrong columns was accepted
+at startup. Reviewer reproduced it and independently ran reporting/service/targets
+115 PASS. Before fixing, added three regression variants (wrong columns, omitted
+count constraint, missing eligible-outcome trigger): **3 FAIL** as expected. Fixed
+startup to compare the actual schema objects against versioned DDL, including
+columns, keys/checks/FKs/index and eligibility trigger, before enabling WAL. Invalid
+stores are rejected with fixed invalid_reporting_configuration without destructive
+recovery. Unit reporting after fix: **74 PASS**. Affected integration and fresh
+reviews were requested; final results follow.
+
+Final review/verification after schema fix:
+
+- `poetry run pytest tests/unit/test_reporting.py tests/integration/test_reporting_http.py tests/integration/test_extensions.py -q`: **107 PASS** (outside sandbox).
+- Fresh correctness rereview `/root/reporting_correctness_review`: **PASS**, no
+  remaining findings. Independently ran reporting/service/targets **118 PASS**.
+- Fresh security rereview `/root/reporting_security_review`: **PASS**, no remaining
+  bypass or privacy findings. Independently ran reporting/service **104 PASS**,
+  including schema regressions; confirmed existing incompatible data is preserved.
+- Full pytest, final lint/format, strict validation and whitespace results are
+  recorded below. Challenge traceability was updated only after both fresh review
+  gates passed. No output, budget, dashboard or cryptographic integrity claims.
+
+- Final `poetry run pytest -q` after confirmed review fix: **1207 PASS**, one
+  pre-existing Starlette/httpx deprecation warning, 25.05 seconds.
+- Final Ruff lint/format with the pre-existing missing archive path excluded:
+  **PASS**, 44 files formatted. Strict change validation and whitespace: **PASS**.
+- Required correctness and security review gates: **PASS**. No remaining product
+  blocker. The broad unexcluded formatter still encounters the unrelated missing
+  archive path; its files/staged state remain preserved. One reporting task-group
+  commit is required; no push, spec synchronization or archival is performed.
+
+## 2026-10-04 — Reporting and pending archive finalization
+
+**Authorization:** The user requested “Ok so now everything necessary to archive
+and commit all the necessarry changes”, superseding the earlier instruction to
+leave reporting unarchived. This authorizes current-spec synchronization, reporting
+archive and a finalization commit including the previously staged local-model
+closure. No push is authorized or performed.
+
+**Gates:** Reporting implementation is committed at `b801527`. All six tasks are
+complete; final full suite 1207 PASS and fresh correctness/security reviews PASS
+with no remaining findings are recorded above. Application, tests, configuration,
+scripts and dependencies remain byte-identical to `b801527` during finalization
+(`git diff HEAD --exit-code -- app tests config scripts pyproject.toml poetry.lock`
+PASS). The deterministic suite was not redundantly rerun for documentation-only
+archive/spec changes; real Ollama remains optional NOT RUN.
+
+**Spec synchronization:** Added two durable-audit requirements, two target/model
+and storage-lifecycle gateway requirements, and the eight-requirement
+security-reporting capability; modified only the named local-model output/governance
+requirement. Existing main-spec titles/Purpose and unmentioned requirements/scenarios
+were preserved. New security-reporting main spec has canonical Requirements format
+and verbatim delta Purpose. Every reporting delta block was checked present after
+sync, with no delta headers remaining in main specs.
+
+**Archive integrity and recovery:** Reporting artifacts were copied into
+`openspec/changes/archive/2026-10-04-add-security-reporting-foundation/`, every one
+of nine files verified by SHA-256 before removing the active directory. The tasks
+file records the new archive authorization and archive-relative worklog link.
+
+The earlier `2026-10-03-add-local-model-target` directory is listed but remains
+unreadable (ENOENT), and recreation fails EEXIST, both inside and outside sandbox.
+That filesystem entry was preserved. To safely commit the pending local-model
+finalization without losing planning/evidence, all eight original tracked files
+were recovered from Git HEAD into the readable
+`openspec/changes/archive/2026-10-04-add-local-model-target/` directory. Recovered
+bytes were checked against Git, including .openspec.yaml; only tasks worklog link
+depth and a recovery/finalization note were then changed. Original reviewed code
+and completed test/review evidence are unchanged. No unavailable archive contents
+were invented. The old 2026-10-03 worklog blocker is historical; the readable
+recovery completes preservation for this commit. The unreadable old entry is still
+an environment limitation, not a claimed repaired directory.
+
+**Finalization checks:** `poetry check` PASS; `openspec validate --specs --strict`
+9 PASS; reporting active validation PASS before moving; post-archive
+`openspec validate --all --strict` 9 PASS and
+`openspec validate --archived --strict` 6 PASS (CLI includes the unreadable older
+entry); `openspec list --json` returns no active changes. Ruff lint/format PASS,
+44 formatted files, excluding only the unchanged unreadable old archive path.
+`git diff --check` PASS. No code changes or new scope.
+
+Fresh independent archive/spec-conformity review and commit result are recorded
+below once complete.
+
+**Fresh independent finalization review:** `/root/archive_finalization_review`
+returned **PASS**, no findings. Independently verified all nine reporting artifacts
+and all eight local-model recovered artifacts against Git, delta/main equality,
+untouched requirement/Purpose preservation, unchanged implementation, current/all
+9 PASS, archived 6 PASS, no active changes and whitespace PASS. The older unreadable
+entry is explicitly documented; readable recovery preserves tracked evidence and
+does not block this finalization commit.
+
+**Finalization commit:** `chore(openspec): finalize reporting and local model archives`
+(resolve its hash from the commit containing this entry). Includes synced current
+specs, verified readable archives, prior staged local-model finalization and this
+evidence. No implementation changes, push or new OpenSpec change.

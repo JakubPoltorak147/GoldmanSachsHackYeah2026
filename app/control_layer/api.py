@@ -18,6 +18,8 @@ from app.control_layer.composition import default_controls, default_targets
 from app.control_layer.domain import Action, Interaction
 from app.control_layer.policy import load_policy
 from app.control_layer.registry import ControlRegistry
+from app.control_layer.reporting import ReportingProjection
+from app.control_layer.reporting_store import PersistentAuditSink, ReportingStore
 from app.control_layer.service import InteractionService
 from app.control_layer.targets import TargetRegistry
 
@@ -80,6 +82,7 @@ def create_app(
     audit_sink: AuditSink | None = None,
     target_registry: TargetRegistry | None = None,
     control_registry: ControlRegistry | None = None,
+    reporting_store: ReportingStore | None = None,
 ) -> FastAPI:
     @asynccontextmanager
     async def lifespan(application: FastAPI):
@@ -89,12 +92,32 @@ def create_app(
             else os.environ.get("CONTROL_LAYER_POLICY", "config/policy.yaml"),
             default_controls() if control_registry is None else control_registry,
         )
-        application.state.service = InteractionService(
-            policy,
-            audit_sink if audit_sink is not None else JsonLinesAuditSink(sys.stdout),
-            default_targets() if target_registry is None else target_registry,
+        targets = default_targets() if target_registry is None else target_registry
+        if type(targets) is not TargetRegistry:
+            raise ValueError("invalid_composition")
+        store = (
+            reporting_store
+            if reporting_store is not None
+            else ReportingStore(
+                os.environ.get(
+                    "CONTROL_LAYER_REPORTING_DB", "var/security-reporting.sqlite3"
+                )
+            )
         )
-        yield
+        try:
+            sink = PersistentAuditSink(
+                audit_sink
+                if audit_sink is not None
+                else JsonLinesAuditSink(sys.stdout),
+                store,
+                ReportingProjection(policy, targets),
+            )
+            application.state.reporting = store
+            application.state.service = InteractionService(policy, sink, targets)
+            yield
+        finally:
+            if reporting_store is None:
+                store.close()
 
     application = FastAPI(lifespan=lifespan)
 
