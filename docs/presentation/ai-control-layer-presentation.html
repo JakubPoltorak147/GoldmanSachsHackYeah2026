@@ -1,0 +1,894 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1280">
+<title>AI Control Layer — HackYeah 2026</title>
+<!--
+  Source of ai-control-layer-presentation.pdf (16:9, 10 slides).
+  Rebuild the PDF with:  py docs/presentation/ai-control-layer-presentation.py
+  Open this file in a browser to preview the slides.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&family=Poppins:wght@500;600;700;800&display=block" rel="stylesheet">
+<style>
+@page { size: 1280px 720px; margin: 0; }
+
+:root {
+  --ink: #17133a;
+  --muted: #5f5b7a;
+  --soft: #8d89a8;
+  --paper: #f7f5fe;
+  --line: #ebe6fb;
+  --violet: #6c47ff;
+  --violet-t: #ece7ff;
+  --pink: #ff4f9a;
+  --pink-t: #ffe3ef;
+  --sky: #1c9ff0;
+  --sky-t: #def1fd;
+  --allow: #0fae7b;
+  --allow-t: #dcf6ec;
+  --redact: #f09a0e;
+  --redact-t: #fff0d4;
+  --block: #ef4452;
+  --block-t: #fde3e6;
+  --sun: #ffd166;
+  --night: #130d33;
+  --grad: linear-gradient(120deg, #3a1fc1 0%, #6c47ff 38%, #b43ff0 70%, #ff5f9e 100%);
+  --display: "Poppins", "Segoe UI", system-ui, sans-serif;
+  --body: "Inter", "Segoe UI", system-ui, sans-serif;
+  --mono: "JetBrains Mono", Consolas, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: var(--body); color: var(--ink); background: #dcd7ee; }
+
+.slide {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  overflow: hidden;
+  background: var(--paper);
+  isolation: isolate;
+  break-after: page;
+}
+.slide:last-of-type { break-after: auto; }
+@media screen {
+  body { padding: 40px 0; }
+  .slide { margin: 0 auto 40px; border-radius: 16px; box-shadow: 0 30px 60px -30px rgba(23, 19, 58, .45); }
+}
+
+i[data-i] { display: inline-grid; place-items: center; width: 1em; height: 1em; flex: none; font-style: normal; }
+i[data-i] svg { width: 100%; height: 100%; }
+p { text-wrap: pretty; }
+h3, .statement, .why, .quote strong { text-wrap: balance; }
+
+/* ---------- backgrounds & decoration ---------- */
+.light {
+  background:
+    radial-gradient(520px 420px at 104% -8%, rgba(255, 79, 154, .16), transparent 70%),
+    radial-gradient(560px 460px at 92% -14%, rgba(108, 71, 255, .14), transparent 70%),
+    var(--paper);
+}
+.dark {
+  color: #fff;
+  background:
+    radial-gradient(720px 460px at 100% 0%, rgba(124, 77, 255, .5), transparent 70%),
+    radial-gradient(640px 420px at 0% 100%, rgba(255, 79, 154, .26), transparent 70%),
+    var(--night);
+}
+.grad {
+  color: #fff;
+  background:
+    radial-gradient(760px 560px at 88% 22%, rgba(255, 95, 158, .55), transparent 62%),
+    radial-gradient(640px 480px at 0% 108%, rgba(43, 179, 255, .38), transparent 62%),
+    linear-gradient(135deg, #1d0f5c 0%, #3b1fb8 45%, #7a2fe0 76%, #c9439f 100%);
+}
+.deco { position: absolute; pointer-events: none; z-index: -1; }
+.dots { background-image: radial-gradient(currentColor 1.6px, transparent 1.9px); background-size: 18px 18px; }
+.ring { border-radius: 50%; border: 2px solid currentColor; }
+
+/* ---------- header ---------- */
+.head {
+  position: absolute; left: 64px; right: 64px; top: 50px;
+  display: grid; grid-template-columns: 1fr 410px; column-gap: 48px; align-items: end;
+}
+.kicker {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 7px 14px 7px 11px; border-radius: 999px;
+  background: var(--violet-t); color: var(--violet);
+  font: 700 12px/1 var(--body); letter-spacing: .09em; text-transform: uppercase;
+}
+.kicker i { font-size: 15px; }
+.dark .kicker, .grad .kicker { background: rgba(255, 255, 255, .12); color: #ddd3ff; }
+h2 { margin-top: 16px; font: 700 40px/1.14 var(--display); letter-spacing: -.02em; word-spacing: .05em; }
+.lead { font: 400 16.5px/1.55 var(--body); color: var(--muted); padding-bottom: 4px; }
+.dark .lead { color: rgba(255, 255, 255, .72); }
+.hl {
+  color: var(--violet);
+  background: linear-gradient(transparent 66%, rgba(255, 196, 64, .5) 66%, rgba(255, 196, 64, .5) 92%, transparent 92%);
+  -webkit-box-decoration-break: clone; box-decoration-break: clone;
+}
+.dark .hl, .grad .hl { color: var(--sun); background: none; }
+
+.body { position: absolute; left: 64px; right: 64px; top: 226px; bottom: 84px; }
+
+/* ---------- footer ---------- */
+.foot {
+  position: absolute; left: 64px; right: 64px; bottom: 26px;
+  display: flex; align-items: center; justify-content: space-between;
+  font: 600 12px/1 var(--body); color: var(--soft); letter-spacing: .02em;
+}
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand b { color: var(--ink); font-weight: 700; }
+.brand .sep { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .6; }
+.logo { width: 26px; height: 26px; border-radius: 8px; background: var(--grad); color: #fff; display: grid; place-items: center; font-size: 15px; }
+.num { padding: 6px 11px; border-radius: 999px; background: #fff; border: 1px solid var(--line); color: var(--muted); }
+.dark .foot, .grad .foot { color: rgba(255, 255, 255, .62); }
+.dark .brand b, .grad .brand b { color: #fff; }
+.dark .num, .grad .num { background: rgba(255, 255, 255, .1); border-color: rgba(255, 255, 255, .2); color: #fff; }
+.grad .logo { background: #fff; color: var(--violet); }
+
+/* ---------- shared components ---------- */
+.card {
+  background: #fff; border-radius: 24px; border: 1px solid #eee9fc;
+  box-shadow: 0 1px 2px rgba(23, 19, 58, .04), 0 18px 40px -22px rgba(76, 52, 180, .38);
+}
+.glass { background: rgba(255, 255, 255, .07); border: 1px solid rgba(255, 255, 255, .14); border-radius: 24px; }
+.ib { width: 54px; height: 54px; border-radius: 17px; display: grid; place-items: center; font-size: 27px; flex: none; }
+.t-allow { background: var(--allow-t); color: var(--allow); }
+.t-redact { background: var(--redact-t); color: var(--redact); }
+.t-block { background: var(--block-t); color: var(--block); }
+.t-violet { background: var(--violet-t); color: var(--violet); }
+.t-pink { background: var(--pink-t); color: var(--pink); }
+.t-sky { background: var(--sky-t); color: var(--sky); }
+.t-ink { background: #e9e7f2; color: var(--ink); }
+.s-allow { background: var(--allow); color: #fff; }
+.s-redact { background: var(--redact); color: #fff; }
+.s-block { background: var(--block); color: #fff; }
+.s-sky { background: var(--sky); color: #fff; }
+.s-violet { background: var(--violet); color: #fff; }
+.s-pink { background: var(--pink); color: #fff; }
+.c-allow { color: var(--allow); }
+.c-redact { color: var(--redact); }
+.c-block { color: var(--block); }
+.c-violet { color: var(--violet); }
+.c-pink { color: var(--pink); }
+.c-sky { color: var(--sky); }
+.eyebrow { font: 700 12px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; }
+.badge {
+  display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px 5px 8px; border-radius: 999px;
+  font: 700 12px/1 var(--body); letter-spacing: .05em;
+}
+.badge i { font-size: 14px; }
+
+/* ---------- 01 cover ---------- */
+.cover-left { position: absolute; left: 72px; top: 92px; width: 610px; }
+.chip-glass {
+  display: inline-flex; align-items: center; gap: 9px; padding: 9px 16px 9px 12px; border-radius: 999px;
+  background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .28);
+  font: 600 13px/1 var(--body); letter-spacing: .04em; color: #fff;
+}
+.chip-glass i { font-size: 16px; color: var(--sun); }
+.cover h1 { margin-top: 28px; font: 800 70px/1.02 var(--display); letter-spacing: -.035em; word-spacing: .06em; }
+.cover h1 .hl { color: var(--sun); }
+.cover-lead { margin-top: 26px; font: 400 21px/1.5 var(--body); color: rgba(255, 255, 255, .82); max-width: 560px; }
+.trio { margin-top: 14px; display: flex; gap: 10px; align-items: center; font: 600 16px/1 var(--body); color: #fff; }
+.trio .sep { width: 5px; height: 5px; border-radius: 50%; background: var(--sun); }
+.pills { margin-top: 34px; display: flex; gap: 12px; }
+.pill {
+  display: inline-flex; align-items: center; gap: 10px; padding: 7px 18px 7px 7px; border-radius: 999px;
+  background: #fff; color: var(--ink); font: 700 14px/1 var(--display); letter-spacing: .04em;
+  box-shadow: 0 12px 26px -14px rgba(10, 4, 40, .7);
+}
+.pill .dot { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 17px; }
+
+.art { position: absolute; left: 690px; top: 116px; width: 540px; height: 470px; }
+.art svg.wires { position: absolute; inset: 0; overflow: visible; }
+.art .cap { position: absolute; top: 40px; font: 700 11px/1 var(--body); letter-spacing: .12em; text-transform: uppercase; color: rgba(255, 255, 255, .7); }
+.in-chip, .out-chip { white-space: nowrap;
+  position: absolute; width: 150px; height: 52px; border-radius: 16px;
+  display: flex; align-items: center; gap: 10px; padding: 0 14px 0 9px;
+  font: 600 14.5px/1 var(--display);
+}
+.in-chip { left: 0; width: 160px; background: rgba(255, 255, 255, .14); border: 1px solid rgba(255, 255, 255, .3); color: #fff; }
+.in-chip .ib, .out-chip .ib { width: 34px; height: 34px; border-radius: 11px; font-size: 18px; }
+.in-chip .ib { background: rgba(255, 255, 255, .18); color: #fff; }
+.out-chip { left: 390px; background: #fff; color: var(--ink); box-shadow: 0 16px 30px -16px rgba(10, 4, 40, .75); letter-spacing: .03em; font-weight: 700; }
+.core-ring { position: absolute; border-radius: 50%; border: 1.5px solid rgba(255, 255, 255, .2); }
+.core {
+  position: absolute; left: 200px; top: 165px; width: 140px; height: 140px; border-radius: 50%;
+  background: #fff; display: grid; place-items: center;
+  box-shadow: 0 0 0 10px rgba(255, 255, 255, .12), 0 26px 50px -20px rgba(10, 4, 40, .8);
+}
+.core-inner { width: 108px; height: 108px; border-radius: 50%; background: var(--grad); display: grid; place-items: center; color: #fff; font-size: 54px; }
+.core-label {
+  position: absolute; left: 270px; top: 326px; transform: translateX(-50%); white-space: nowrap;
+  padding: 7px 13px; border-radius: 999px; background: var(--sun); color: var(--ink);
+  font: 700 12.5px/1 var(--display); letter-spacing: .03em;
+}
+
+/* ---------- 02 problem ---------- */
+.threats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+.threat { position: relative; height: 232px; padding: 28px 28px 26px; }
+.threat .bignum { position: absolute; right: 26px; top: 20px; font: 800 56px/1 var(--display); color: #f0ecfd; letter-spacing: -.03em; }
+.threat h3 { margin-top: 22px; font: 600 22px/1.2 var(--display); }
+.threat p { margin-top: 10px; font: 400 15.5px/1.55 var(--body); color: var(--muted); }
+.banner {
+  position: relative; overflow: hidden; margin-top: 28px; height: 134px; border-radius: 28px;
+  background: var(--grad); color: #fff; display: flex; align-items: center; gap: 26px; padding: 0 40px;
+}
+.banner .ib { background: rgba(255, 255, 255, .18); color: #fff; width: 64px; height: 64px; border-radius: 20px; font-size: 32px; }
+.banner .eyebrow { color: rgba(255, 255, 255, .78); }
+.statement { margin-top: 8px; font: 700 26px/1.25 var(--display); letter-spacing: -.01em; max-width: 860px; }
+.banner .ring { position: absolute; color: rgba(255, 255, 255, .22); }
+
+/* ---------- 03 architecture ---------- */
+.flow { margin-top: 14px; display: flex; align-items: center; justify-content: space-between; }
+.node {
+  width: 170px; height: 196px; padding: 22px 12px 18px; text-align: center;
+  display: flex; flex-direction: column; align-items: center;
+}
+.node.ext { width: 132px; }
+.node b { margin-top: 14px; font: 600 17px/1.2 var(--display); }
+.node > span { margin-top: 6px; font: 400 13.5px/1.4 var(--body); color: var(--muted); }
+.minis { margin-top: 9px; display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+.mini { padding: 4px 7px; border-radius: 7px; font: 700 10.5px/1 var(--body); letter-spacing: .04em; }
+.arr { font-size: 30px; color: #b5a6ff; }
+.arr.sm { font-size: 24px; color: var(--violet); }
+.layer {
+  position: relative; display: flex; align-items: center; gap: 0; justify-content: space-between;
+  width: 800px; padding: 32px 18px 18px; border-radius: 30px;
+  border: 2px dashed #bfaeff; background: linear-gradient(135deg, #efe9ff 0%, #fbe8f4 100%);
+}
+.layer-tag {
+  position: absolute; top: -17px; left: 50%; transform: translateX(-50%);
+  display: inline-flex; align-items: center; gap: 8px; padding: 8px 16px 8px 12px; border-radius: 999px;
+  background: var(--grad); color: #fff; font: 700 13px/1 var(--display); letter-spacing: .04em; white-space: nowrap;
+  box-shadow: 0 10px 22px -12px rgba(76, 52, 180, .8);
+}
+.layer-tag i { font-size: 16px; }
+.callout {
+  margin: 40px auto 0; width: fit-content; display: flex; align-items: center; gap: 14px;
+  padding: 14px 26px 14px 14px; border-radius: 999px; font: 600 17px/1.3 var(--display);
+}
+.callout .ib { width: 40px; height: 40px; border-radius: 50%; font-size: 21px; }
+
+/* ---------- 04 live ---------- */
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.stat { position: relative; overflow: hidden; isolation: isolate; height: 236px; padding: 24px 26px; }
+.stat .top { display: flex; justify-content: space-between; align-items: flex-start; }
+.stat .n { font: 800 72px/.95 var(--display); letter-spacing: -.04em; }
+.stat h3 { margin-top: 18px; font: 600 19px/1.2 var(--display); }
+.stat p { margin-top: 8px; font: 400 14.5px/1.5 var(--body); color: var(--muted); }
+.stat .glow { position: absolute; width: 260px; height: 260px; right: -110px; bottom: -130px; z-index: -1; opacity: .2; background: radial-gradient(closest-side, var(--g), transparent); }
+.principles { margin-top: 24px; padding: 20px 26px 22px; }
+.p-head { display: flex; align-items: center; gap: 10px; font: 600 17px/1.2 var(--display); }
+.p-head i { font-size: 20px; color: var(--violet); }
+.p-grid { margin-top: 14px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.p-grid span {
+  display: flex; align-items: center; gap: 9px; padding: 12px 12px; border-radius: 14px;
+  background: var(--paper); font: 600 13.5px/1.3 var(--body); white-space: nowrap;
+}
+.p-grid i { font-size: 13px; width: 24px; height: 24px; padding: 5px; border-radius: 50%; background: var(--allow); color: #fff; }
+
+/* ---------- 05 decisions ---------- */
+.dcards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.dcard { position: relative; overflow: hidden; isolation: isolate; height: 300px; padding: 30px 30px 28px; }
+.dcard .glow { position: absolute; left: -110px; top: -150px; width: 400px; height: 340px; z-index: -1; opacity: .45; background: radial-gradient(closest-side, var(--g), transparent); }
+.dtop { display: flex; align-items: center; gap: 16px; }
+.dtop .ib { width: 58px; height: 58px; border-radius: 50%; font-size: 28px; }
+.act { font: 800 32px/1 var(--display); letter-spacing: .01em; }
+.dcard .eyebrow { display: block; margin-top: 28px; }
+.why { margin-top: 8px; font: 600 18px/1.4 var(--display); color: #fff; }
+.what { margin-top: 8px; font: 400 15.5px/1.5 var(--body); color: rgba(255, 255, 255, .72); }
+.prec {
+  margin-top: 28px; display: flex; align-items: center; gap: 14px; width: fit-content;
+  padding: 12px 22px 12px 12px; border-radius: 999px;
+}
+.prec .lab { display: flex; align-items: center; gap: 10px; padding-right: 8px; font: 600 15px/1 var(--display); color: rgba(255, 255, 255, .85); }
+.prec .lab i { width: 36px; height: 36px; padding: 9px; border-radius: 50%; background: rgba(255, 255, 255, .12); color: var(--sun); }
+.prec .badge { padding: 9px 14px 9px 11px; font-size: 13.5px; }
+.prec .gt { font-size: 18px; color: rgba(255, 255, 255, .5); }
+.prec .note { margin-left: 8px; font: 400 14px/1 var(--body); color: rgba(255, 255, 255, .6); }
+
+/* ---------- 06 coverage ---------- */
+.cov { display: grid; grid-template-columns: 1fr 330px; gap: 28px; align-items: start; }
+.tbl-head, .tbl-row { display: grid; grid-template-columns: 206px 172px 132px 1fr; align-items: center; padding: 0 22px; }
+.tbl-head { height: 26px; color: var(--soft); }
+.tbl-row { height: 56px; margin-top: 10px; border-radius: 16px; }
+.tbl-row b { font: 600 15.5px/1.2 var(--display); }
+.code { width: fit-content; padding: 5px 9px; border-radius: 8px; background: var(--violet-t); color: var(--violet); font: 600 13px/1 var(--mono); }
+.tbl-row .bound { font: 400 14.5px/1.3 var(--body); color: var(--muted); }
+.limits { height: 356px; padding: 26px 26px 24px; border: 2px dashed #d6cbff; box-shadow: none; display: flex; flex-direction: column; }
+.limits h3 { display: flex; align-items: center; gap: 12px; font: 600 21px/1.2 var(--display); }
+.limits h3 .ib { width: 44px; height: 44px; border-radius: 14px; font-size: 22px; }
+.limits .sub { margin-top: 6px; font: 400 14px/1.45 var(--body); color: var(--muted); }
+.lchips { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+.lchips span { padding: 7px 11px; border-radius: 10px; background: var(--paper); border: 1px solid var(--line); font: 600 13px/1.2 var(--body); color: var(--ink); }
+.limits .end { margin-top: auto; padding-top: 14px; display: flex; align-items: center; gap: 8px; font: 600 14.5px/1.3 var(--display); color: var(--violet); }
+.limits .end i { font-size: 18px; }
+
+/* ---------- 07 evidence ---------- */
+.ev { display: grid; grid-template-columns: 500px 1fr; gap: 24px; height: 282px; }
+.audit { padding: 22px 28px; }
+.ph { display: flex; align-items: center; gap: 14px; }
+.ph .ib { width: 44px; height: 44px; border-radius: 14px; font-size: 22px; }
+.ph b { font: 600 20px/1.2 var(--display); }
+.ph small { display: block; margin-top: 3px; font: 400 13px/1.2 var(--body); color: var(--muted); }
+.alist { margin-top: 12px; list-style: none; }
+.alist li { display: flex; align-items: center; gap: 12px; height: 30px; font: 500 15px/1.2 var(--body); }
+.alist i { font-size: 20px; color: var(--allow); }
+.dash { overflow: hidden; background: var(--night); border-radius: 24px; color: #fff; box-shadow: 0 24px 46px -24px rgba(23, 13, 70, .8); }
+.dash-bar { height: 46px; display: flex; align-items: center; gap: 8px; padding: 0 20px; border-bottom: 1px solid rgba(255, 255, 255, .1); background: rgba(255, 255, 255, .04); }
+.dash-bar .w { width: 11px; height: 11px; border-radius: 50%; }
+.dash-bar b { margin-left: 10px; font: 600 14px/1 var(--display); }
+.dash-bar .badge { margin-left: auto; background: rgba(255, 255, 255, .1); color: rgba(255, 255, 255, .8); }
+.tiles { padding: 18px 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.tile { position: relative; height: 86px; border-radius: 16px; background: rgba(255, 255, 255, .06); padding: 18px 18px 0 22px; overflow: hidden; }
+.tile::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 5px; background: currentColor; }
+.tile .k { font: 700 21px/1 var(--display); letter-spacing: .02em; }
+.tile .v { margin-top: 9px; font: 400 14px/1 var(--body); color: rgba(255, 255, 255, .66); }
+.tile i { position: absolute; right: 16px; top: 22px; width: 46px; height: 46px; padding: 12px; border-radius: 50%; background: rgba(255, 255, 255, .08); }
+.privacy {
+  margin-top: 22px; height: 104px; padding: 0 26px; border-radius: 24px;
+  display: flex; align-items: center; gap: 20px;
+  background: linear-gradient(120deg, #ece6ff 0%, #fbe6f2 100%); border: 1px solid #e3dafd;
+}
+.privacy .ib { background: var(--grad); color: #fff; }
+.privacy .txt { width: 300px; flex: none; }
+.privacy .txt b { font: 600 19px/1.2 var(--display); }
+.privacy .txt p { margin-top: 5px; font: 400 14px/1.45 var(--body); color: var(--muted); }
+.never { display: flex; flex-wrap: wrap; gap: 8px; }
+.never span { display: inline-flex; align-items: center; gap: 7px; padding: 8px 12px 8px 9px; border-radius: 10px; background: #fff; font: 600 13.5px/1 var(--body); }
+.never i { font-size: 15px; color: var(--block); }
+
+/* ---------- 08 operator ---------- */
+.scen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.sc { position: relative; overflow: hidden; height: 206px; padding: 24px 24px 22px; }
+.sc .ib { width: 48px; height: 48px; border-radius: 15px; font-size: 24px; }
+.sc .eyebrow { display: block; margin-top: 18px; }
+.sc .a { margin-top: 8px; font: 700 23px/1.15 var(--display); }
+.sc .d { margin-top: 8px; font: 400 14.5px/1.45 var(--body); color: rgba(255, 255, 255, .7); }
+.sc .bar { position: absolute; left: 0; right: 0; top: 0; height: 4px; }
+.op-row { margin-top: 24px; display: grid; grid-template-columns: 420px 1fr; gap: 20px; height: 160px; }
+.big19 { position: relative; overflow: hidden; border-radius: 24px; background: var(--grad); display: flex; align-items: center; gap: 22px; padding: 0 30px; }
+.big19 .n { font: 800 92px/1 var(--display); letter-spacing: -.05em; }
+.big19 p { font: 600 16px/1.45 var(--display); }
+.big19 .ring { position: absolute; color: rgba(255, 255, 255, .2); }
+.quote { display: flex; align-items: center; gap: 22px; padding: 0 32px; }
+.quote .ib { width: 58px; height: 58px; border-radius: 18px; font-size: 28px; }
+.quote p { font: 400 15px/1.5 var(--body); color: rgba(255, 255, 255, .72); }
+.quote strong { display: block; margin-top: 8px; font: 600 20px/1.3 var(--display); color: #fff; }
+
+/* ---------- 09 scale ---------- */
+.road { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.track { position: absolute; left: 32px; right: 240px; top: 30px; height: 6px; border-radius: 6px; background: linear-gradient(90deg, var(--sky), var(--violet), var(--pink), var(--redact)); opacity: .9; }
+.ms { position: relative; }
+.ms .dot { width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; font-size: 28px; color: #fff; border: 5px solid var(--paper); box-shadow: 0 12px 24px -12px rgba(76, 52, 180, .8); }
+.ms .mcard { margin-top: 16px; height: 148px; padding: 18px 20px; }
+.ms .step { font: 700 12px/1 var(--body); letter-spacing: .1em; text-transform: uppercase; }
+.ms h3 { margin-top: 7px; font: 700 21px/1.1 var(--display); }
+.ms ul { margin-top: 9px; list-style: none; }
+.ms li { position: relative; padding-left: 14px; font: 400 14px/1.45 var(--body); color: var(--muted); }
+.ms li::before { content: ""; position: absolute; left: 0; top: 8px; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .55; }
+.sticker {
+  position: absolute; left: 84px; top: 6px; transform: rotate(-6deg);
+  padding: 8px 12px; border-radius: 10px; background: var(--sun); color: var(--ink);
+  font: 700 13px/1 var(--display); box-shadow: 0 10px 18px -10px rgba(120, 80, 0, .6);
+}
+.clean {
+  position: relative; overflow: hidden; margin-top: 26px; height: 88px; border-radius: 24px; background: var(--grad); color: #fff;
+  display: flex; align-items: center; gap: 22px; padding: 0 28px;
+}
+.clean .eyebrow { width: 120px; line-height: 1.35; color: rgba(255, 255, 255, .85); flex: none; }
+.clean .chips { display: flex; gap: 10px; }
+.clean .chips span {
+  display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px 10px 10px; border-radius: 12px;
+  background: rgba(255, 255, 255, .16); border: 1px solid rgba(255, 255, 255, .25); font: 600 14.5px/1 var(--display); white-space: nowrap;
+}
+.clean .chips i { font-size: 17px; color: var(--sun); }
+.foot-note { margin-top: 16px; display: flex; gap: 10px; font: 400 13.5px/1.5 var(--body); color: var(--muted); }
+.foot-note i { font-size: 17px; margin-top: 2px; color: var(--soft); }
+
+/* ---------- 10 close ---------- */
+.close-head { position: absolute; left: 72px; top: 56px; width: 900px; }
+.close-head h2 { font-size: 46px; line-height: 1.12; }
+.close-head .lead { margin-top: 16px; max-width: 700px; font-size: 18px; color: rgba(255, 255, 255, .8); }
+.proof { position: absolute; left: 72px; right: 72px; top: 326px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.pf { height: 146px; padding: 20px 22px; border-radius: 24px; background: rgba(255, 255, 255, .12); border: 1px solid rgba(255, 255, 255, .24); }
+.pf .row { display: flex; align-items: center; justify-content: space-between; }
+.pf .n { font: 800 50px/1 var(--display); letter-spacing: -.03em; }
+.pf .row i { width: 40px; height: 40px; padding: 10px; border-radius: 50%; background: rgba(255, 255, 255, .16); color: var(--sun); }
+.pf p { margin-top: 14px; font: 500 15px/1.4 var(--body); color: rgba(255, 255, 255, .86); }
+.pillars { position: absolute; left: 72px; right: 72px; top: 506px; display: flex; gap: 14px; }
+.pillars span {
+  display: inline-flex; align-items: center; gap: 12px; padding: 10px 22px 10px 10px; border-radius: 999px;
+  background: #fff; color: var(--ink); font: 700 18px/1 var(--display);
+  box-shadow: 0 14px 28px -16px rgba(10, 4, 40, .8);
+}
+.pillars i { width: 38px; height: 38px; padding: 9px; border-radius: 50%; color: #fff; }
+.tagline { position: absolute; left: 72px; top: 590px; font: 600 13px/1 var(--body); letter-spacing: .06em; color: rgba(255, 255, 255, .7); text-transform: uppercase; }
+.thanks {
+  position: absolute; right: 78px; top: 62px; width: 132px; height: 132px; border-radius: 50%; transform: rotate(10deg);
+  background: var(--sun); color: var(--ink); display: grid; place-items: center; text-align: center;
+  font: 800 22px/1.05 var(--display); box-shadow: 0 18px 34px -16px rgba(10, 4, 40, .8);
+}
+</style>
+</head>
+<body>
+
+<!-- 01 · Cover -->
+<section class="slide grad cover">
+  <div class="deco dots" style="color:rgba(255,255,255,.22); left:-20px; bottom:70px; width:200px; height:126px;"></div>
+  <div class="deco ring" style="color:rgba(255,255,255,.09); right:-210px; top:-250px; width:520px; height:520px;"></div>
+
+  <div class="cover-left">
+    <span class="chip-glass"><i data-i="sparkles"></i>HackYeah 2026 · AI safety infrastructure</span>
+    <h1>Govern every<br>AI interaction<br><span class="hl">before it acts.</span></h1>
+    <p class="cover-lead">A provider-independent control layer for model, agent, tool and API traffic.</p>
+    <div class="trio"><span>Built locally.</span><span class="sep"></span><span>Enforced centrally.</span><span class="sep"></span><span>Explained clearly.</span></div>
+    <div class="pills">
+      <span class="pill"><span class="dot s-allow"><i data-i="check"></i></span>ALLOW</span>
+      <span class="pill"><span class="dot s-redact"><i data-i="redact"></i></span>REDACT</span>
+      <span class="pill"><span class="dot s-block"><i data-i="ban"></i></span>BLOCK</span>
+    </div>
+  </div>
+
+  <div class="art">
+    <div class="core-ring" style="left:155px; top:120px; width:230px; height:230px;"></div>
+    <div class="core-ring" style="left:105px; top:70px; width:330px; height:330px; border-style:dashed;"></div>
+    <svg class="wires" viewBox="0 0 540 470" fill="none" stroke-linecap="round">
+      <g stroke="rgba(255,255,255,.6)" stroke-width="2.5" stroke-dasharray="2 7">
+        <path d="M160 106 C188 106 176 235 200 235"/>
+        <path d="M160 235 L200 235"/>
+        <path d="M160 364 C188 364 176 235 200 235"/>
+      </g>
+      <g stroke-width="3">
+        <path d="M340 235 C368 235 355 106 390 106" stroke="#5ff0bf"/>
+        <path d="M340 235 L390 235" stroke="#ffc861"/>
+        <path d="M340 235 C368 235 355 364 390 364" stroke="#ff8a95"/>
+      </g>
+    </svg>
+    <span class="cap" style="left:0;">Every interaction</span>
+    <span class="cap" style="left:390px;">One decision</span>
+    <div class="in-chip" style="top:80px;"><span class="ib"><i data-i="message"></i></span>Prompt</div>
+    <div class="in-chip" style="top:209px;"><span class="ib"><i data-i="wrench"></i></span>Tool call</div>
+    <div class="in-chip" style="top:338px;"><span class="ib"><i data-i="code"></i></span>API request</div>
+    <div class="core"><div class="core-inner"><i data-i="shield-check"></i></div></div>
+    <span class="core-label">AI Control Layer</span>
+    <div class="out-chip" style="top:80px;"><span class="ib s-allow"><i data-i="check"></i></span>ALLOW</div>
+    <div class="out-chip" style="top:209px;"><span class="ib s-redact"><i data-i="redact"></i></span>REDACT</div>
+    <div class="out-chip" style="top:338px;"><span class="ib s-block"><i data-i="ban"></i></span>BLOCK</div>
+  </div>
+</section>
+
+<!-- 02 · Problem -->
+<section class="slide light">
+  <div class="deco dots" style="color:rgba(108,71,255,.16); left:-30px; bottom:60px; width:150px; height:130px;"></div>
+  <header class="head">
+    <div>
+      <span class="kicker"><i data-i="alert"></i>The threat</span>
+      <h2>AI traffic is the new<br><span class="hl">production boundary.</span></h2>
+    </div>
+    <p class="lead">Every prompt, tool call and model response can carry sensitive data or risky instructions. The control point must sit between intent and execution.</p>
+  </header>
+  <div class="body">
+    <div class="threats">
+      <article class="card threat">
+        <span class="bignum">01</span>
+        <div class="ib t-block"><i data-i="key"></i></div>
+        <h3>Sensitive data</h3>
+        <p>PII, credentials and private-key material can move into model or tool paths.</p>
+      </article>
+      <article class="card threat">
+        <span class="bignum">02</span>
+        <div class="ib t-redact"><i data-i="alert"></i></div>
+        <h3>Unsafe intent</h3>
+        <p>Prompt injection, instruction override and exfiltration intent need policy decisions.</p>
+      </article>
+      <article class="card threat">
+        <span class="bignum">03</span>
+        <div class="ib t-violet"><i data-i="eye-off"></i></div>
+        <h3>Blind operations</h3>
+        <p>Without safe evidence, operators cannot explain what happened or scale trust.</p>
+      </article>
+    </div>
+    <div class="banner">
+      <div class="ring" style="right:-60px; top:-90px; width:260px; height:260px;"></div>
+      <div class="ring" style="right:60px; top:40px; width:150px; height:150px;"></div>
+      <div class="ib"><i data-i="sparkles"></i></div>
+      <div>
+        <span class="eyebrow">The opportunity</span>
+        <p class="statement">Make security a reusable service<br>between every caller and every target.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 · Architecture -->
+<section class="slide light">
+  <header class="head">
+    <div>
+      <span class="kicker"><i data-i="layers"></i>The product</span>
+      <h2>One control point.<br><span class="hl">One decision model.</span></h2>
+    </div>
+    <p class="lead">The system normalizes an interaction, evaluates registered controls, applies central policy, records safe evidence and forwards only what is eligible.</p>
+  </header>
+  <div class="body">
+    <div class="flow">
+      <div class="card node ext"><div class="ib t-ink"><i data-i="bot"></i></div><b>Caller</b><span>app / agent</span></div>
+      <i data-i="arrow" class="arr"></i>
+      <div class="layer">
+        <span class="layer-tag"><i data-i="shield"></i>AI Control Layer</span>
+        <div class="card node"><div class="ib t-sky"><i data-i="plug"></i></div><b>Adapter</b><span>normalized interaction</span></div>
+        <i data-i="chev" class="arr sm"></i>
+        <div class="card node"><div class="ib t-violet"><i data-i="sliders"></i></div><b>Controls</b><span>deterministic + semantic</span></div>
+        <i data-i="chev" class="arr sm"></i>
+        <div class="card node"><div class="ib t-redact"><i data-i="scale"></i></div><b>Policy</b>
+          <div class="minis"><span class="mini t-allow">ALLOW</span><span class="mini t-redact">REDACT</span><span class="mini t-block">BLOCK</span></div>
+        </div>
+        <i data-i="chev" class="arr sm"></i>
+        <div class="card node"><div class="ib t-allow"><i data-i="file"></i></div><b>Audit</b><span>stdout + SQLite</span></div>
+      </div>
+      <i data-i="arrow" class="arr"></i>
+      <div class="card node ext"><div class="ib t-ink"><i data-i="target"></i></div><b>Target</b><span>echo / local model</span></div>
+    </div>
+    <div class="card callout"><span class="ib t-violet"><i data-i="shield-check"></i></span>Every decision is structured, explainable and auditable before eligible dispatch.</div>
+  </div>
+</section>
+
+<!-- 04 · What is live -->
+<section class="slide light">
+  <header class="head">
+    <div>
+      <span class="kicker"><i data-i="zap"></i>What is live</span>
+      <h2>A focused security pack,<br><span class="hl">working end to end.</span></h2>
+    </div>
+    <p class="lead">The current build is deliberately bounded: it proves the control-layer pattern with local targets, strict startup policy and deterministic tests.</p>
+  </header>
+  <div class="body">
+    <div class="stats">
+      <article class="card stat">
+        <div class="glow" style="--g:var(--violet);"></div>
+        <div class="top"><span class="n c-violet">6</span><div class="ib t-violet"><i data-i="sliders"></i></div></div>
+        <h3>registered controls</h3>
+        <p>email, bearer, PEM, GitHub, labelled SSN, known attacks</p>
+      </article>
+      <article class="card stat">
+        <div class="glow" style="--g:var(--pink);"></div>
+        <div class="top"><span class="n c-pink">3</span><div class="ib t-pink"><i data-i="scale"></i></div></div>
+        <h3>central actions</h3>
+        <p>ALLOW preserves, REDACT transforms, BLOCK stops</p>
+      </article>
+      <article class="card stat">
+        <div class="glow" style="--g:var(--sky);"></div>
+        <div class="top"><span class="n c-sky">2</span><div class="ib t-sky"><i data-i="target"></i></div></div>
+        <h3>target boundaries</h3>
+        <p>local echo and operator-configured loopback Ollama</p>
+      </article>
+      <article class="card stat">
+        <div class="glow" style="--g:var(--redact);"></div>
+        <div class="top"><span class="n c-redact">19</span><div class="ib t-redact"><i data-i="play"></i></div></div>
+        <h3>demo scenarios</h3>
+        <p>benign, deterministic, semantic and failure modes</p>
+      </article>
+    </div>
+    <div class="card principles">
+      <div class="p-head"><i data-i="layers"></i>Provider-independent by construction</div>
+      <div class="p-grid">
+        <span><i data-i="check"></i>Controls return findings</span>
+        <span><i data-i="check"></i>Policy owns enforcement</span>
+        <span><i data-i="check"></i>Adapters own protocol behavior</span>
+        <span><i data-i="check"></i>Targets remain replaceable</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 · Decisions -->
+<section class="slide dark">
+  <div class="deco dots" style="color:rgba(255,255,255,.12); right:50px; top:50px; width:130px; height:90px;"></div>
+  <header class="head">
+    <div>
+      <span class="kicker"><i data-i="scale"></i>The moment of control</span>
+      <h2>A simple outcome<br><span class="hl">users can trust.</span></h2>
+    </div>
+    <p class="lead">The decision engine makes the security posture visible in one line, while retaining the structured reasons behind it.</p>
+  </header>
+  <div class="body">
+    <div class="dcards">
+      <article class="glass dcard">
+        <div class="glow" style="--g:var(--allow);"></div>
+        <div class="dtop"><div class="ib s-allow"><i data-i="check"></i></div><span class="act">ALLOW</span></div>
+        <span class="eyebrow c-allow">When</span>
+        <p class="why">No finding maps to a stronger action.</p>
+        <span class="eyebrow c-allow">Then</span>
+        <p class="what">Forward the original interaction exactly once.</p>
+      </article>
+      <article class="glass dcard">
+        <div class="glow" style="--g:var(--redact);"></div>
+        <div class="dtop"><div class="ib s-redact"><i data-i="redact"></i></div><span class="act">REDACT</span></div>
+        <span class="eyebrow c-redact">When</span>
+        <p class="why">A supported PII finding needs protection.</p>
+        <span class="eyebrow c-redact">Then</span>
+        <p class="what">Replace selected spans with [REDACTED] before forwarding.</p>
+      </article>
+      <article class="glass dcard">
+        <div class="glow" style="--g:var(--block);"></div>
+        <div class="dtop"><div class="ib s-block"><i data-i="ban"></i></div><span class="act">BLOCK</span></div>
+        <span class="eyebrow c-block">When</span>
+        <p class="why">A credential or known attack indicator is detected.</p>
+        <span class="eyebrow c-block">Then</span>
+        <p class="what">Make zero target calls and return a safe reason.</p>
+      </article>
+    </div>
+    <div class="glass prec">
+      <span class="lab"><i data-i="layers"></i>Central precedence</span>
+      <span class="badge s-block"><i data-i="ban"></i>BLOCK</span><i data-i="chev" class="gt"></i>
+      <span class="badge s-redact"><i data-i="redact"></i>REDACT</span><i data-i="chev" class="gt"></i>
+      <span class="badge s-allow"><i data-i="check"></i>ALLOW</span>
+      <span class="note">the stronger action always wins</span>
+    </div>
+  </div>
+</section>
+
+<!-- 06 · Coverage -->
+<section class="slide light">
+  <header class="head">
+    <div>
+      <span class="kicker"><i data-i="shield"></i>Control coverage</span>
+      <h2>Protection with<br><span class="hl">honest boundaries.</span></h2>
+    </div>
+    <p class="lead">The pack recognizes precise supported shapes and keeps its claims narrow. That makes the behavior testable, explainable and safe to extend.</p>
+  </header>
+  <div class="body">
+    <div class="cov">
+      <div>
+        <div class="tbl-head eyebrow"><span>Control</span><span>Finding family</span><span>Default</span><span>Boundary</span></div>
+        <div class="card tbl-row"><b>Email address</b><span class="code">pii.email</span><span><span class="badge t-redact"><i data-i="redact"></i>REDACT</span></span><span class="bound">bounded ASCII dot-atom</span></div>
+        <div class="card tbl-row"><b>Labelled US SSN</b><span class="code">pii.us_ssn</span><span><span class="badge t-redact"><i data-i="redact"></i>REDACT</span></span><span class="bound">labelled, fictional syntax</span></div>
+        <div class="card tbl-row"><b>Bearer / PEM / GitHub</b><span class="code">secret.*</span><span><span class="badge t-block"><i data-i="ban"></i>BLOCK</span></span><span class="bound">supported token / key shapes</span></div>
+        <div class="card tbl-row"><b>Known attack literals</b><span class="code">attack.*</span><span><span class="badge t-block"><i data-i="ban"></i>BLOCK</span></span><span class="bound">5 exact inert signatures</span></div>
+        <div class="card tbl-row"><b>Semantic security</b><span class="code">semantic.*</span><span><span class="badge t-block"><i data-i="ban"></i>BLOCK</span></span><span class="bound">optional local evaluator</span></div>
+      </div>
+      <aside class="card limits">
+        <h3><span class="ib t-pink"><i data-i="flag"></i></span>Current limits</h3>
+        <p class="sub">Deliberately not claimed by today's build:</p>
+        <div class="lchips">
+          <span>output inspection</span><span>auth</span><span>budgets</span><span>policy reload</span><span>remote provider</span><span>general secret / jailbreak detection</span>
+        </div>
+        <p class="end"><i data-i="rocket"></i>Product expansion points, not hidden claims.</p>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- 07 · Evidence -->
+<section class="slide light">
+  <div class="deco dots" style="color:rgba(255,79,154,.16); right:-20px; bottom:120px; width:120px; height:150px;"></div>
+  <header class="head">
+    <div>
+      <span class="kicker"><i data-i="activity"></i>Safe operations</span>
+      <h2>Evidence that helps<br><span class="hl">operators move fast.</span></h2>
+    </div>
+    <p class="lead">Every relevant decision becomes safe telemetry. The dashboard turns that evidence into a living view of posture, timing and outcomes.</p>
+  </header>
+  <div class="body">
+    <div class="ev">
+      <div class="card audit">
+        <div class="ph"><div class="ib t-violet"><i data-i="file"></i></div><div><b>Audit event</b><small>structured record per decision</small></div></div>
+        <ul class="alist">
+          <li><i data-i="check-circle"></i>server interaction ID</li>
+          <li><i data-i="check-circle"></i>UTC timestamp</li>
+          <li><i data-i="check-circle"></i>target + policy digest</li>
+          <li><i data-i="check-circle"></i>evaluated controls + enablement</li>
+          <li><i data-i="check-circle"></i>action + finding codes</li>
+          <li><i data-i="check-circle"></i>evaluation / invocation / total timing</li>
+        </ul>
+      </div>
+      <div class="dash">
+        <div class="dash-bar">
+          <span class="w" style="background:#ff6b6b;"></span><span class="w" style="background:#ffc94d;"></span><span class="w" style="background:#3ddc97;"></span>
+          <b>Security dashboard</b>
+          <span class="badge"><i data-i="eye"></i>read-only overview</span>
+        </div>
+        <div class="tiles">
+          <div class="tile c-allow"><div class="k">ALLOW</div><div class="v">posture</div><i data-i="check"></i></div>
+          <div class="tile c-redact"><div class="k">REDACT</div><div class="v">protected</div><i data-i="redact"></i></div>
+          <div class="tile c-block"><div class="k">BLOCK</div><div class="v">stopped</div><i data-i="ban"></i></div>
+          <div class="tile" style="color:#c9c3ef;"><div class="k">UNKNOWN</div><div class="v">evidence gap</div><i data-i="help"></i></div>
+        </div>
+      </div>
+    </div>
+    <div class="privacy">
+      <div class="ib"><i data-i="lock"></i></div>
+      <div class="txt"><b>Privacy by design</b><p>Audit and reporting retain safe metadata only. They never keep:</p></div>
+      <div class="never">
+        <span><i data-i="x"></i>raw prompt content</span><span><i data-i="x"></i>matched values</span><span><i data-i="x"></i>spans</span>
+        <span><i data-i="x"></i>hashes</span><span><i data-i="x"></i>scores</span><span><i data-i="x"></i>exception text</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 08 · Operator experience -->
+<section class="slide dark">
+  <header class="head">
+    <div>
+      <span class="kicker"><i data-i="window"></i>The operator experience</span>
+      <h2>From live walkthrough<br><span class="hl">to repeatable evidence.</span></h2>
+    </div>
+    <p class="lead">The local dashboard combines a read-only security overview with an interaction workbench for custom input and prepared scenarios.</p>
+  </header>
+  <div class="body">
+    <div class="scen">
+      <article class="glass sc"><span class="bar" style="background:var(--allow);"></span>
+        <div class="ib s-allow"><i data-i="check-circle"></i></div>
+        <span class="eyebrow c-allow">Benign</span><p class="a">ALLOW</p><p class="d">safe request</p></article>
+      <article class="glass sc"><span class="bar" style="background:var(--redact);"></span>
+        <div class="ib s-redact"><i data-i="sliders"></i></div>
+        <span class="eyebrow c-redact">Deterministic</span><p class="a">REDACT / BLOCK</p><p class="d">PII, token, key, attack</p></article>
+      <article class="glass sc"><span class="bar" style="background:var(--block);"></span>
+        <div class="ib s-block"><i data-i="sparkles"></i></div>
+        <span class="eyebrow c-block">Semantic</span><p class="a">BLOCK</p><p class="d">injection, override, exfiltration</p></article>
+      <article class="glass sc"><span class="bar" style="background:var(--sky);"></span>
+        <div class="ib s-sky"><i data-i="alert-circle"></i></div>
+        <span class="eyebrow c-sky">Failure</span><p class="a">EXPLAIN</p><p class="d">evaluator / target unavailable</p></article>
+    </div>
+    <div class="op-row">
+      <div class="big19">
+        <div class="ring" style="right:-50px; top:-60px; width:180px; height:180px;"></div>
+        <span class="n">19</span>
+        <p>code-owned scenarios with expected explanations and actual-result reporting</p>
+      </div>
+      <div class="glass quote">
+        <div class="ib s-pink"><i data-i="eye"></i></div>
+        <p>The operator can see what was expected, what happened, why policy chose the action and whether the target completed.
+          <strong>A mismatch stays visible instead of being rewritten as success.</strong></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 09 · Scalability -->
+<section class="slide light">
+  <header class="head">
+    <div>
+      <span class="kicker"><i data-i="rocket"></i>Scalability</span>
+      <h2>Scale the boundary first;<br><span class="hl">scale the adapters next.</span></h2>
+    </div>
+    <p class="lead">The architecture keeps the security decision core small and composable. That gives the product a credible path from local proof to platform service.</p>
+  </header>
+  <div class="body">
+    <div class="road">
+      <div class="track"></div>
+      <div class="ms">
+        <div class="dot s-sky"><i data-i="server"></i></div>
+        <span class="sticker">We are here</span>
+        <div class="card mcard"><span class="step c-sky">01</span><h3>Today</h3>
+          <ul class="c-sky"><li>in-process FastAPI</li><li>local SQLite reporting</li></ul></div>
+      </div>
+      <div class="ms">
+        <div class="dot s-violet"><i data-i="layers"></i></div>
+        <div class="card mcard"><span class="step c-violet">02</span><h3>Next</h3>
+          <ul class="c-violet"><li>stateless control workers</li><li>shared policy distribution</li></ul></div>
+      </div>
+      <div class="ms">
+        <div class="dot s-pink"><i data-i="cloud"></i></div>
+        <div class="card mcard"><span class="step c-pink">03</span><h3>Platform</h3>
+          <ul class="c-pink"><li>remote adapters</li><li>central event pipeline</li></ul></div>
+      </div>
+      <div class="ms">
+        <div class="dot s-redact"><i data-i="building"></i></div>
+        <div class="card mcard"><span class="step c-redact">04</span><h3>Enterprise</h3>
+          <ul class="c-redact"><li>identity, budgets, output DLP</li><li>model / tool / resource governance</li></ul></div>
+      </div>
+    </div>
+    <div class="clean">
+      <div class="ring" style="position:absolute; right:-40px; top:-70px; width:160px; height:160px; color:rgba(255,255,255,.2);"></div>
+      <span class="eyebrow">What scales cleanly</span>
+      <div class="chips">
+        <span><i data-i="sliders"></i>stateless controls</span>
+        <span><i data-i="lock"></i>immutable registrations</span>
+        <span><i data-i="scale"></i>policy-owned decisions</span>
+        <span><i data-i="plug"></i>replaceable target adapters</span>
+      </div>
+    </div>
+    <p class="foot-note"><i data-i="info"></i><span>Intentionally local today: synchronous request handling, loopback Ollama, single-node SQLite and no distributed queue. These are clear deployment boundaries, not architecture dead ends.</span></p>
+  </div>
+</section>
+
+<!-- 10 · Close -->
+<section class="slide grad">
+  <div class="deco ring" style="color:rgba(255,255,255,.12); right:-120px; bottom:-260px; width:560px; height:560px;"></div>
+  <div class="deco dots" style="color:rgba(255,255,255,.2); right:250px; top:40px; width:150px; height:90px;"></div>
+  <div class="close-head">
+    <span class="kicker"><i data-i="trophy"></i>Why this wins</span>
+    <h2>A control layer people can adopt<br><span class="hl">before they trust it at scale.</span></h2>
+    <p class="lead">It starts with a narrow, testable promise: no eligible AI interaction reaches a target without a policy decision and safe evidence.</p>
+  </div>
+  <div class="thanks">Thank<br>you!</div>
+  <div class="proof">
+    <div class="pf"><div class="row"><span class="n">1,614</span><i data-i="flask"></i></div><p>unit + integration checks</p></div>
+    <div class="pf"><div class="row"><span class="n">9</span><i data-i="window"></i></div><p>Chromium journeys</p></div>
+    <div class="pf"><div class="row"><span class="n">PASS</span><i data-i="users"></i></div><p>fresh correctness + security reviews</p></div>
+    <div class="pf"><div class="row"><span class="n">0</span><i data-i="ban"></i></div><p>target calls after BLOCK</p></div>
+  </div>
+  <div class="pillars">
+    <span><i data-i="shield" class="s-violet"></i>Protect the interaction.</span>
+    <span><i data-i="file" class="s-pink"></i>Preserve the evidence.</span>
+    <span><i data-i="plug" class="s-sky"></i>Earn the next integration.</span>
+  </div>
+  <p class="tagline">Local proof today · scalable policy boundary tomorrow</p>
+</section>
+
+<script>
+// Lucide-style 24px stroke icons (redact is a custom glyph).
+const ICONS = {
+  "activity": '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+  "alert": '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>',
+  "alert-circle": '<circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
+  "arrow": '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+  "ban": '<circle cx="12" cy="12" r="10"/><path d="m4.9 4.9 14.2 14.2"/>',
+  "bot": '<path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/>',
+  "building": '<path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/>',
+  "check": '<path d="M20 6 9 17l-5-5"/>',
+  "check-circle": '<circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/>',
+  "chev": '<path d="m9 18 6-6-6-6"/>',
+  "cloud": '<path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/>',
+  "code": '<path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/>',
+  "eye": '<path d="M2.06 12.35a1 1 0 0 1 0-.7 10.75 10.75 0 0 1 19.88 0 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-19.88 0"/><circle cx="12" cy="12" r="3"/>',
+  "eye-off": '<path d="M10.73 5.08a10.74 10.74 0 0 1 11.2 6.57 1 1 0 0 1 0 .7 10.75 10.75 0 0 1-1.44 2.49"/><path d="M14.08 14.16a3 3 0 0 1-4.24-4.24"/><path d="M17.48 17.5a10.75 10.75 0 0 1-15.42-5.15 1 1 0 0 1 0-.7 10.75 10.75 0 0 1 4.45-5.14"/><path d="m2 2 20 20"/>',
+  "file": '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/>',
+  "flag": '<path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/>',
+  "flask": '<path d="M14 2v6a2 2 0 0 0 .25.96l5.51 10.08A2 2 0 0 1 18 22H6a2 2 0 0 1-1.76-2.96l5.51-10.08A2 2 0 0 0 10 8V2"/><path d="M6.45 15h11.1"/><path d="M8.5 2h7"/>',
+  "help": '<circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/>',
+  "info": '<circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>',
+  "key": '<circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/>',
+  "layers": '<path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>',
+  "lock": '<rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  "message": '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  "play": '<circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4Z"/>',
+  "plug": '<path d="M12 22v-5"/><path d="M9 8V2"/><path d="M15 8V2"/><path d="M18 8v5a4 4 0 0 1-4 4h-4a4 4 0 0 1-4-4V8Z"/>',
+  "redact": '<path d="M4 6.5h10"/><rect x="3" y="10" width="18" height="4.5" rx="1.2" fill="currentColor" stroke="none"/><path d="M4 18.5h7"/>',
+  "rocket": '<path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>',
+  "scale": '<path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/>',
+  "server": '<rect width="20" height="8" x="2" y="2" rx="2"/><rect width="20" height="8" x="2" y="14" rx="2"/><path d="M6 6h.01"/><path d="M6 18h.01"/>',
+  "shield": '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
+  "shield-check": '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/>',
+  "sliders": '<path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><path d="M14 2v4"/><path d="M8 10v4"/><path d="M16 18v4"/>',
+  "sparkles": '<path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0l1.58 6.14a2 2 0 0 0 1.44 1.44l6.14 1.58a.5.5 0 0 1 0 .96l-6.14 1.58a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/>',
+  "target": '<circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/>',
+  "trophy": '<path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/>',
+  "users": '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/>',
+  "window": '<rect x="2" y="4" width="20" height="16" rx="2"/><path d="M10 4v4"/><path d="M2 8h20"/><path d="M6 4v4"/>',
+  "wrench": '<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',
+  "x": '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+  "zap": '<path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"/>'
+};
+
+const slides = [...document.querySelectorAll(".slide")];
+const pad = n => String(n).padStart(2, "0");
+slides.forEach((slide, index) => {
+  const foot = document.createElement("div");
+  foot.className = "foot";
+  foot.innerHTML =
+    '<div class="brand"><span class="logo"><i data-i="shield"></i></span><b>AI Control Layer</b>' +
+    '<span class="sep"></span><span>HackYeah 2026</span></div>' +
+    `<span class="num">${pad(index + 1)} / ${pad(slides.length)}</span>`;
+  slide.appendChild(foot);
+});
+
+document.querySelectorAll("i[data-i]").forEach(el => {
+  const body = ICONS[el.dataset.i];
+  if (!body) throw new Error(`unknown icon: ${el.dataset.i}`);
+  el.innerHTML =
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" ' +
+    `stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+});
+</script>
+</body>
+</html>
