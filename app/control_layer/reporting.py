@@ -67,6 +67,9 @@ class ReportingEvent:
     evaluated_controls: tuple[str, ...]
     control_status: tuple[tuple[str, bool], ...]
     findings: tuple[FindingCount, ...]
+    semantic_duration_ms: float | None = None
+    semantic_model_id: str | None = None
+    semantic_status: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -100,7 +103,7 @@ class EventView:
     event: ReportingEvent
     invocation_status: InvocationStatus
     completion: Completion | None
-    schema_version: int = 1
+    schema_version: int = 2
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,6 +162,7 @@ class Summary:
     evaluation: TimingSummary
     invocation: TimingSummary
     total: TimingSummary
+    semantic: TimingSummary
 
 
 @dataclass(frozen=True, slots=True)
@@ -226,6 +230,38 @@ class ReportingProjection:
                 or event.evaluated_controls != enabled[: len(event.evaluated_controls)]
             ):
                 raise ValueError()
+            observation = (
+                event.semantic_duration_ms,
+                event.semantic_model_id,
+                event.semantic_status,
+            )
+            semantic_entries = [
+                e
+                for e in self.policy.entries
+                if e.control_id == "semantic-security" and e.enabled
+            ]
+            if any(v is not None for v in observation):
+                if (
+                    not all(v is not None for v in observation)
+                    or not semantic_entries
+                    or not duration(event.semantic_duration_ms)
+                    or event.semantic_duration_ms > event.evaluation_duration_ms
+                    or type(event.semantic_model_id) is not str
+                    or event.semantic_model_id
+                    != semantic_entries[0].registration.definition.model_id
+                    or type(event.semantic_status) is not str
+                    or event.semantic_status not in ("succeeded", "failed")
+                    or event.target_id == "unresolved"
+                ):
+                    raise ValueError()
+                index = enabled.index("semantic-security")
+                if event.semantic_status == "failed":
+                    if decision or event.evaluated_controls != enabled[:index]:
+                        raise ValueError()
+                elif "semantic-security" not in event.evaluated_controls:
+                    raise ValueError()
+            elif "semantic-security" in event.evaluated_controls:
+                raise ValueError()
             model = None
             if event.target_id == "unresolved":
                 if decision or event.evaluated_controls:
@@ -281,6 +317,7 @@ class ReportingProjection:
                 event.evaluated_controls,
                 event.control_status,
                 tuple(findings),
+                *observation,
             )
         except Exception:
             raise ReportingError("invalid_reporting_record") from None

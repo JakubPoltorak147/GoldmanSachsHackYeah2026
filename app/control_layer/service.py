@@ -48,6 +48,7 @@ class InteractionService:
         target_id: str,
         policy: BoundPolicy,
         decision: Decision | None = None,
+        semantic: tuple = (None, None, None),
     ) -> AuditEvent:
         counts = (
             Counter(r.finding.code for r in decision.resolutions) if decision else {}
@@ -65,11 +66,15 @@ class InteractionService:
             forwarding_eligible=decision is not None and decision.action != "BLOCK",
             evaluation_duration_ms=max(0, (perf_counter() - started) * 1000),
             error_code=None if decision else "evaluation_failed",
+            semantic_duration_ms=semantic[0],
+            semantic_model_id=semantic[1],
+            semantic_status=semantic[2],
         )
 
     def evaluate(self, interaction: Interaction) -> ServiceOutcome:
         started = perf_counter()
         evaluated = []
+        semantic = (None, None, None)
         target_id = "unresolved"
         policy = self.policy
         try:
@@ -80,22 +85,46 @@ class InteractionService:
                 if type(entry.enabled) is not bool:
                     raise EvaluationError()
                 if entry.enabled:
-                    output = entry.registration.evaluator.evaluate(interaction)
-                    validated = validate_findings(
-                        output, entry.registration, interaction.content
-                    )
+                    semantic_attempt = entry.control_id == "semantic-security"
+                    if semantic_attempt:
+                        semantic_started = perf_counter()
+                    succeeded = False
+                    try:
+                        output = entry.registration.evaluator.evaluate(interaction)
+                        validated = validate_findings(
+                            output, entry.registration, interaction.content
+                        )
+                        succeeded = True
+                    finally:
+                        if semantic_attempt:
+                            semantic = (
+                                max(0, (perf_counter() - semantic_started) * 1000),
+                                entry.registration.definition.model_id,
+                                "succeeded" if succeeded else "failed",
+                            )
                     evaluated.append(entry.control_id)
                     findings.extend(validated)
             decision = decide(interaction, tuple(findings), tuple(evaluated), policy)
             forwarded = forwarded_interaction(interaction, decision)
             event = self._event(
-                interaction, started, tuple(evaluated), target_id, policy, decision
+                interaction,
+                started,
+                tuple(evaluated),
+                target_id,
+                policy,
+                decision,
+                semantic,
             )
         except Exception:
             try:
                 self.audit_sink.emit(
                     self._event(
-                        interaction, started, tuple(evaluated), target_id, policy
+                        interaction,
+                        started,
+                        tuple(evaluated),
+                        target_id,
+                        policy,
+                        semantic=semantic,
                     )
                 )
             except Exception:

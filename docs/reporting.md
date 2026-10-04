@@ -8,9 +8,9 @@ operator-owned private directory; administer permissions on existing directories
 files and backups. Symlink database destinations and SQLite URI/memory destinations
 are rejected. Initialization failure raises a fixed reporting error without paths.
 
-SQLite schema version 1 stores atomic audit events, control status, finding counts
+SQLite schema version 2 stores atomic audit events, control status, finding counts
 and separate invocation outcomes. WAL, synchronous FULL and a one-second busy
-timeout are enabled. Unsupported schema versions or incompatible version-1 table/constraint/trigger
+timeout are enabled. Unsupported schema versions or incompatible table/constraint/trigger
 definitions fail startup without migration.
 The application closes its owned store at shutdown. Injected `reporting_store`
 instances remain owned by the caller; `audit_sink` injection is the upstream sink
@@ -112,6 +112,33 @@ administrators or disk loss. Disk exhaustion and write lock failures close the
 required gate. Operators manage file growth and backups. Exports, export manifests,
 operator CLI, model/policy/control/day groupings, control/code filters, exhaustive
 acknowledgement fault matrices and platform permission auditing are deferred.
-There is no dashboard, output inspection, semantic control, budget governance or
+There is no dashboard, output inspection, budget governance or
 cryptographic audit integrity in this capability. Automated verification uses
 temporary files, local detector inputs and fake targets; Ollama is not required.
+
+## Semantic attempt evidence and schema version 2
+
+Events expose nullable `semantic_duration_ms`, `semantic_model_id` and
+`semantic_status` (succeeded/failed), all absent together when no attempt occurs.
+Duration includes semantic input guards, setup, inference, reading, score parsing,
+threshold conversion and actual-producer finding validation. It excludes earlier
+deterministic controls, audit emission and target generation, and never exceeds
+whole evaluation duration. Identity comes from startup control registration,
+separate from target `model_id`; no runtime identity assertion is authoritative.
+
+Existing typed detail/list queries expose these fields. `Summary.semantic` is a
+TimingSummary counting both succeeded and failed attempts. Disabled/not-reached
+and historical events have no semantic sample. Failed evaluation keeps
+operational status, no action/findings, target not_invoked and no invocation
+sample. Required stdout/persistence failures still prevent target dispatch;
+completion accounting and poisoning are unchanged. No raw scores, input, output,
+spans, hashes, rationale or exceptions are persisted.
+
+New stores and EventView use schema version 2. Exact known v1 stores undergo one
+transaction adding nullable observation columns and closed checks, validating v2
+DDL and updating user_version before commit. IDs, sequences, prior fields and
+outcomes are preserved. Unsupported/modified DDL fails startup; migration errors
+roll back schema/version/data without deleting evidence. Back up history before
+upgrading. An older binary rejects v2; use a prior backup or compatible binary
+for code rollback. Explicitly disabling semantic policy retains history and
+independent deterministic enforcement.

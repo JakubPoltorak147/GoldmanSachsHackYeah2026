@@ -1,7 +1,6 @@
 """SQLite persistence and bounded typed queries; no interaction content accepted."""
 
 import os
-import re
 import sqlite3
 from collections import Counter
 from contextlib import contextmanager
@@ -29,7 +28,7 @@ from app.control_layer.reporting import (
     TimingSummary,
 )
 
-_SCHEMA = """
+_SCHEMA_V1 = """
 CREATE TABLE audit_events (
  sequence INTEGER PRIMARY KEY AUTOINCREMENT,
  interaction_id TEXT NOT NULL UNIQUE, timestamp TEXT NOT NULL,
@@ -68,24 +67,43 @@ PRAGMA user_version=1;
 """
 
 
-def _expected_schema() -> dict[str, str]:
-    # Use SQLite's parser to delimit the trigger body (which has inner semicolons).
-    # Compare the versioned DDL, not just table names, so keys/checks/FKs/triggers
-    # are startup contracts too. Formatting differences in whitespace are harmless.
-    objects = {}
-    statement = ""
-    for character in _SCHEMA:
-        statement += character
-        if character == ";" and sqlite3.complete_statement(statement):
-            sql = statement.strip().removesuffix(";")
-            match = re.match(r"CREATE (?:TABLE|TRIGGER|INDEX) (\w+)", sql)
-            if match:
-                objects[match[1]] = " ".join(sql.split())
-            statement = ""
-    return objects
+_SEMANTIC_COLUMNS = (
+    "semantic_duration_ms REAL CHECK(semantic_duration_ms >= 0 "
+    "AND semantic_duration_ms <= evaluation_duration_ms)",
+    "semantic_model_id TEXT",
+    "semantic_status TEXT CHECK(semantic_status IN ('succeeded','failed')) "
+    "CHECK((semantic_duration_ms IS NULL AND semantic_model_id IS NULL "
+    "AND semantic_status IS NULL) OR (semantic_duration_ms IS NOT NULL "
+    "AND semantic_model_id IS NOT NULL AND semantic_status IS NOT NULL))",
+)
 
 
-_EXPECTED_SCHEMA = _expected_schema()
+def _schema_objects(connection):
+    return {
+        name: " ".join(sql.split())
+        for name, sql in connection.execute(
+            "SELECT name,sql FROM sqlite_master "
+            "WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%'"
+        )
+    }
+
+
+def _upgrade(connection):
+    for column in _SEMANTIC_COLUMNS:
+        connection.execute("ALTER TABLE audit_events ADD COLUMN " + column)
+    connection.execute("PRAGMA user_version=2")
+
+
+def _expected_schema(version):
+    with sqlite3.connect(":memory:") as db:
+        db.executescript(_SCHEMA_V1)
+        if version == 2:
+            _upgrade(db)
+        return _schema_objects(db)
+
+
+_EXPECTED_V1 = _expected_schema(1)
+_EXPECTED_SCHEMA = _expected_schema(2)
 
 _STATUS = (
     "CASE WHEN o.status IS NOT NULL THEN o.status "
@@ -130,23 +148,33 @@ class ReportingStore:
             connection.row_factory = sqlite3.Row
             connection.execute("PRAGMA foreign_keys=ON")
             version = connection.execute("PRAGMA user_version").fetchone()[0]
-            if version != 1:
-                if (
-                    version != 0
-                    or connection.execute(
-                        "SELECT 1 FROM sqlite_master WHERE type='table'"
-                    ).fetchone()
-                ):
+            if version == 0:
+                if connection.execute(
+                    "SELECT 1 FROM sqlite_master WHERE sql IS NOT NULL"
+                ).fetchone():
                     raise ReportingError("invalid_reporting_configuration")
-                connection.executescript("BEGIN IMMEDIATE;\n" + _SCHEMA + "\nCOMMIT;")
-            actual = {
-                name: " ".join(sql.split())
-                for name, sql in connection.execute(
-                    "SELECT name,sql FROM sqlite_master "
-                    "WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%'"
-                )
-            }
-            if actual != _EXPECTED_SCHEMA:
+                connection.executescript("BEGIN IMMEDIATE;\n" + _SCHEMA_V1)
+                try:
+                    _upgrade(connection)
+                    if _schema_objects(connection) != _EXPECTED_SCHEMA:
+                        raise ReportingError("invalid_reporting_configuration")
+                    connection.commit()
+                except Exception:
+                    connection.rollback()
+                    raise
+            elif version == 1:
+                if _schema_objects(connection) != _EXPECTED_V1:
+                    raise ReportingError("invalid_reporting_configuration")
+                connection.execute("BEGIN IMMEDIATE")
+                try:
+                    _upgrade(connection)
+                    if _schema_objects(connection) != _EXPECTED_SCHEMA:
+                        raise ReportingError("invalid_reporting_configuration")
+                    connection.commit()
+                except Exception:
+                    connection.rollback()
+                    raise
+            elif version != 2 or _schema_objects(connection) != _EXPECTED_SCHEMA:
                 raise ReportingError("invalid_reporting_configuration")
             connection.execute("PRAGMA journal_mode=WAL")
             connection.execute("PRAGMA synchronous=FULL")
@@ -196,8 +224,9 @@ class ReportingStore:
             db.execute(
                 """INSERT INTO audit_events
             (interaction_id,timestamp,event_type,target_id,model_id,policy_digest,
-            action,reason_code,error_code,forwarding_eligible,evaluation_duration_ms)
-            VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+            action,reason_code,error_code,forwarding_eligible,evaluation_duration_ms,
+            semantic_duration_ms,semantic_model_id,semantic_status)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
                 (
                     identity,
                     _time(event.timestamp),
@@ -210,6 +239,9 @@ class ReportingStore:
                     event.error_code,
                     int(event.forwarding_eligible),
                     event.evaluation_duration_ms,
+                    event.semantic_duration_ms,
+                    event.semantic_model_id,
+                    event.semantic_status,
                 ),
             )
             db.executemany(
@@ -320,6 +352,9 @@ class ReportingStore:
                 )
                 for f in findings
             ),
+            row["semantic_duration_ms"],
+            row["semantic_model_id"],
+            row["semantic_status"],
         )
         completion = (
             Completion(
@@ -399,6 +434,7 @@ class ReportingStore:
             "evaluation_duration_ms",
             "invocation_duration_ms",
             "total_duration_ms",
+            "semantic_duration_ms",
         ):
             row = db.execute(
                 cte + f"SELECT count({name}),coalesce(sum({name}),0),min({name}),"

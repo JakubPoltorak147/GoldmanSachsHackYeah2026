@@ -565,3 +565,115 @@ def test_incompatible_version_one_schema_fails_startup(tmp_path, mismatch):
     with pytest.raises(ReportingError, match="^invalid_reporting_configuration$"):
         ReportingStore(path)
     assert path.read_bytes() == before
+
+
+def test_exact_v1_upgrade_preserves_all_history(tmp_path):
+    from tests.fixtures.reporting_v1 import SCHEMA_V1
+
+    service, store, sink, _, _ = composition(tmp_path / "source")
+    identities = []
+    for content in ("ordinary", CANARY):
+        result = service.evaluate(Interaction.create("local-echo", content))
+        identities.append(result.interaction_id)
+    operational = replace(
+        audit(service),
+        event_type="operational_failure",
+        action=None,
+        forwarding_eligible=False,
+        evaluated_controls=(),
+        error_code="evaluation_failed",
+    )
+    sink.emit(operational)
+    unknown = audit(service)
+    sink.emit(unknown)
+    failed = audit(service)
+    sink.emit(failed)
+    sink.complete(failed.interaction_id, InvocationStatus.FAILED, 2, 4)
+    block_service, block_store, block_sink, _, _ = composition(
+        tmp_path / "block", Action.BLOCK
+    )
+    blocked = audit(block_service, Action.BLOCK, counts=(("pii.email", 2),))
+    store._append_event(block_sink.projection.project(blocked))
+    block_store.close()
+    historical = store.list_events()
+    path = tmp_path / "historical.db"
+    with sqlite3.connect(path) as db:
+        db.executescript(SCHEMA_V1)
+        for table in (
+            "audit_events",
+            "event_controls",
+            "event_findings",
+            "invocation_outcomes",
+        ):
+            rows = store._connection.execute("SELECT * FROM " + table).fetchall()
+            for row in rows:
+                values = tuple(row)[:-3] if table == "audit_events" else tuple(row)
+                placeholders = ",".join("?" for _ in values)
+                db.execute(f"INSERT INTO {table} VALUES ({placeholders})", values)
+    store.close()
+    upgraded = ReportingStore(path)
+    assert upgraded.list_events() == historical
+    assert all(
+        e.schema_version == 2 and e.event.semantic_duration_ms is None
+        for e in upgraded.list_events()
+    )
+    next_event = replace(audit(service), interaction_id=uuid4())
+    upgraded._append_event(sink.projection.project(next_event))
+    assert upgraded.list_events()[-1].sequence == historical[-1].sequence + 1
+    upgraded.close()
+    restarted = ReportingStore(path)
+    assert restarted.list_events()[:-1] == historical
+    restarted.close()
+
+
+@pytest.mark.parametrize("failure_column", [0, 1, 2, 3])
+def test_v1_migration_rolls_back_schema_version_and_data(
+    tmp_path, monkeypatch, failure_column
+):
+    import app.control_layer.reporting_store as module
+    from tests.fixtures.reporting_v1 import SCHEMA_V1
+
+    path = tmp_path / "historical.db"
+    with sqlite3.connect(path) as db:
+        db.executescript(SCHEMA_V1)
+        before = module._schema_objects(db)
+    columns = module._SEMANTIC_COLUMNS
+
+    def failing_upgrade(connection):
+        for i, column in enumerate(columns):
+            if i == failure_column:
+                raise RuntimeError("MIGRATION_CANARY")
+            connection.execute("ALTER TABLE audit_events ADD COLUMN " + column)
+        connection.execute("PRAGMA user_version=2")
+        raise RuntimeError("MIGRATION_CANARY")
+
+    monkeypatch.setattr(module, "_upgrade", failing_upgrade)
+    with pytest.raises(ReportingError, match="^reporting_unavailable$"):
+        ReportingStore(path)
+    with sqlite3.connect(path) as db:
+        assert db.execute("PRAGMA user_version").fetchone()[0] == 1
+        assert module._schema_objects(db) == before
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "DROP TRIGGER eligible_outcome",
+        "CREATE TABLE unexpected (x TEXT)",
+        "ALTER TABLE audit_events ADD COLUMN unexpected TEXT",
+    ],
+)
+def test_modified_v1_never_migrates(tmp_path, mutation):
+    import app.control_layer.reporting_store as module
+    from tests.fixtures.reporting_v1 import SCHEMA_V1
+
+    path = tmp_path / "historical.db"
+    with sqlite3.connect(path) as db:
+        db.executescript(SCHEMA_V1)
+        db.execute(mutation)
+        before = module._schema_objects(db)
+    with pytest.raises(ReportingError, match="^invalid_reporting_configuration$"):
+        ReportingStore(path)
+    with sqlite3.connect(path) as db:
+        assert db.execute("PRAGMA user_version").fetchone()[0] == 1
+        assert module._schema_objects(db) == before

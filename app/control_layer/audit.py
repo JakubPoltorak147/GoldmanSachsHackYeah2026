@@ -24,6 +24,9 @@ class AuditEvent:
     forwarding_eligible: bool
     evaluation_duration_ms: float
     error_code: str | None = None
+    semantic_duration_ms: float | None = None
+    semantic_model_id: str | None = None
+    semantic_status: str | None = None
 
     def safe_record(self) -> dict:
         # Explicit field selection: never serialize domain objects or exceptions.
@@ -38,6 +41,12 @@ class AuditEvent:
             "forwarding_eligible": self.forwarding_eligible,
             "evaluation_duration_ms": self.evaluation_duration_ms,
         }
+        if self.semantic_status is not None:
+            record.update(
+                semantic_duration_ms=self.semantic_duration_ms,
+                semantic_model_id=self.semantic_model_id,
+                semantic_status=self.semantic_status,
+            )
         if self.action is not None:
             record["action"] = self.action.value
             record["finding_counts"] = dict(self.finding_counts)

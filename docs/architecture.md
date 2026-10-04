@@ -187,7 +187,7 @@ Connect/write/pool and read inactivity timeouts are explicit, with no total dead
 or guaranteed runtime cancellation. Synchronous thread-pool calls may queue/occupy
 threads for hardware/load-dependent durations. Evaluation audit duration excludes
 inference, and eligibility does not imply execution success. There is no output
-inspection, centralized model authorization, semantic control or budget
+inspection, centralized model authorization, budget
 addition. Deployment trusts the separately administered loopback daemon, with
 cloud disabled. No runtime/model installation, download or lifecycle handling exists.
 
@@ -199,7 +199,7 @@ is documented in README and is excluded from normal test discovery.
 ## Durable security reporting
 
 `reporting.py` defines closed frozen reporting/query DTOs and startup-bound safe
-projection. `reporting_store.py` implements version-1 SQLite audit/control/finding
+projection. `reporting_store.py` implements version-2 SQLite audit/control/finding
 and separate outcome tables, transactional appends, typed list/detail/summary and
 the composed `PersistentAuditSink`. Projection validates digest, identities,
 enablement, evaluated order, finding counts, mapped action and final precedence
@@ -228,3 +228,35 @@ Finding multiplicities and completed timing samples aggregate independently of
 event totals. Reads use consistent transactions. No CLI, export or reporting HTTP
 endpoint is implemented. Storage access requires trusted local filesystem access.
 See `docs/reporting.md` for deployment, query contracts and limitations.
+
+## Semantic input control
+
+`ollama_semantic.py` owns the dedicated frozen, bounded local classifier settings
+and request boundary, independent of `ollama_target.py`. `semantic_control.py`
+validates even injected runtime scores against exactly three finite [0,1] numbers
+and converts inclusive threshold hits into fixed spanless findings. It owns no
+actions. The production registry includes semantic-security last, after all six
+deterministic controls. Baseline disables it; the complete demo enables it.
+
+Policy accepts threshold only for semantic-security and includes supplied,
+normalized values in its digest. `bind_semantic_policy` in composition constructs
+final immutable registrations with policy thresholds before serving, including
+injections. Trusted ControlDefinition.model_id supplies evaluator identity;
+runtime metadata cannot rename it. Startup performs no network calls. All controls
+see original input; central policy and audit-gated target dispatch remain unchanged.
+Enabled classifier failures yield operational evaluation_failed, with no partial
+findings/action and zero target calls. Generated target output remains uninspected.
+
+Service timing brackets semantic invocation through actual-producer validation,
+including failure, with request-local monotonic timestamps. A closed optional
+semantic duration/model/status observation is projected and committed with the
+event, independently of invocation completion. Failed attempts contribute semantic
+summary samples, never target timing. Missing attempts have no sample.
+
+Reporting storage is version 2. Startup verifies exact v1 DDL before one atomic
+additive migration; nullable semantic columns preserve IDs, sequences, findings,
+controls and outcomes. Validation and version update occur before commit; failure
+rolls back without evidence reset. Fresh stores have the same v2 DDL. Modified or
+unknown schemas fail startup. Historical fields are null. Older binaries reject v2;
+code rollback requires a backup or compatible binary. Disabling semantic policy
+is the normal rollback. See README for evaluator bounds and trust limitations.
