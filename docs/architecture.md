@@ -293,3 +293,34 @@ platform. See `docs/reporting.md` for loopback operation and exact API contracts
 Browser tests cover two operator journeys; core security assertions stay in unit/
 integration tests. Development Playwright dependencies do not enter the application
 runtime stack.
+
+## Opt-in interaction workspace
+
+`demo.py` owns the immutable synthetic catalog, strict default-off flags, safe
+startup metadata and retained scenario services. API lifespan passes the same
+validated control/target bindings to ordinary and scenario composition. Each
+scenario service has its own policy-bound reporting projection and shares the
+ordinary service's upstream sink and ReportingStore. No core policy/control,
+transport or reporting-schema behavior is changed. Transport fault scenarios
+clone only the selected existing adapter's client-factory binding.
+
+`GET /v1/demo/scenarios` and `/v1/demo/workspace` expose safe no-store metadata;
+Demo disabled returns fixed 404. The scenario-only interaction request resolves
+server content/target/profile and reuses the ordinary outcome serializer. Custom
+input uses the original target/content request and application's ordinary service,
+never the selected scenario's policy. Scenario Origin is mandatory; an ordinary
+Origin is optional but, when supplied, must be unique and exactly same origin.
+Untrusted browser fields cannot choose runtime/model/policy. This remains a
+trusted local console, not a caller-authentication system.
+
+`workbench.js` provides custom input, Unicode scalar count, public target selection,
+actual active controls, prepared cases, shared run lock, response and UUID-correlated
+pipeline evidence. Draft/output stays transient plain text and clears on view
+navigation. Pending navigation invalidates result callbacks but retains the lock
+until the POST settles. Model output is uninspected; echo is labelled approved
+input returned by Local echo. Pipeline stages derive from actual response/reporting,
+never fabricated streaming instrumentation. Overview retains its reporting API,
+three-second visible-view polling, filter-generation protection and safe event
+renderer under the light console styling. See `docs/demo.md` for execution and
+failure/privacy contracts. Live acceptance is tracked separately in the active
+change and worklog; code existence does not imply complete challenge coverage.

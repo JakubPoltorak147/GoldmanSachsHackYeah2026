@@ -2,24 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="color-scheme" content="dark">
-  <title>Sentinel · Security overview</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%2374e0be' d='M16 2 29 7v9c0 7-13 14-13 14S3 23 3 16V7z'/%3E%3C/svg%3E">
+  <meta name="color-scheme" content="light">
+  <title>AI Control Layer · Console</title>
   <link rel="stylesheet" href="/dashboard/assets/dashboard.css">
   <script type="module" src="/dashboard/assets/dashboard.js"></script>
+  <script type="module" src="/dashboard/assets/workbench.js"></script>
 </head>
 <body>
-  <aside class="sidebar">
-    <a class="brand" href="/dashboard" aria-label="Sentinel security overview"><span class="brand-mark">S</span><span>SENTINEL<small>AI CONTROL LAYER</small></span></a>
-    <div class="nav-label">WORKSPACE</div>
-    <nav id="navigation" aria-label="Main navigation"><a class="nav-item active" href="/dashboard" aria-current="page"><span aria-hidden="true">◈</span> Security overview</a></nav>
-    <div class="sidebar-note"><span class="safe-dot"></span> CONTENT-FREE BY DESIGN<p>Security evidence.<br>Without sensitive content.</p></div>
-    <div class="sidebar-footer">LOCAL CONTROL PLANE<span>Reporting API · v1</span></div>
-  </aside>
+  <header class="console-header">
+    <a class="brand" href="/dashboard">AI Control Layer</a>
+    <nav aria-label="Main navigation"><button id="nav-overview" class="nav-item active" aria-current="page" type="button">Security overview</button><button id="nav-interactions" class="nav-item" type="button" hidden>Interactions</button></nav>
+    <span class="local-label">Local workspace</span>
+  </header>
   <div class="app-shell">
-    <header class="topbar"><span class="breadcrumb">Workspace <span>/</span> <strong>Security overview</strong></span><span class="local-label"><span class="safe-dot"></span> Local reporting</span></header>
     <main id="page-content">
-      <div class="page-heading"><div><p class="eyebrow">OBSERVE. UNDERSTAND. PROTECT.</p><h1>Security overview</h1><p class="subtitle">A clear view of every decision between your application and AI.</p></div><div class="heading-actions"><span class="live-label" id="live-label"><span class="safe-dot"></span> Polling · 3s</span><button class="button" id="refresh" type="button"><span aria-hidden="true">↻</span> Refresh now</button></div></div>
+      <section id="overview-view">
+      <div class="page-heading"><div><h1>Security overview</h1><p class="subtitle">Decisions, security findings and recorded target outcomes.</p></div><div class="heading-actions"><span class="live-label" id="live-label"><span class="safe-dot"></span> Polling · 3s</span><button class="button" id="refresh" type="button"><span aria-hidden="true">↻</span> Refresh now</button></div></div>
       <form id="filters" class="filter-bar" aria-label="Reporting filters">
         <label>Time window<select id="time-window" name="window"><option value="1">Last hour</option><option value="24" selected>Last 24 hours</option><option value="168">Last 7 days</option></select></label>
         <label>Decision<select id="action" name="action"><option value="">All decisions</option><option>ALLOW</option><option>REDACT</option><option>BLOCK</option></select></label>
@@ -30,7 +28,7 @@
       <div class="filter-caption"><div id="filter-chips" class="chips"></div><span id="window-label">Selected window: last 24 hours</span></div>
       <div id="availability" class="availability" role="status" aria-live="polite">Loading security evidence…</div>
       <section class="metric-grid" aria-label="Security metrics">
-        <article class="metric total"><div class="metric-label">Total interactions <span class="metric-symbol" aria-hidden="true">↗</span></div><strong id="metric-total">—</strong><p>Distinct interactions in this window</p><div class="metric-line"></div></article>
+        <article class="metric total"><div class="metric-label">Total interactions </div><strong id="metric-total">—</strong><p>Distinct interactions in this window</p><div class="metric-line"></div></article>
         <article class="metric allow"><div class="metric-label">Allowed <span class="pill allow">ALLOW</span></div><strong id="metric-allow">—</strong><p>Approved by central policy</p><div class="metric-line"></div></article>
         <article class="metric redact"><div class="metric-label">Redacted <span class="pill redact">REDACT</span></div><strong id="metric-redact">—</strong><p>Transformed before forwarding</p><div class="metric-line"></div></article>
         <article class="metric block"><div class="metric-label">Blocked <span class="pill block">BLOCK</span></div><strong id="metric-block">—</strong><p>Prevented from reaching a target</p><div class="metric-line"></div></article>
@@ -44,12 +42,31 @@
         <div class="operational-count"><strong id="metric-operational">—</strong><span>Evaluation failures<small>Operational · no policy action</small></span></div>
       </section>
       <section class="insight-grid" aria-label="Findings and latency">
-        <article class="panel finding-panel"><div class="panel-heading"><div><h2>Security findings</h2><p>Top categories by occurrence</p></div><span class="panel-icon" aria-hidden="true">◈</span></div><div class="finding-totals"><span>Deterministic <strong id="findings-deterministic">—</strong></span><span>Semantic <strong id="findings-semantic">—</strong></span></div><div id="finding-rankings" class="rankings"><p class="muted">Waiting for evidence…</p></div></article>
-        <article class="panel"><div class="panel-heading"><div><h2>Control activity</h2><p>Top controls with findings</p></div><span class="panel-icon" aria-hidden="true">⌘</span></div><div id="control-rankings" class="rankings"><p class="muted">Waiting for evidence…</p></div><p class="panel-footnote">Finding occurrences · not distinct interactions</p></article>
+        <article class="panel finding-panel"><div class="panel-heading"><div><h2>Security findings</h2><p>Top categories by occurrence</p></div></div><div class="finding-totals"><span>Deterministic <strong id="findings-deterministic">—</strong></span><span>Semantic <strong id="findings-semantic">—</strong></span></div><div id="finding-rankings" class="rankings"><p class="muted">Waiting for evidence…</p></div></article>
+        <article class="panel"><div class="panel-heading"><div><h2>Control activity</h2><p>Top controls with findings</p></div></div><div id="control-rankings" class="rankings"><p class="muted">Waiting for evidence…</p></div><p class="panel-footnote">Finding occurrences · not distinct interactions</p></article>
         <article class="panel"><div class="panel-heading"><div><h2>Pipeline latency</h2><p>Mean duration · recorded samples</p></div><span class="unit-label">ms</span></div><div id="timing-stats" class="timing-stats"><p class="muted">Waiting for measurements…</p></div><p class="panel-footnote">Semantic is part of evaluation. Target invocation is separate.</p></article>
       </section>
-      <section class="panel event-panel" aria-labelledby="events-heading"><div class="panel-heading"><div><h2 id="events-heading" tabindex="-1">Recent security events <span id="event-count" class="count-badge">—</span></h2><p>Newest first · safe evidence only</p></div><span id="last-updated" class="updated">No successful refresh yet</span></div><div class="table-scroll"><table><thead><tr><th>Decision / event</th><th>Target / model</th><th>Findings</th><th>Invocation</th><th>Evaluation</th><th>Time</th><th><span class="sr-only">Detail</span></th></tr></thead><tbody id="event-rows"></tbody></table></div><div id="event-empty" class="empty-state" hidden><span class="empty-icon" aria-hidden="true">◇</span><h3>No events in this window</h3><p>Try a wider window or clear the filters.<br>New audited interactions appear here automatically.</p></div><div class="table-footer"><span id="page-label">Latest events</span><div><button class="text-button" id="back-live" type="button" hidden>Back to live events</button><button class="button compact" id="older-events" type="button" disabled>Older events <span aria-hidden="true">→</span></button></div></div></section>
+      <section class="panel event-panel" aria-labelledby="events-heading"><div class="panel-heading"><div><h2 id="events-heading" tabindex="-1">Recent security events <span id="event-count" class="count-badge">—</span></h2><p>Newest first · safe evidence only</p></div><span id="last-updated" class="updated">No successful refresh yet</span></div><div class="table-scroll"><table><thead><tr><th>Decision / event</th><th>Target / model</th><th>Findings</th><th>Invocation</th><th>Evaluation</th><th>Time</th><th><span class="sr-only">Detail</span></th></tr></thead><tbody id="event-rows"></tbody></table></div><div id="event-empty" class="empty-state" hidden><h3>No events in this window</h3><p>Try a wider window or clear the filters.<br>New audited interactions appear here automatically.</p></div><div class="table-footer"><span id="page-label">Latest events</span><div><button class="text-button" id="back-live" type="button" hidden>Back to live events</button><button class="button compact" id="older-events" type="button" disabled>Older events <span aria-hidden="true">→</span></button></div></div></section>
       <footer class="page-footer"><span><span class="safe-dot"></span> Prompts, responses and sensitive content never enter reporting.</span><span id="health-label">Write-gate health: loading</span></footer>
+      </section>
+      <section id="interactions-view" hidden aria-labelledby="interactions-heading">
+        <div class="page-heading"><div><h1 id="interactions-heading">Interactions</h1><p class="subtitle">Run a prepared case or send your own text through the control layer.</p></div><button class="button" id="reload-workspace" type="button">Refresh configured controls</button></div>
+        <p id="workspace-availability" class="availability" role="status">Loading configured controls…</p>
+        <div class="workspace-grid">
+          <aside class="scenario-column" aria-labelledby="scenarios-heading"><h2 id="scenarios-heading">Prepared scenarios</h2><p class="muted">Synthetic fixtures · fixed server profiles</p><div id="scenario-list"></div></aside>
+          <section class="composer panel" aria-labelledby="composer-heading">
+            <div class="panel-heading"><div><h2 id="composer-heading">Custom interaction</h2><p>Uses the application policy</p></div></div>
+            <form id="custom-form" class="composer-body">
+              <label for="custom-target">Target</label><select id="custom-target" disabled aria-describedby="target-description"></select><p class="muted" id="target-description"></p>
+              <label for="custom-content">Interaction text</label><textarea id="custom-content" rows="10" placeholder="Type an interaction to evaluate…" spellcheck="false" autocomplete="off" aria-describedby="input-count input-validation"></textarea>
+              <div class="input-caption"><span id="input-count">0 / 16,384 characters</span><span id="input-validation" role="status"></span></div>
+              <button id="run-custom" class="button primary" type="submit" disabled>Run interaction</button>
+            </form>
+            <div class="configuration"><h3>Application controls</h3><div id="custom-controls"></div><p class="muted" id="custom-policy"></p></div>
+          </section>
+          <section class="result-panel panel" aria-labelledby="result-heading"><div class="panel-heading"><div><h2 id="result-heading">Result</h2><p id="run-context">Select a scenario or enter custom text.</p></div></div><div class="result-body"><p id="run-status" role="status" aria-live="polite">No interaction submitted.</p><div id="scenario-selection"></div><div id="run-result"></div><div id="run-pipeline"></div><div id="run-evidence"></div></div></section>
+        </div>
+      </section>
     </main>
   </div>
   <dialog id="event-dialog" aria-labelledby="detail-heading"><div class="drawer-header"><div><p class="eyebrow">SECURITY EVENT</p><h2 id="detail-heading">Event detail</h2></div><button id="close-detail" class="icon-button" aria-label="Close event detail" type="button">×</button></div><div id="detail-content"></div><div class="drawer-footer"><span class="safe-dot"></span> Content-free evidence · no input or output captured</div></dialog>

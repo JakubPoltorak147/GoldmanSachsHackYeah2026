@@ -235,3 +235,21 @@ and deterministic targets/evaluator; they never need Ollama. Chromium requires i
 normal system libraries. An alternative writable browser/cache directory can be
 selected with `PLAYWRIGHT_BROWSERS_PATH`; use the same path for installation and
 verification. Screenshots are temporary artifacts, not reporting history.
+
+## Interaction workspace and console presentation
+
+The shared dashboard now uses compact top navigation and a light operator layout.
+Its overview still consumes the unchanged read-only reporting routes/DTOs; metrics,
+filters, pagination, unknown-completion semantics and safe detail remain intact.
+Polling pauses while Interactions is shown and refreshes when returning to overview.
+
+With `CONTROL_LAYER_DEMO_ENABLED=true`, Interactions can submit a predefined
+server-owned scenario or ordinary custom text. Safe startup metadata shows actual
+application control enablement and public target/model identities without querying
+history or probing runtimes. Immediate results stay in the transient text-only
+workspace; prompts, transformed input and model/echo output never enter reporting.
+Only UUID-correlated safe event detail supplies recorded pipeline stages/timings.
+Missing detail leaves the immediate outcome intact and labels recorded stages
+unavailable; unknown completion never proves invocation or triggers retry.
+See [Interaction workspace](demo.md) for startup flags, privacy, origin validation,
+scenario profiles, model prerequisites and separate live-rehearsal requirements.

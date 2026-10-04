@@ -14,32 +14,6 @@ from app.control_layer.reporting import InvocationStatus
 from tests.fixtures.dashboard import dashboard_app, seed_dashboard
 
 
-@pytest.fixture(scope="session")
-def browser_type_launch_args(browser_type_launch_args):
-    # Keep these isolated UI journeys viable in constrained CI containers.
-    return {
-        **browser_type_launch_args,
-        "args": [
-            "--disable-dev-shm-usage",
-            "--disable-gpu",
-            "--no-zygote",
-            "--single-process",
-        ],
-    }
-
-
-@pytest.fixture
-def page(browser_type, browser_type_launch_args, tmp_path):
-    # A persistent context closes the whole low-process browser on teardown.
-    context = browser_type.launch_persistent_context(
-        str(tmp_path / "browser"), **browser_type_launch_args
-    )
-    try:
-        yield context.pages[0]
-    finally:
-        context.close()
-
-
 @pytest.fixture
 def dashboard_server(tmp_path):
     app, store, state, _, _ = dashboard_app(tmp_path)

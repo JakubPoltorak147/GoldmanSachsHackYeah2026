@@ -140,11 +140,11 @@ function invalidate() {
 }
 function schedule() {
   clearTimeout(timer);
-  if (!document.hidden) timer = setTimeout(refresh, 3000);
+  if (!document.hidden && !$('overview-view').hidden) timer = setTimeout(refresh, 3000);
 }
 async function refresh() {
   clearTimeout(timer);
-  if (document.hidden) return;
+  if (document.hidden || $('overview-view').hidden) return;
   if (busy) { queued = true; return; }
   busy = true;
   const token = generation;
@@ -201,6 +201,11 @@ function openDetail(id) {
 }
 function closeDetail() { dialog.close(); }
 dialog.addEventListener('close', () => {
+  if (dialog.dataset.source === 'interactions') {
+    delete dialog.dataset.source;
+    document.querySelector('.audit-link')?.focus();
+    return;
+  }
   const id = selected;
   selected = null;
   detailSnapshot = null;
@@ -242,5 +247,12 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) clearTimeout(timer);
   else refresh();
 });
+document.addEventListener('console-view', () => {
+  generation += 1;
+  controller?.abort();
+  clearTimeout(timer);
+  if (!$('overview-view').hidden) refresh();
+});
+document.addEventListener('interaction-complete', refresh);
 chips();
 refresh();

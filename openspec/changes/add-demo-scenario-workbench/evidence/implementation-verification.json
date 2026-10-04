@@ -1,0 +1,54 @@
+{
+  "date": "2026-10-04",
+  "backend": {
+    "command": "poetry run pytest tests/unit tests/integration -q",
+    "status": "PASS",
+    "passed": 1606,
+    "seconds": 47.36
+  },
+  "browser": {
+    "command": "PLAYWRIGHT_BROWSERS_PATH=/tmp/workbench-playwright poetry run pytest tests/browser --browser chromium -q",
+    "status": "PASS",
+    "passed": 5,
+    "seconds": 24.86,
+    "retained_overview_journeys": 2,
+    "new_workbench_journeys": 3
+  },
+  "checks": [
+    {
+      "command": "poetry run ruff check app tests",
+      "status": "PASS"
+    },
+    {
+      "command": "poetry run ruff format --check app tests",
+      "status": "PASS"
+    },
+    {
+      "command": "node --check app/dashboard/api.js",
+      "status": "PASS"
+    },
+    {
+      "command": "node --check app/dashboard/dashboard.js",
+      "status": "PASS"
+    },
+    {
+      "command": "node --check app/dashboard/detail.js",
+      "status": "PASS"
+    },
+    {
+      "command": "node --check app/dashboard/workbench.js",
+      "status": "PASS"
+    },
+    {
+      "command": "openspec validate add-demo-scenario-workbench --strict",
+      "status": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS"
+    }
+  ],
+  "review": "PASS: correctness and security",
+  "live_acceptance": "INCOMPLETE: see live-rehearsal.json; default evaluator absent",
+  "complete": false
+}

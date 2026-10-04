@@ -1451,3 +1451,63 @@ correctness and security reviews PASS; independent security ran all 68 focused
 tests. Live installed-model semantic outcomes failed closed and remain pending
 acceptance. No core/reporting schema changes, archive or push.
 Commit subject: test(demo): verify governed interaction boundaries.
+
+## 2026-10-04 — workbench console and integrated deterministic verification
+
+Implemented the light shared operator console, preserved overview behavior and
+added Interactions with immutable scenario selection, exact-text composer, scalar
+counter, public echo/model selector, actual policy/control metadata and transient
+results. Observed pipeline/detail derives from the response and UUID-correlated
+safe reporting, with no invented stage progress, retries or completion claims.
+One shared run lock survives view navigation; abandoned late results cannot refill
+cleared drafts/output. Matching audit detail closes back to its keyboard trigger.
+
+Three new essential browser journeys plus both retained overview journeys PASS
+(24.92 seconds). An existing narrow-screen assertion first reproduced overflow
+from an absolutely positioned screen-reader table label; anchoring the scrolling
+table container fixed it without hiding the assertion. Screenshots inspected at
+1440px/390px: /tmp/workbench-desktop.png, /tmp/workbench-mobile.png and overview
+screenshots. Body text is 14px; input/select and form action controls are 16px;
+neutral/light surfaces, labelled colors and visible focus meet the design direction.
+
+Integrated deterministic checks: 1606 unit/integration PASS (47.36 seconds),
+Ruff check PASS, Ruff format check PASS (60 files), all four dashboard JS syntax
+checks PASS, strict workbench OpenSpec PASS and git diff --check PASS. Browser
+assets were downloaded only into /tmp/workbench-playwright after the sandbox
+blocked network; no local development environment configuration was committed.
+The approved OpenAPI alternative is explicitly enumerated in the retained full
+foundation-schema comparison. No ordinary response schema assertion was removed.
+
+Architecture/reporting/demo documentation now describes actual implemented
+behavior, while challenge coverage status remains unchanged pending final
+acceptance. Fresh independent implementation reviews completed with PASS as recorded below. Live semantic acceptance remains FAIL on the installed 0.5b model and
+NOT RUN with absent default 3b model; invalid classifier values fail closed.
+Provisioning permission was requested separately; no new model has been downloaded.
+
+## 2026-10-04 — workbench final regression fixes and independent reviews
+
+Fresh correctness review initially returned FAIL for active-tab result loss and stale
+pending status after leaving/reopening during a POST. Each browser regression
+reproduced FAIL before its fix. Same-view navigation now retains pending/completed
+results; abandoned output stays cleared and settlement provides truthful guidance
+to recorded overview evidence. Custom runs clear obsolete scenario expectations.
+
+Final browser verification: **5 PASS**, 24.86 seconds, including both retained
+overview journeys. Final Ruff check/format, JavaScript syntax, strict OpenSpec and
+whitespace checks PASS. Backend remains **1606 PASS**; no backend changes followed
+that integrated run. Fresh nonimplementing reviewers: `/root/workbench_correctness`
+**PASS** (also executed actual-script navigation checks) and
+`/root/revised_plan_security` **PASS** (independently verified 68 focused backend
+tests). See change evidence/implementation-review.md and
+evidence/implementation-verification.json.
+
+Groups 1–3 are verified and reviewed; exactly one commit per group follows.
+Task 4.3 is complete. Tasks 4.2/4.4 remain incomplete: live semantic evaluation
+failed closed with installed qwen2.5:0.5b; default qwen2.5:3b is absent and
+provisioning permission remains pending. No model downloaded, challenge coverage
+status changed, archive, current-spec sync or push. The overall change remains open.
+
+Task-group commits: `e88300e feat(demo): add immutable scenarios and startup profiles`;
+`a92d5e5 test(demo): verify governed interaction boundaries`.
+Console group commit subject: `feat(dashboard): add interaction workspace and operator console`.
+The incomplete live/acceptance group is not committed as complete.
