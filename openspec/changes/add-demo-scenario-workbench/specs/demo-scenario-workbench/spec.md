@@ -2,9 +2,61 @@
 
 ## Purpose
 
-Provide a curated interactive challenge console that exercises actual policy-governed local generation and semantic security while explaining observed content-free evidence.
+Provide an operator workspace for predefined scenarios and spontaneous text interactions that exercises actual policy-governed local targets while explaining observed content-free evidence.
 
 ## ADDED Requirements
+
+### Requirement: Readable shared operator console
+The dashboard SHALL use a light neutral operator interface with compact navigation, readable tables and labelled status colors. Interactions SHALL contain a scenario list, custom composer and result area; overview SHALL preserve its read-only metrics, filters, polling and safe event detail. The overview MUST remain usable with Demo disabled or no model runtime.
+
+#### Scenario: Desktop and narrow keyboard use
+- **WHEN** an operator uses the dashboard at 1440px or 390px viewport width by keyboard
+- **THEN** navigation, scenario selection, labelled textarea/target controls, Run buttons, filters and event detail remain usable with visible focus, readable contrast and no body-level horizontal overflow; interaction sections stack on narrow screens
+
+#### Scenario: Disabled Demo
+- **WHEN** Demo is disabled
+- **THEN** the restyled read-only overview remains available, with no Interactions execution surface or target calls
+
+### Requirement: Single custom text interaction
+Enabled Interactions SHALL provide a multiline composer, Unicode scalar count and registered public target selector. Custom execution MUST use the existing target_id/content request and the actual application policy, not a scenario profile. No request SHALL select a model, policy, endpoint, fault or semantic toggle. Input MUST retain exact textarea text without trimming or truncation.
+
+#### Scenario: Echo and local model selection
+- **WHEN** the operator submits valid custom text to Local echo or Local model
+- **THEN** one ordinary interaction runs through central evaluation, redaction, required audit and eligible dispatch; the result names the selected target and returned UUID
+
+#### Scenario: Scalar bounds and whitespace
+- **WHEN** custom text is nonempty whitespace, includes non-BMP characters, or reaches the 16,384 Unicode scalar limit
+- **THEN** client validation follows the server scalar contract, preserves exact submitted text and accepts within-bound scalar strings; empty, over-limit and lone-surrogate input cannot be submitted
+
+#### Scenario: Target unavailable
+- **WHEN** the selected configured target fails at execution
+- **THEN** the workspace displays the sanitized actual failure and available audited decision without switching targets or retrying
+
+### Requirement: Truthful custom configuration
+The workspace SHALL display startup-bound application policy identity, enabled/disabled control IDs and registered public target/model identities from safe metadata. It MUST distinguish this configuration from a selected scenario's profile and from runtime availability. Failed metadata reads MUST disable submission and show unavailable rather than invented control states.
+
+#### Scenario: Semantic baseline and echo
+- **WHEN** the application baseline disables semantic inspection while semantic scenarios are enabled
+- **THEN** custom input still reports semantic disabled and uses the baseline service; Local echo needs no model runtime under that policy
+
+#### Scenario: Enabled application semantics
+- **WHEN** the application's startup policy enables semantic inspection and its evaluator is unavailable
+- **THEN** custom execution, including Local echo, fails closed as an operational failure without fabricating BLOCK or disabling the control
+
+#### Scenario: Metadata read failure
+- **WHEN** workspace metadata cannot be read
+- **THEN** Run is disabled and configured controls/targets are unavailable; history is not used to infer current configuration
+
+### Requirement: Transient custom draft and echo result
+Custom drafts and immediate results SHALL stay in current-page memory and render as text. They MUST NOT enter browser storage, URLs, reporting/history, application logs or metadata. Leaving Interactions SHALL clear draft/output; a new run SHALL clear prior output. Echo result SHALL be labelled approved input returned by Local echo; generated result SHALL be labelled uninspected model response.
+
+#### Scenario: Sensitive HTML-like input or output
+- **WHEN** custom text, echo or model output contains sensitive or HTML-like canaries
+- **THEN** only the current composer and immediate result may display the corresponding text, no HTML executes and reporting/catalog/workspace/history/logs/storage contain none of it
+
+#### Scenario: Navigation during execution
+- **WHEN** an operator leaves and returns to Interactions while a POST remains pending
+- **THEN** draft/output are cleared, late results cannot refill the abandoned view and a second run stays disabled until the pending request settles; navigation does not claim server cancellation
 
 ### Requirement: Server-owned synthetic catalog
 An explicitly enabled Demo view SHALL expose a fixed server-owned scenario catalog with safe titles/descriptions, expected outcomes, prerequisites and simulation labels. Content, target and execution profile MUST be resolved on the server. Catalog/reporting APIs MUST NOT return prompts, transformed content, generated output, semantic raw responses/scores or configuration endpoints.
@@ -85,7 +137,7 @@ The Demo SHALL show input, deterministic controls, semantic attempt, findings, c
 - **THEN** immediate outcome and historical unknown evidence are shown separately and generation is not retried
 
 ### Requirement: Transient result and deterministic verification
-Successful generated text SHALL be delivered only via the existing interaction result and displayed transiently as uninspected plain text. It MUST NOT enter reporting/catalog APIs, historical detail, logs or browser storage. Required automated tests SHALL use deterministic doubles without Ollama; real evaluator/generation SHALL be exercised separately for live rehearsal.
+Successful target text SHALL be delivered only via the existing interaction result and displayed transiently as plain text with echo/model labels. It MUST NOT enter reporting/catalog/workspace APIs, historical detail, logs or browser storage. Required automated tests SHALL use deterministic doubles without Ollama; real evaluator/generation SHALL be exercised separately for live rehearsal.
 
 #### Scenario: HTML-like output and privacy
 - **WHEN** an allowed interaction returns sensitive or HTML-like generated text
@@ -96,8 +148,12 @@ Successful generated text SHALL be delivered only via the existing interaction r
 - **THEN** all catalog, policy, redaction, audit-order, zero-call, semantic-category and sanitized failure assertions run deterministically
 
 ### Requirement: Predictable single-run controls
-The Demo SHALL allow one active run per panel, show waiting and actual measured completion states, refresh matching reporting after completion and never automatically retry execution. A disconnected request MUST be labelled outcome unknown rather than assumed failed or safely cancelled.
+The workspace SHALL allow one active run across custom and scenario actions, show waiting and actual measured completion states, refresh matching reporting after completion and never automatically retry execution. A disconnected request MUST be labelled outcome unknown rather than assumed failed or safely cancelled.
 
 #### Scenario: Double click or network interruption
 - **WHEN** an operator double-clicks Run or connectivity is lost after submission
 - **THEN** the panel issues one POST, avoids retry and explains unknown outcome without claiming daemon cancellation
+
+#### Scenario: Switching execution modes
+- **WHEN** a custom interaction is running and the operator attempts Run scenario, or vice versa
+- **THEN** one shared run lock prevents a second POST and each outcome remains associated with its own submitted target/profile and UUID

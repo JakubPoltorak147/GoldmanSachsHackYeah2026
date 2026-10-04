@@ -2,6 +2,28 @@
 
 ## ADDED Requirements
 
+### Requirement: Safe configured workspace metadata
+When Demo is enabled, GET /v1/demo/workspace SHALL return only version, application policy digest, control IDs/enablement and registered public target/model identities. It MUST derive from startup bindings without runtime calls or readiness claims. Workspace/catalog GETs SHALL reject queries and return fixed no-store errors; disabled Demo SHALL return 404/not_found.
+
+#### Scenario: Frozen safe metadata
+- **WHEN** enabled Demo receives a workspace GET
+- **THEN** the closed versioned response describes the ordinary interaction service, excludes internal targets, prompts/output/scores/endpoints/paths/raw policy and performs no model calls or history writes
+
+#### Scenario: Invalid metadata access
+- **WHEN** Demo metadata receives unknown/duplicate query parameters, an unsupported method, an unavailable service or a noncanonical trailing-slash path
+- **THEN** it returns respectively fixed 422/invalid_request, 405/method_not_allowed, 503/service_unavailable or 404/not_found with Cache-Control no-store, without reflecting supplied values or redirecting
+
+### Requirement: Same-origin browser execution
+Scenario requests SHALL require one valid same-origin Origin. Ordinary requests with Origin SHALL require the same validation in either Demo mode; ordinary requests without Origin MUST remain supported. Foreign, null, malformed or duplicate Origin MUST produce fixed 422/invalid_request before evaluation. No browser field SHALL select policy/model/runtime or fault behavior.
+
+#### Scenario: Compatible ordinary API client
+- **WHEN** an ordinary client supplies no Origin or exactly one valid same-origin Origin with valid target/content
+- **THEN** the configured application service handles the exact content under its bound policy with existing response/status semantics
+
+#### Scenario: Rejected browser origins
+- **WHEN** either request variant includes foreign, null, malformed or duplicate Origin, or a scenario has no Origin
+- **THEN** fixed sanitized 422/invalid_request occurs with zero control/evaluator/target calls and no service audit event
+
 ### Requirement: Opt-in server-owned scenario interaction variant
 When local Demo is explicitly enabled, the interaction endpoint SHALL additionally accept an exclusive scenario_id-only request selecting a fixed server-owned catalog entry. It SHALL retain existing outcome/error envelopes and generate the UUID on the server. Ordinary target/content requests MUST remain compatible. Disabled, unknown, mixed or extra-field scenario requests MUST fail sanitized validation before evaluation.
 
@@ -14,7 +36,7 @@ When local Demo is explicitly enabled, the interaction endpoint SHALL additional
 - **THEN** fixed 422 invalid_request reflects no submitted values and makes zero control/evaluator/target calls
 
 #### Scenario: Original request compatibility
-- **WHEN** ordinary explicit target/content requests produce ALLOW, REDACT, BLOCK, validation/evaluation/audit/target failures in either demo mode
+- **WHEN** ordinary explicit target/content requests without Origin or with valid same-origin Origin produce ALLOW, REDACT, BLOCK, validation/evaluation/audit/target failures in either demo mode
 - **THEN** existing validation semantics, target selection, UUIDs, status codes, result/null omission and sanitized error envelopes remain unchanged
 
 ### Requirement: Retained demo profile and shared required audit gate
@@ -31,7 +53,7 @@ Scenario execution SHALL retain immutable server-selected policy/control/target 
 ## MODIFIED Requirements
 
 ### Requirement: Validated text interaction
-The gateway SHALL accept a text interaction for either explicit public target `local-echo` or `local-ollama`, assign its identifier on the server, and reject invalid ordinary text requests without forwarding them. The separately specified opt-in server-owned scenario variant is also permitted when Demo is enabled.
+The gateway SHALL accept a text interaction for either explicit public target `local-echo` or `local-ollama`, assign its identifier on the server, and reject invalid ordinary text requests without forwarding them. The separately specified opt-in server-owned scenario variant is permitted when Demo is enabled. Both variants SHALL obey the specified browser-origin boundary.
 
 #### Scenario: Valid request
 - **WHEN** a caller submits a valid nonempty text string of at most 16,384 characters for either explicit public target
@@ -66,7 +88,7 @@ The gateway SHALL accept a text interaction for either explicit public target `l
 - **THEN** the gateway accepts it under the same text and identity validation rules as `local-echo`
 
 ### Requirement: Preserved public foundation behavior
-The public gateway SHALL accept the explicit public targets `local-echo` and `local-ollama`, preserving current ordinary target/content text, identity, response, and error behavior. The opt-in scenario_id-only variant is a separate intentional request-shape extension; it uses the same outcome/error envelopes. Internal registry expansion MUST NOT expose any other public destination. Existing email detection, local echo behavior and wire schemas SHALL remain supported, with the intentional public target selector expansion and separately specified opt-in scenario request extension. The historical text-result schema name SHALL remain compatible. Historical email-only policies and their digest SHALL remain supported with an explicitly supplied email-only registry; expanded default composition requires explicit policy migration and legitimately changes the default digest.
+The public gateway SHALL accept the explicit public targets `local-echo` and `local-ollama`, preserving current ordinary target/content text, identity, response, and error behavior for originless and valid same-origin clients. Browser-origin rejection is an intentional boundary tightening. The opt-in scenario_id-only variant is a separate intentional request-shape extension; it uses the same outcome/error envelopes. Internal registry expansion MUST NOT expose any other public destination. Existing email detection, local echo behavior and wire schemas SHALL remain supported, with the intentional public target selector expansion and separately specified opt-in scenario request extension. The historical text-result schema name SHALL remain compatible. Historical email-only policies and their digest SHALL remain supported with an explicitly supplied email-only registry; expanded default composition requires explicit policy migration and legitimately changes the default digest.
 
 #### Scenario: Internal registration does not expose a target
 - **WHEN** a target other than the two explicit public IDs is registered internally and a caller requests it through HTTP
@@ -79,6 +101,10 @@ The public gateway SHALL accept the explicit public targets `local-echo` and `lo
 #### Scenario: Input and identity compatibility
 - **WHEN** existing valid or invalid request cases exercise exact text, 16,384-character bounds, Unicode scalar validation, strict types, extra fields, malformed JSON, unsupported targets, or asserted identities
 - **THEN** their acceptance/rejection and sanitized responses remain unchanged and accepted interactions retain server-generated IDs
+
+#### Scenario: Intentional browser boundary tightening
+- **WHEN** an otherwise valid ordinary text request has a foreign, null, malformed or duplicate Origin
+- **THEN** it is rejected with sanitized 422 before service evaluation rather than retaining formerly unrestricted browser-origin acceptance
 
 #### Scenario: Email-only compatibility registry
 - **WHEN** recorded foundation policies and wire fixtures run with an explicit unchanged email-only registration

@@ -1385,3 +1385,37 @@ and [review/acceptance record](../openspec/changes/add-interactive-security-dash
 Dashboard MVP implementation is complete with no remaining blockers. Exactly one
 Conventional Commit is made per approved task group after passing verification
 and reviews. Workbench remains planned only; no archive, current-spec sync or push.
+
+## 2026-10-04 — workbench planning revised for custom input and console design
+
+The user requested the first OpenSpec exploration stage for runnable predefined
+use cases, custom interaction input and a less generic dashboard appearance,
+then replied “Do it” to the recommendation to revise the existing workbench
+planning artifacts before apply. This instruction authorizes planning changes,
+not implementation. Revised proposal, design, both existing delta specs and
+tasks in `add-demo-scenario-workbench`; no duplicate change or execution plan.
+
+Scope now includes a single-interaction composer using the ordinary application
+policy, Local echo/Local model selection, safe startup controls/target metadata,
+the existing eleven immutable scenarios, a light operator console across the
+shared shell/overview, labelled transient echo/model results and explicit
+same-origin browser validation with originless API compatibility. Tasks specify
+scalar-boundary, privacy, profile isolation, navigation-race and adversarial
+checks, retained overview journeys and separate required live-model rehearsal.
+
+Read challenge summary/coverage and original `docs/reference/ai-control-layer.pdf`
+during exploration; original pages 3–4 support interactive dashboard and ad-hoc
+evaluation. No challenge-coverage status changed because implementation is
+pending. No application, current-spec, architecture or environment files changed.
+
+Validation: `openspec validate add-demo-scenario-workbench --strict` PASS;
+`openspec validate --all --strict` 12 PASS, 0 FAIL; `git diff --check` PASS.
+Application tests/live rehearsal NOT RUN for this planning-only revision.
+Fresh independent planning reviews: `/root/revised_plan_correctness` PASS and
+`/root/revised_plan_security` PASS. Compatibility wording was clarified and
+verified; no blocking findings remain. Detailed scope and evidence:
+[revised planning review](../openspec/changes/add-demo-scenario-workbench/evidence/planning-review.md).
+
+Revised scope is ready for explicit user approval. All implementation tasks remain
+unchecked, approval remains NOT GRANTED, and implementation/live/review acceptance
+gates remain outstanding. No apply, archive, current-spec sync or push occurred.
