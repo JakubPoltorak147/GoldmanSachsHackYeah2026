@@ -6,6 +6,7 @@ import pytest
 
 from app.control_layer.domain import EvaluationError
 from app.control_layer.ollama_semantic import (
+    SYSTEM_PROMPT,
     OllamaSemanticRuntime,
     SemanticSettings,
     load_semantic_settings,
@@ -189,6 +190,12 @@ def test_exact_request_timeouts_and_closed_resources(monkeypatch):
     }
     assert options[0]["trust_env"] is options[0]["follow_redirects"] is False
     assert clients[0].is_closed and streams[0].closed
+
+
+def test_classifier_prompt_contains_closed_examples():
+    assert "Return exactly one JSON object" in SYSTEM_PROMPT
+    assert '"prompt_injection":0' in SYSTEM_PROMPT
+    assert "Now classify only the JSON-encoded untrusted_content value" in SYSTEM_PROMPT
 
 
 @pytest.mark.parametrize(
