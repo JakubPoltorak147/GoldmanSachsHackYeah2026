@@ -1,0 +1,102 @@
+{
+  "change": "add-interactive-security-dashboard-mvp",
+  "recorded_at": "2026-10-04T02:42:25.951135+00:00",
+  "checks": [
+    {
+      "command": "poetry run pytest tests/unit/test_reporting.py tests/integration/test_reporting_http.py tests/integration/test_dashboard_reporting.py -q",
+      "result": "PASS",
+      "passed": 150,
+      "duration_seconds": 12.74,
+      "phase": "initial focused reporting checks"
+    },
+    {
+      "command": "poetry run pytest tests/integration/test_extensions.py tests/integration/test_dashboard_reporting.py -q",
+      "result": "PASS",
+      "passed": 72,
+      "duration_seconds": 9.41,
+      "phase": "affected compatibility checks"
+    },
+    {
+      "command": "poetry run pytest tests/unit tests/integration -q",
+      "result": "PASS",
+      "passed": 1532,
+      "duration_seconds": 38.73
+    },
+    {
+      "command": "PLAYWRIGHT_BROWSERS_PATH=/tmp/dashboard-playwright poetry run pytest tests/browser/test_security_dashboard.py --browser chromium -x -vv -o faulthandler_timeout=30",
+      "result": "PASS",
+      "passed": 2,
+      "duration_seconds": 19.27
+    },
+    {
+      "command": "poetry run ruff check app tests",
+      "result": "PASS"
+    },
+    {
+      "command": "poetry run ruff format --check app tests",
+      "result": "PASS",
+      "formatted_files": 53
+    },
+    {
+      "command": "node --check app/dashboard/dashboard.js; node --check app/dashboard/detail.js; node --check app/dashboard/api.js",
+      "result": "PASS"
+    },
+    {
+      "command": "openspec validate add-interactive-security-dashboard-mvp --strict",
+      "result": "PASS"
+    },
+    {
+      "command": "git diff --check",
+      "result": "PASS"
+    },
+    {
+      "command": "poetry run pytest tests/integration/test_extensions.py tests/integration/test_dashboard_reporting.py -q",
+      "result": "PASS",
+      "passed": 78,
+      "duration_seconds": 10.57,
+      "phase": "final verification after review fixes"
+    },
+    {
+      "command": "poetry run pytest tests/unit tests/integration -q",
+      "result": "PASS",
+      "passed": 1538,
+      "duration_seconds": 36.55,
+      "phase": "final verification after review fixes"
+    },
+    {
+      "command": "PLAYWRIGHT_BROWSERS_PATH=/tmp/dashboard-playwright poetry run pytest tests/browser/test_security_dashboard.py --browser chromium -x -q",
+      "result": "PASS",
+      "passed": 2,
+      "duration_seconds": 19.67,
+      "phase": "final verification after review fixes"
+    },
+    {
+      "command": "poetry check --lock",
+      "result": "PASS"
+    }
+  ],
+  "manual": {
+    "result": "PASS",
+    "checks": [
+      "desktop 1280px rendered screenshot",
+      "mobile 390px overview and safe detail",
+      "documented loopback factory startup, summary curl and shutdown on isolated temporary database"
+    ]
+  },
+  "limitations": [
+    "existing Starlette TestClient deprecation warning",
+    "Ollama not needed or used for this read-only change"
+  ],
+  "scope": "dashboard MVP only; no workbench, archive, current spec sync or push",
+  "independent_implementation_reviews": {
+    "correctness": "PASS",
+    "security": "PASS",
+    "evidence": "implementation-review.md",
+    "security_independent_reporting_tests": 55
+  },
+  "regressions": [
+    "Reporting trailing-slash query reflection: failing 307 reproduced before reporting-only fixed 404/no-store guard; six GET/POST cases now PASS; interaction redirects unchanged.",
+    "Historical target missing from filter: failing browser selector assertion reproduced before discovering targets from accepted older pages; pagination/filter journey now PASS."
+  ],
+  "acceptance_criteria": "All seven design criteria PASS; see implementation-review.md"
+}

@@ -1347,6 +1347,41 @@ and no injected output execution. Temporary screenshots:
 launch and curl summary example were exercised against an isolated `/tmp` store;
 startup, read-only empty history and shutdown all succeeded without Ollama.
 
-Final corrected implementation verification and both fresh independent reviews
-PASS; detailed final review/acceptance evidence is recorded with group 3. No workbench,
+Implementation verification is passing; fresh independent implementation reviews
+are pending. Task-group commits remain deferred until reviews pass. No workbench,
 archive, current-spec sync or push has occurred.
+
+## 2026-10-04 — dashboard MVP final reviews and acceptance
+
+Initial independent reviews returned FAIL with two confirmed findings. The first
+was omission of historical targets discovered on older pages from the target
+filter. The existing first browser journey reproduced the missing option before
+`targets(page)` was added after generation validation. It now verifies historical
+discovery after 50 newer rows and successful filtering.
+
+The second was FastAPI's automatic reporting trailing-slash redirect reflecting
+secret query text in Location without no-store. A regression first reproduced
+307. A reporting-only pre-routing guard now returns fixed 404/not_found/no-store.
+Six GET/POST cases verify no Location/reflection/calls/mutations; existing
+interaction redirects remain compatible. No security core or scope was changed.
+
+Final verification after fixes:
+
+- Affected extension/reporting integration checks: **78 PASS**, 10.57 seconds.
+- `poetry run pytest tests/unit tests/integration -q`: **1538 PASS**, 36.55 seconds.
+- `PLAYWRIGHT_BROWSERS_PATH=/tmp/dashboard-playwright poetry run pytest tests/browser/test_security_dashboard.py --browser chromium -x -q`: **2 PASS**, 19.67 seconds.
+- Ruff check/format (53 files), all three JavaScript syntax checks, strict OpenSpec,
+  `poetry check --lock` and `git diff --check`: **PASS**.
+
+Fresh independent corrected-implementation reviews: correctness/specification
+(`/root/dashboard_correctness_review`) **PASS**; security/bypass
+(`/root/dashboard_security_review`) **PASS**. Security reviewer independently
+verified all **55 reporting integration tests**. A temporary account usage-limit
+interruption was resolved by retrying the required review; no approval was inferred.
+All seven design acceptance criteria pass. Evidence:
+[implementation checks](../openspec/changes/add-interactive-security-dashboard-mvp/evidence/implementation-verification.json)
+and [review/acceptance record](../openspec/changes/add-interactive-security-dashboard-mvp/evidence/implementation-review.md).
+
+Dashboard MVP implementation is complete with no remaining blockers. Exactly one
+Conventional Commit is made per approved task group after passing verification
+and reviews. Workbench remains planned only; no archive, current-spec sync or push.
