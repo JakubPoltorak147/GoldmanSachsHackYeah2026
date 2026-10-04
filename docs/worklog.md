@@ -1121,3 +1121,104 @@ does not block this finalization commit.
 (resolve its hash from the commit containing this entry). Includes synced current
 specs, verified readable archives, prior staged local-model finalization and this
 evidence. No implementation changes, push or new OpenSpec change.
+
+## 2026-10-04 — add-semantic-security-control apply verification
+
+Explicit apply approval: user instructed “Explicitly APPROVE and APPLY
+`add-semantic-security-control`” with strict approved-artifact scope and no archive.
+Primary agent owns implementation and serialized integration. Dedicated local
+classifier/control, frozen startup threshold/model binding, disabled baseline and
+complete demo policy, semantic attempt timing and exact transactional reporting
+v1→v2 migration are implemented. Central policy remains the enforcement authority;
+deterministic controls and target generation behavior are unchanged.
+
+Verification evidence:
+
+- Focused evaluator/parser/target/policy/binding/registry suite: **430 PASS**.
+- Focused service/reporting/semantic/extension/API suite: **223 PASS**.
+- `poetry run pytest tests/unit tests/integration -q`: **1473 PASS**, one existing
+  Starlette TestClient deprecation warning, 32.03 seconds. Fake clients and a local
+  fake HTTP runtime suffice; no real Ollama/commercial dependency.
+- `poetry run ruff check .`: **PASS**, with pre-existing archive traversal warning.
+- `poetry run ruff format --check .`: **ENVIRONMENT BLOCKER**, exit 2. The existing
+  archive directory entry `openspec/changes/archive/2026-10-03-add-local-model-target`
+  appears in scandir but stat returns ENOENT. The error remains outside the sandbox.
+  No formatting violations: `poetry run ruff format --check . --exclude
+  openspec/changes/archive`: **PASS**, all 50 Python files already formatted.
+  The inaccessible archive and local environment configuration were not modified.
+- `openspec validate add-semantic-security-control --strict`: **PASS**.
+- `git diff --check`: **PASS**.
+- Optional real semantic Ollama smoke: **NOT RUN**; no install/download requested.
+
+Initial sandbox HTTP runs hung inside TestClient/AnyIO thread wakeup and were
+interrupted. Focused/full HTTP and fake loopback verification was rerun outside the
+sandbox with approved execution. The first full run found one legacy fixture
+expecting only six disabled-control statuses; corrected to include the explicit
+semantic entry, then reran the full suite above.
+
+Independent reviews: pending fresh correctness/specification and security/bypass
+review. Completion gate remains open while required exact formatting command is
+blocked; no archive requested or performed.
+
+Fresh independent review evidence:
+
+- `/root/correctness_review`: **PASS**, no blocking correctness/specification
+  findings. Reviewed final startup binding, central decisions, failed-attempt
+  timing/projection and transactional history migration. Independently ran
+  **292 focused unit tests PASS** and `git diff --check` PASS. Nonblocking README
+  migration-count wording was corrected from five to six additional controls.
+- `/root/security_review`: **PASS**, no concrete security/bypass findings.
+  Reviewed closed scores and injected runtimes, fail-closed mixed-control paths,
+  loopback/no-retry transport, immutable metadata, privacy, required audit gates,
+  concurrency and the additive migration. Independently ran **242 semantic tests
+  PASS** (16 HTTP selections deselected) and **82 reporting tests PASS**.
+- Final affected verification after extending historical preservation fixtures to
+  include ALLOW/REDACT/BLOCK, operational events and succeeded/failed/unknown/
+  not_invoked history: **130 reporting + semantic tests PASS**, 8.65 seconds.
+
+No confirmed review findings required a code fix or regression cycle. Both final
+review responsibilities PASS. OpenSpec tracks **14/15 tasks complete**; task 4.1
+remains unchecked because its exact format command fails on the pre-existing
+inaccessible archive entry. The full required verification gate therefore remains
+open: this change is implemented and reviewed but is not declared complete, not
+archived, and task-group commits are deferred until all required checks pass.
+
+## 2026-10-04 — semantic completion blocker resolved
+
+The user authorized investigation and minimal repository-local filesystem repair
+of `openspec/changes/archive/2026-10-03-add-local-model-target`, preserving archived
+content/history and leaving the passing semantic implementation unchanged.
+
+Root cause: inconsistent case-dependent pathname lookup on the case-insensitive
+9p/DrvFS workspace mount (`cache=5`). Directory enumeration reported the lowercase
+name and inode 6473924464762285, but lstat/stat/open/listdir for that exact spelling
+returned ENOENT. A differently cased spelling resolved the same directory and
+revealed its contents. This was a stale lookup/directory-entry state, rather than
+permissions or a dangling symlink: the real directory was mode 0755, uid/gid
+1000/1000 (`node:node`), with accessible 0755 parent directories and no symlink.
+
+Minimal fix: rename the existing directory through its accessible case alias to a
+unique temporary sibling, then rename it back to the original lowercase basename.
+No exclusion, ignore rule, chmod/chown, deletion or archived-content rewrite was
+used. Before/after manifests verified identical contents, modes, ownership and
+symlink state for all 12 entries within that directory. SHA-256 checks also verified
+all 53 tracked archived files remained unchanged. The original directory's
+pre-existing untracked contents are now visible to Git and remain untracked; they
+are not part of the semantic change or its commits.
+
+Final exact verification, after the repair:
+
+- `poetry run ruff format --check .`: **PASS**, exit 0; 50 files already formatted,
+  with no exclusion or traversal error.
+- `poetry run ruff check .`: **PASS**, exit 0; no traversal warning.
+- `poetry run pytest tests/unit tests/integration`: **1473 PASS**, 28.90 seconds;
+  one existing Starlette TestClient deprecation warning.
+- `openspec validate add-semantic-security-control --strict`: **PASS**.
+- `git diff --check`: **PASS**.
+
+The preceding fresh correctness/specification and security/bypass reviews remain
+**PASS**: this repair changed no semantic implementation, tests or enforcement
+configuration. All completion gates now PASS, task 4.1 is complete and OpenSpec
+tracks 15/15 tasks complete. No blocker remains. No archive or push is authorized
+or performed. The previously deferred task-group commits may now be created under
+the existing AGENTS.md/task instructions.
