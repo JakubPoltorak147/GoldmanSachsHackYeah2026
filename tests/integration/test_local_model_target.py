@@ -16,7 +16,11 @@ from app.control_layer.api import create_app
 from app.control_layer.audit import JsonLinesAuditSink
 from app.control_layer.composition import default_controls
 from app.control_layer.domain import Interaction, TargetError
-from app.control_layer.ollama_target import OllamaSettings, OllamaTextTarget
+from app.control_layer.ollama_target import (
+    TARGET_SYSTEM_PROMPT,
+    OllamaSettings,
+    OllamaTextTarget,
+)
 from app.control_layer.registry import ControlRegistration, ControlRegistry
 from app.control_layer.targets import (
     LocalEchoTarget,
@@ -118,7 +122,12 @@ def test_real_client_exact_request_and_uninspected_output(runtime, monkeypatch):
         call(adapter(runtime), " exact 😀 ").content == "RAW_OUTPUT alice@example.com"
     )
     assert runtime.calls == [
-        {"model": "qwen2.5:0.5b", "prompt": " exact 😀 ", "stream": False}
+        {
+            "model": "qwen2.5:0.5b",
+            "system": TARGET_SYSTEM_PROMPT,
+            "prompt": " exact 😀 ",
+            "stream": False,
+        }
     ]
 
 

@@ -20,6 +20,13 @@ Echo returns only centrally approved input and needs no Ollama while semantic
 inspection is disabled. `alex@example.invalid` is a safe synthetic email example
 that demonstrates REDACT. The immediate echo result is labelled explicitly.
 
+The default benign case is deliberately a drafting task: it asks the model for a
+professional meeting-change email with a subject and body. The local model target
+also supplies a fixed system instruction that treats requests as text/planning,
+helps draft emails, and never claims to have sent, scheduled, delivered, or read an
+email. The target cannot perform external actions, so the response should describe
+what was drafted rather than inventing a delivery confirmation.
+
 The flags `CONTROL_LAYER_DEMO_ENABLED` and
 `CONTROL_LAYER_DEMO_SEMANTIC_ENABLED` accept exactly `true` or `false`; both
 are false by default. Invalid values prevent startup. Omit the second flag for
