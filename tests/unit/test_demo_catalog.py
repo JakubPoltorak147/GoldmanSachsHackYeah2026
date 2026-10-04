@@ -91,6 +91,10 @@ def test_synthetic_catalog_is_bounded_immutable_and_public_projection_is_safe():
     }
     private = next(s for s in SCENARIOS if s.id == "private-key")
     assert base64.b64decode(private.content.splitlines()[1]) == bytes(range(32))
+    benign = next(s for s in SCENARIOS if s.id == "benign")
+    assert "professional email" in benign.content
+    assert "Do not claim that the email was sent" in benign.content
+    assert "does not send it" in benign.expected_explanation
 
 
 def test_semantic_prerequisites_and_simulation_labels():

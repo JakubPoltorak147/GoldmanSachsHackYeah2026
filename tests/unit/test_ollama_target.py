@@ -6,6 +6,7 @@ import pytest
 
 from app.control_layer.domain import Interaction, TargetError
 from app.control_layer.ollama_target import (
+    TARGET_SYSTEM_PROMPT,
     OllamaSettings,
     OllamaTextTarget,
     load_ollama_settings,
@@ -180,6 +181,7 @@ def test_exact_request_timeouts_and_closed_resources(monkeypatch):
     assert calls[0].method == "POST"
     assert json.loads(calls[0].content) == {
         "model": "qwen2.5:0.5b",
+        "system": TARGET_SYSTEM_PROMPT,
         "prompt": " RAW_PROMPT 😀 ",
         "stream": False,
     }
@@ -222,7 +224,12 @@ def test_invalid_response(body, caplog):
     assert str(caught.value) == "target_failed"
     assert caught.value.__cause__ is None and caught.value.__suppress_context__
     assert len(calls) == 1 and clients[0].is_closed and streams[0].closed
-    assert caplog.text == ""
+    assert "local model target failed" in caplog.text
+    assert "RAW_" not in caplog.text
+    assert any(
+        record.__dict__.get("stage") == "response_validation"
+        for record in caplog.records
+    )
 
 
 @pytest.mark.parametrize("status", [301, 302, 307, 400, 404, 429, 500])
