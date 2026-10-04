@@ -1250,3 +1250,33 @@ no active changes; `poetry run ruff check .`, exact
 `poetry run ruff format --check .` (50 files) and `git diff --check` all **PASS**.
 No test rerun was needed for this spec/documentation-only finalization; the final
 1473-test PASS and both fresh review PASS results remain the implementation evidence.
+
+## 2026-10-04 — interactive dashboard and workbench proposals
+
+The user authorized EXPLORE and exactly two narrowly separated OpenSpec changes,
+explicitly prohibiting implementation. Created proposal, focused design, two
+capability delta files and unchecked implementation tasks with acceptance criteria
+and focused tests for each:
+
+- [add-interactive-security-dashboard-mvp](../openspec/changes/add-interactive-security-dashboard-mvp/proposal.md): independently shippable FastAPI-served read-only dashboard, three typed reporting GET routes, bounded newest-first query and polling. No target invocation or enforcement changes.
+- [add-demo-scenario-workbench](../openspec/changes/add-demo-scenario-workbench/proposal.md): dependent UI/catalog extension, exclusive server-owned scenario request variant on the existing interaction API, eleven scenarios, existing real local generation/evaluation adapters and labelled isolated transport faults. Existing reporting contracts remain content-free and unchanged.
+
+Focused exploration used relevant current specs, reporting/query/test boundaries,
+interaction API/service/composition, local Ollama/semantic adapters and sample
+policies. No application code, runtime configuration or current specs changed.
+
+Both individual `openspec validate <change> --strict` checks: **PASS**.
+Both `openspec status --change <change>` checks: **4/4 planning artifacts complete**;
+implementation remains unapproved and unchecked. Fresh independent read-only
+planning correctness and security/bypass reviews: **PASS** for both changes.
+Correctness review identified and verified correction of OpenAPI compatibility
+language to permit the documented demo scenario request alternative.
+Detailed evidence: [dashboard planning review](../openspec/changes/add-interactive-security-dashboard-mvp/evidence/planning-review.md)
+and [workbench planning review](../openspec/changes/add-demo-scenario-workbench/evidence/planning-review.md).
+
+Dashboard MVP is **READY FOR APPLY APPROVAL**, with no planning blockers.
+Workbench implementation depends on passing integrated MVP; its live acceptance
+requires preprovisioned local models and successful actual-runtime rehearsal.
+No implementation tests or live-model checks were run for these planning artifacts;
+planning PASS does not satisfy implementation completion/review gates. No apply,
+archive or push is authorized or performed.
