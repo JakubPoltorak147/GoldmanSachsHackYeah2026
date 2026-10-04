@@ -24,7 +24,7 @@ and test tooling: FastAPI, Pydantic, PyYAML, Uvicorn, pytest, httpx and Ruff.
 poetry run uvicorn app.control_layer.api:create_app --factory --no-access-log
 ```
 
-The default startup policy is `config/policy.yaml`: all six controls enabled,
+The default startup policy is `config/policy.yaml`: all six deterministic controls enabled and semantic-security disabled,
 email/labelled SSN mapped to `REDACT`, credentials and known attacks to `BLOCK`. Select an administrator-owned policy file with:
 
 ```sh
@@ -73,7 +73,7 @@ any configured mapping is still validated. Audit events expose explicit enableme
 
 ## Extension contracts and compatibility
 
-`composition.py` explicitly registers the six deterministic controls and both local echo/local Ollama in production.
+`composition.py` explicitly registers the six deterministic controls, the semantic control and both local echo/local Ollama in production.
 `ControlRegistry` holds ordered, frozen `ControlRegistration` objects pairing an
 immutable `ControlDefinition` and its `FindingDefinition` catalogue with an
 evaluator. Control IDs use `[a-z][a-z0-9_-]{0,63}` and globally unique finding
@@ -186,7 +186,7 @@ git diff --check
 ```
 
 The suites use deterministic local inputs and injectable targets/sinks. No browser
-suite, dashboard, authentication, policy reload, semantic control, database,
+suite, dashboard, authentication, policy reload,
 response inspection, remote targets or additional infrastructure is implemented.
 
 Project documents: [context](docs/project-context.md),
@@ -224,10 +224,10 @@ not catalog contents: record the deployed catalog revision separately.
 
 ## Policy migration and rollback
 
-The expanded default registry requires explicit entries for all six controls. Old
+The expanded default registry requires explicit entries for all seven controls. Old
 email-only policies fail startup; no implicit disabled entries or default actions
 are added. To preserve an email-only deployment behavior, retain the email entry
-and add `enabled: false` entries for each of the five new controls. Supplied
+and add `enabled: false` entries for each of the six additional controls. Supplied
 mappings remain validated even when disabled, so attack REDACT is always invalid.
 Policy and catalog edits take effect only after restart. Rollback requires the
 baseline code **and** its matching baseline policy; an expanded policy is invalid
@@ -327,7 +327,7 @@ or truncate inference internally; the submitted prompt field remains exact.
 Generated output is untrusted and **not security-inspected**. It may repeat sensitive
 input or contain unsafe text. Input approval does not certify output safety. One
 fixed operator model is a deployment restriction; centralized model authorization,
-semantic controls, budgets and output DLP remain deferred. Durable content-free
+budgets and output DLP remain deferred. Durable content-free
 reporting is available through the typed in-process boundary. Audit evaluation
 duration excludes generation time; eligibility audit does not claim execution success.
 
@@ -367,3 +367,75 @@ See [docs/reporting.md](docs/reporting.md) for schema, query examples, identity
 provenance, timings, setup and backup requirements. No reporting HTTP routes, CLI,
 exports, output inspection or token/cost telemetry are added. Automated tests need
 no Ollama. Injected stores remain caller-owned and still use the validated gate.
+
+### Local semantic input evaluation
+
+The baseline `config/policy.yaml` explicitly disables `semantic-security`.
+Select `CONTROL_LAYER_POLICY=config/policy-semantic-demo.yaml` to enable the
+complete deterministic pack plus semantic classification at threshold 0.75.
+Custom policies using the default registry must add an explicit semantic entry.
+Enabled entries require a threshold and all three mappings:
+
+```yaml
+semantic-security:
+  enabled: true
+  threshold: 0.75
+  findings:
+    semantic.prompt_injection: BLOCK
+    semantic.instruction_override: BLOCK
+    semantic.exfiltration_intent: BLOCK
+```
+
+Change a mapping to ALLOW to observe a finding without blocking; semantic REDACT
+is unsupported. A score greater than or equal to threshold emits that category's
+fixed finding. Increasing threshold reduces sensitivity. Scores are independent
+estimated risks, not calibrated probabilities. Deterministic controls all run
+first, independently, on original input; semantic evaluation also sees original
+input before central policy resolves BLOCK > REDACT > ALLOW and redacts spans.
+An enabled evaluation failure produces `503 evaluation_failed` and zero target
+calls, even after a deterministic BLOCK finding. A disabled control makes no calls.
+
+The dedicated evaluator uses a preprovisioned trusted local model with Ollama
+cloud disabled (`OLLAMA_NO_CLOUD=1`); it never installs, downloads or probes at
+startup. Its frozen settings are independent of target-generation settings:
+
+| `CONTROL_LAYER_SEMANTIC_` suffix | Default | Bounds |
+| --- | --- | --- |
+| BASE_URL | http://127.0.0.1:11434 | literal HTTP 127.0.0.1 or [::1], port 1–65535, optional trailing slash |
+| MODEL | qwen2.5:3b | lowercase local name:tag, 1–128 characters, no cloud tag |
+| CONNECT_TIMEOUT_SECONDS | 2 | 0.1–10, also write/pool |
+| READ_TIMEOUT_SECONDS | 30 | 0.1–60, read inactivity |
+| MAX_INPUT_CHARACTERS | 16384 | 1–16384 Unicode scalars |
+| MAX_INPUT_BYTES | 65536 | 1–65536 UTF-8 bytes |
+| MAX_RESPONSE_BYTES | 8192 | 1024–65536 entire HTTP body bytes |
+| MAX_OUTPUT_CHARACTERS | 1024 | 128–4096 inner classifier JSON scalars |
+
+Settings and policy changes require restart. Numeric environment settings use
+unsigned decimal syntax. Invalid settings fail startup with
+`invalid_semantic_configuration`. Smaller input caps reject accepted gateway
+input operationally rather than truncating it. JSON escaping can expand submitted
+text to six characters per scalar inside the prompt, then escape again inside the
+HTTP request JSON; the submitted UTF-8 cap is not a serialized request-byte cap.
+
+One non-streaming request uses fixed classifier instructions, JSON-encoded
+untrusted input, a closed three-score schema, temperature 0 and num_predict 256.
+No history, tools, memory, proxies, redirects, retries or fallback are used.
+Prompt/data separation is defense in depth, not a proof against model steering.
+Timeouts bound connection/read inactivity, not total wall time or daemon
+cancellation; active trickle responses and runtime queueing can take longer.
+The separately administered daemon/model are trusted and may handle content
+outside the application's logging control. Model identity is an administrator tag,
+not artifact attestation. Real classification can have false positives/negatives.
+Target output remains uninspected.
+
+For a demo, try ordinary questions, defensive quotations, indirect overrides
+such as treating prior constraints as historical notes, and requests to reveal
+protected instructions. The fake-runtime suite verifies boundary validation and
+central enforcement; it does not establish actual learned-model accuracy:
+
+```sh
+poetry run pytest tests/unit/test_ollama_semantic.py tests/unit/test_semantic_control.py tests/integration/test_semantic_security.py
+```
+
+Semantic duration/model/status are content-free attempt evidence, separate from
+target invocation and model identity; see `docs/reporting.md`.
