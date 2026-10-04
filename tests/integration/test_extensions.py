@@ -214,12 +214,15 @@ def test_openapi_only_approved_finding_code_and_target_differences():
     baseline["components"]["schemas"]["InteractionRequest"]["properties"][
         "target_id"
     ] = target
-    # Approved dashboard addition is isolated from the unchanged interaction API.
+    # Reporting and opt-in demo GETs are isolated additions. The approved
+    # scenario alternative retains the ordinary request and response schemas.
     added_paths = set(actual["paths"]) - set(baseline["paths"])
     assert added_paths == {
         "/v1/reporting/summary",
         "/v1/reporting/events",
         "/v1/reporting/events/{interaction_id}",
+        "/v1/demo/scenarios",
+        "/v1/demo/workspace",
     }
     for path in added_paths:
         assert set(actual["paths"].pop(path)) == {"get"}
@@ -240,7 +243,25 @@ def test_openapi_only_approved_finding_code_and_target_differences():
         "SummaryResponse",
         "TimingDTO",
         "WindowDTO",
+        "ScenarioRequest",
     }
+    request_schema = actual["paths"]["/v1/interactions"]["post"]["requestBody"][
+        "content"
+    ]["application/json"]["schema"]
+    assert request_schema == {
+        "anyOf": [
+            {"$ref": "#/components/schemas/InteractionRequest"},
+            {"$ref": "#/components/schemas/ScenarioRequest"},
+        ],
+        "title": "Body",
+    }
+    scenario_schema = actual["components"]["schemas"]["ScenarioRequest"]
+    assert scenario_schema["additionalProperties"] is False
+    assert scenario_schema["required"] == ["scenario_id"]
+    assert set(scenario_schema["properties"]) == {"scenario_id"}
+    actual["paths"]["/v1/interactions"]["post"]["requestBody"]["content"][
+        "application/json"
+    ]["schema"] = {"$ref": "#/components/schemas/InteractionRequest"}
     for name in added_schemas:
         actual["components"]["schemas"].pop(name)
     assert actual == baseline

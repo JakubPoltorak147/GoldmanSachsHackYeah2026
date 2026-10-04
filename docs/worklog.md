@@ -1419,3 +1419,20 @@ verified; no blocking findings remain. Detailed scope and evidence:
 Revised scope is ready for explicit user approval. All implementation tasks remain
 unchecked, approval remains NOT GRANTED, and implementation/live/review acceptance
 gates remain outstanding. No apply, archive, current-spec sync or push occurred.
+
+## 2026-10-04 — workbench server catalog and startup profiles (group 1)
+
+Apply approval: user “Go on. I approve to apply”, revised scope at 6805e42;
+recorded in tasks.md. Integrated dashboard prerequisite has recorded PASS.
+Built eleven immutable synthetic cases, strict opt-in flags, frozen startup
+profiles and safe ordinary-policy/public-target metadata. The narrow API wiring
+and compatible OpenAPI extension are committed alongside composition because
+startup profiles and their tests require the application lifespan seam. No core,
+control, transport, policy-file or reporting-contract changes.
+
+Verification: 68 focused catalog/composition/API tests PASS; 23 retained extension
+checks PASS; integrated backend 1606 PASS, Ruff and strict OpenSpec PASS.
+Fresh final correctness and security reviews PASS; security independently ran
+68 focused tests. Full evidence will be committed with console integration.
+Live semantic acceptance remains incomplete; no download/archive/push.
+Commit subject: feat(demo): add immutable scenarios and startup profiles.
