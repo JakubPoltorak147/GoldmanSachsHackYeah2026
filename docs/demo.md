@@ -28,8 +28,10 @@ with the second flag, after provisioning a trusted local evaluator:
 CONTROL_LAYER_DEMO_ENABLED=true CONTROL_LAYER_DEMO_SEMANTIC_ENABLED=true poetry run uvicorn app.control_layer.api:create_app --factory --host 127.0.0.1 --port 8000 --no-access-log --no-proxy-headers
 ```
 
-Generation and evaluation use the existing configured local runtimes; defaults
-are `qwen2.5:0.5b` for generation and `qwen2.5:3b` for semantic evaluation.
+Generation and evaluation use the existing configured local runtimes; generation
+defaults to `qwen2.5:0.5b` and semantic evaluation defaults to `qwen2.5:3b`.
+The semantic model can be replaced with `CONTROL_LAYER_SEMANTIC_MODEL` when a
+different supported local model is available.
 `CONTROL_LAYER_OLLAMA_MODEL` and `CONTROL_LAYER_SEMANTIC_MODEL` select already
 installed local models at startup. The application does not download models,
 probe availability at startup, call a commercial service or offer runtime URLs
@@ -228,7 +230,7 @@ PY
 ```
 
 Generation and evaluation have separate bindings. Generation defaults to
-`qwen2.5:0.5b`; evaluation defaults to `qwen2.5:3b`. The semantic adapter uses
+`qwen2.5:0.5b`; evaluation defaults to `qwen2.5:3b` unless overridden. The semantic adapter uses
 the local `CONTROL_LAYER_SEMANTIC_BASE_URL` (default
 `http://127.0.0.1:11434`). Dashboard target selection cannot change these
 bindings. The adapter limits are 2-second connect, 30-second read inactivity,
@@ -255,9 +257,10 @@ actions/codes/statuses, model IDs, fixed stage labels and timings. Missing model
 are `NOT RUN`, operational failures are `FAIL`, and classifier mismatches are
 `FAIL`; do not retain raw envelopes, exceptions, input, output or scores.
 
-On 2026-10-04, metadata showed only `qwen2.5:0.5b` installed while the configured
-`qwen2.5:3b` evaluator was absent. A separate diagnostic of the installed 0.5b
-model succeeded for benign input but failed at classifier score validation for the
-synthetic prompt-injection case. This establishes a validation failure, not an
-adapter defect or accepted semantic enforcement. Provisioning a suitable evaluator
-remains an administrator prerequisite outside this change's scope.
+The earlier 2026-10-04 rehearsal recorded only `qwen2.5:0.5b` installed while
+the configured `qwen2.5:3b` evaluator was absent; the smaller model succeeded
+for benign input but failed classifier score validation for the synthetic
+prompt-injection case. With `qwen2.5:3b` provisioned, the bounded live smoke
+now returns valid findings for benign, prompt-injection, instruction-override
+and exfiltration cases. The strict parser remains fail-closed for malformed
+model output.

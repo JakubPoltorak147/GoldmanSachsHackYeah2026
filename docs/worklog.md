@@ -1622,3 +1622,17 @@ acceptance remains incomplete, so 4.2 and 4.4 stay open.
 
 The repeatable diagnosis and rehearsal guide is in docs/demo.md. Commit subject:
 docs(demo): document runtime diagnosis and live rehearsal limits.
+
+## 2026-10-04 — semantic evaluator restored
+
+The earlier live failure was reproduced as a model prerequisite/quality issue:
+`qwen2.5:0.5b` returned classifier text that failed the existing closed score
+validation for attack input. The already provisioned `qwen2.5:3b` evaluator was
+selected by the specified default and verified through the real Ollama runtime.
+A bounded smoke covering benign, prompt-injection, instruction-override and
+exfiltration inputs produced the expected finding-code results; an actual
+FastAPI interaction returned HTTP 403 with `BLOCK` and all three semantic codes,
+and its audit event recorded `semantic_status=succeeded` with model
+`qwen2.5:3b`. No parser relaxation, model download, daemon change or raw
+content/score logging was introduced. Full nineteen-case live rehearsal remains
+separate acceptance work for the active workbench change.
