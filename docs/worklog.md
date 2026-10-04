@@ -1546,3 +1546,27 @@ neither revised implementation correctness nor live semantic success.
 
 Planning group commit subject: `docs(openspec): clarify scenarios and workbench outcomes`.
 The workbench remains incomplete; no apply, archive, spec sync or push.
+
+## 2026-10-04 — expanded scenario catalog (group 5)
+
+Apply approval: user “Approve” grants the reviewed revision in commit 7c0fab3.
+Added eight immutable synthetic fixtures for nineteen total and safe catalog
+expected explanations/runtime-purpose labels. Existing core, routing, profiles,
+transports, policies and reporting/interaction contracts remain unchanged.
+All ten deterministic finding codes have prepared examples. Exact SSN and
+multiple-value redaction and credential BLOCK precedence are tested. A fixture
+initially used unsupported email punctuation; its unit assertion failed, then
+the fixture was corrected to supported syntax without modifying the detector.
+
+Focused catalog/composition/API verification: 76 PASS outside sandbox; Ruff
+check/format and git diff --check PASS. Read-only independent correctness
+/root/catalog_correctness and security /root/catalog_security PASS with no
+material findings. Security independently ran two catalog tests; its sandbox
+TestClient stall was interrupted and was not counted as PASS. The same stall
+was independently reproduced and the targeted case passed outside the sandbox.
+Operator docs now describe nineteen examples, runtime needs and detection limits.
+
+Read-only installed-model metadata confirms generation qwen2.5:0.5b available,
+configured semantic qwen2.5:3b absent. No models downloaded or daemon changed.
+This group does not satisfy live semantic acceptance.
+Commit subject: feat(demo): expand scenarios and explain catalog expectations.

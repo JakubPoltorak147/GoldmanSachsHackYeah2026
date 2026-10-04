@@ -50,8 +50,14 @@ def test_all_scenarios_observed_pipeline_and_actual_adapter_failure(running, sce
     else:
         assert payload["action"] == scenario.expected_action
         assert all(c in payload["finding_codes"] for c in scenario.expected_codes)
-    if scenario.id == "email-pii":
-        assert calls == [scenario.content.replace("alex@example.invalid", "[REDACTED]")]
+    redacted = {
+        "email-pii": "Write a short greeting for [REDACTED].",
+        "labelled-ssn": "Summarize this fictional record. SSN: [REDACTED].",
+        "multiple-pii": "Summarize this fictional record: [REDACTED]. SSN: [REDACTED].",
+    }
+    if scenario.id in redacted:
+        assert calls == [redacted[scenario.id]]
+        assert view.invocation_status == "succeeded"
     elif scenario.expected_action == "BLOCK" or scenario.expected_error:
         assert not calls
     else:
@@ -63,6 +69,20 @@ def test_all_scenarios_observed_pipeline_and_actual_adapter_failure(running, sce
     if scenario.id == "generation-unavailable":
         assert view.event.action == "ALLOW" and view.invocation_status == "failed"
     assert len(evaluations) == (scenario.profile == "semantic-live")
+    if scenario.expected_action == "BLOCK":
+        assert view.invocation_status == "not_invoked"
+        assert {f.code for f in view.event.findings} >= set(scenario.expected_codes)
+    # Definitions and safe metadata cannot expose the detector's matched values.
+    catalog = client.get("/v1/demo/scenarios").text
+    for canary in (
+        "alex@example.invalid",
+        "123-45-6789",
+        "DEMO_ONLY_SYNTHETIC_TOKEN_012345",
+        "ghp_" + "DEMO" * 9,
+        "gho_" + "DEMO" * 9,
+        OUTPUT,
+    ):
+        assert canary not in catalog
 
 
 @pytest.mark.parametrize(
@@ -172,7 +192,25 @@ def test_metadata_closed_safe_no_store_and_failure_contract(running, path):
         assert data["custom"]["policy_digest"] == app.state.service.policy.digest
         assert set(data["custom"]) == {"policy_digest", "controls", "targets"}
     else:
-        assert len(data["items"]) == 11
+        assert len(data["items"]) == 19
+        for item in data["items"]:
+            assert set(item) == {
+                "id",
+                "title",
+                "description",
+                "category",
+                "expected_action",
+                "expected_error",
+                "expected_codes",
+                "profile",
+                "enabled",
+                "prerequisite",
+                "simulation",
+                "expected_explanation",
+                "runtime_requirements",
+            }
+            assert item["expected_explanation"]
+            assert set(item["runtime_requirements"]) <= {"semantic", "generation"}
     for method, suffix, status, code in [
         ("GET", "?secret=PRIVATE&secret=x", 422, "invalid_request"),
         ("POST", "", 405, "method_not_allowed"),

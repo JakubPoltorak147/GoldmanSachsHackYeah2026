@@ -48,7 +48,7 @@ at application startup; this also makes custom echo depend on the evaluator.
 
 Prepared scenarios send only `{scenario_id}`. Payloads and profiles are fixed
 on the server; the UI never loads hidden scenario payloads into the editor or
-sets policy/model/endpoint/fault fields. The eleven scenarios are:
+sets policy/model/endpoint/fault fields. The nineteen scenarios are:
 
 | Scenario | Profile | Expected observation |
 | --- | --- | --- |
@@ -57,6 +57,14 @@ sets policy/model/endpoint/fault fields. The eleven scenarios are:
 | api-secret | deterministic-live | credential BLOCK |
 | private-key | deterministic-live | synthetic key-envelope BLOCK |
 | historical-signature | deterministic-live | known literal BLOCK |
+| github-pat | deterministic-live | GitHub personal-token shape BLOCK |
+| github-oauth | deterministic-live | GitHub OAuth-token shape BLOCK |
+| labelled-ssn | deterministic-live | fictional labelled SSN REDACT; label retained |
+| pickle-os | deterministic-live | inert OS serialization indicator BLOCK |
+| pickle-posix | deterministic-live | inert POSIX serialization indicator BLOCK |
+| encoded-exec | deterministic-live | inert encoded-execution indicator BLOCK |
+| multiple-pii | deterministic-live | email and labelled SSN both REDACT |
+| pii-and-secret | deterministic-live | email plus bearer credential; BLOCK wins over REDACT |
 | prompt-injection | semantic-live | semantic prompt-injection BLOCK |
 | indirect-override | semantic-live | semantic instruction-override BLOCK |
 | exfiltration-intent | semantic-live | semantic exfiltration BLOCK |
@@ -72,12 +80,29 @@ they inject a failure only into the selected existing adapter transport. They do
 not claim the installed daemon is down. All profiles retain independent startup
 bindings and share the required audit stream/store and poisoned write-gate health.
 
+Every catalog entry includes a safe `expected_explanation` and
+`runtime_requirements` purpose labels. Benign and redaction examples need
+generation to complete. Semantic attack/hybrid examples need the evaluator;
+generation can still be attempted if the actual classification permits it.
+Expected deterministic BLOCK needs no model runtime because the target is never
+called; this is an expectation, not a readiness check or alternate routing rule.
+Both transport-fault simulations need no available runtime, although the
+evaluator-failure card requires semantic Demo enabled.
+
+These examples cover the ten existing deterministic finding codes. Token controls
+recognize specific shapes without authenticating credentials; the SSN control
+recognizes supported labelled fictional syntax without checking identity. Attack
+signatures are exact inert text indicators, not general exploit or binary-model
+scanning. Payloads are never executed, deserialized or exported. Budgets,
+authorization, output DLP and policy reload are not implemented by these cards.
+
 ## HTTP and privacy contracts
 
 `GET /v1/demo/workspace` returns a closed version-1 object with
 `custom.policy_digest`, `custom.controls` (ID/enablement), and `custom.targets`
 (public ID/model identity). `GET /v1/demo/scenarios` returns version-1 safe catalog
-metadata. Neither route returns prompts, transformed text, output, raw policy,
+metadata, including code-owned expected explanations and runtime-purpose labels.
+Neither route returns prompts, transformed text, output, raw policy,
 paths, configuration URLs, evaluator scores or secrets. Neither makes runtime
 calls or history writes. These are configured identities, not readiness checks.
 
@@ -138,7 +163,7 @@ poetry run ruff format --check app tests
 openspec validate add-demo-scenario-workbench --strict
 ```
 
-For live acceptance, use preprovisioned models and rehearse all eleven cases, custom
+For live acceptance, use preprovisioned models and rehearse all nineteen cases, custom
 baseline echo without generation, custom model generation and separately enabled
 application semantic policy. Record only case IDs, action/codes/status/model IDs
 and measured timings, never input/output or raw classifier scores. A genuine
