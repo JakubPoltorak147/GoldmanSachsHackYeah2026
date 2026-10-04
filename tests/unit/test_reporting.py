@@ -677,3 +677,73 @@ def test_modified_v1_never_migrates(tmp_path, mutation):
     with sqlite3.connect(path) as db:
         assert db.execute("PRAGMA user_version").fetchone()[0] == 1
         assert module._schema_objects(db) == before
+
+
+def test_recent_pages_filters_insert_and_late_completion(tmp_path):
+    service, store, sink, target, _ = composition(tmp_path)
+    events = [audit(service) for _ in range(5)]
+    for event in events:
+        sink.emit(event)
+    first = store.list_recent_events(limit=2)
+    assert [e.sequence for e in first] == [5, 4]
+    assert [e.sequence for e in store.list_events()] == [1, 2, 3, 4, 5]
+    # An insertion between page fetches cannot duplicate the older page.
+    sink.emit(audit(service))
+    second = store.list_recent_events(limit=2, before_sequence=first[-1].sequence)
+    assert [e.sequence for e in second] == [3, 2]
+    assert [e.sequence for e in store.list_recent_events(before_sequence=2)] == [1]
+    assert store.list_recent_events(EventFilter(target_id="historical-target")) == ()
+    assert len(store.list_recent_events(EventFilter(action=Action.ALLOW))) == 6
+    assert store.list_recent_events(EventFilter(action=Action.BLOCK)) == ()
+    assert (
+        len(
+            store.list_recent_events(
+                EventFilter(invocation_status=InvocationStatus.UNKNOWN)
+            )
+        )
+        == 6
+    )
+    store._append_completion(
+        Completion(
+            events[-1].interaction_id,
+            datetime.now(UTC),
+            InvocationStatus.SUCCEEDED,
+            3.0,
+            6.0,
+        )
+    )
+    refreshed = store.list_recent_events()
+    assert refreshed[1].sequence == 5
+    assert refreshed[1].invocation_status == InvocationStatus.SUCCEEDED
+    assert refreshed[1].completion.invocation_duration_ms == 3.0
+    assert (
+        len(
+            store.list_recent_events(
+                EventFilter(invocation_status=InvocationStatus.UNKNOWN)
+            )
+        )
+        == 5
+    )
+    assert not target.calls
+    store.close()
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"limit": True},
+        {"limit": 0},
+        {"limit": 1001},
+        {"limit": "2"},
+        {"before_sequence": True},
+        {"before_sequence": 0},
+        {"before_sequence": -1},
+        {"before_sequence": 2**63},
+        {"before_sequence": "1"},
+    ],
+)
+def test_recent_query_bounds(tmp_path, kwargs):
+    store = ReportingStore(tmp_path / "db")
+    with pytest.raises(ReportingError, match="^invalid_reporting_query$"):
+        store.list_recent_events(**kwargs)
+    store.close()

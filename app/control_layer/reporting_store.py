@@ -400,6 +400,36 @@ class ReportingStore:
             rows = db.execute(sql + " ORDER BY sequence LIMIT ?", args).fetchall()
             return tuple(self._view(db, row) for row in rows)
 
+    def list_recent_events(
+        self,
+        filters: EventFilter = _EMPTY_FILTER,
+        *,
+        limit: int = 100,
+        before_sequence: int | None = None,
+    ) -> tuple[EventView, ...]:
+        """Newest-first evidence, including updated completion of existing events."""
+        if (
+            type(limit) is not int
+            or not 1 <= limit <= 1000
+            or (
+                before_sequence is not None
+                and (
+                    type(before_sequence) is not int
+                    or not 1 <= before_sequence <= 2**63 - 1
+                )
+            )
+        ):
+            raise ReportingError("invalid_reporting_query")
+        selection, args = self._selection(filters)
+        with self._read() as db:
+            sql = f"SELECT * FROM ({selection})"
+            if before_sequence is not None:
+                sql += " WHERE sequence < ?"
+                args.append(before_sequence)
+            args.append(limit)
+            rows = db.execute(sql + " ORDER BY sequence DESC LIMIT ?", args).fetchall()
+            return tuple(self._view(db, row) for row in rows)
+
     def get_event(self, interaction_id: UUID) -> EventView | None:
         if type(interaction_id) is not UUID:
             raise ReportingError("invalid_reporting_query")

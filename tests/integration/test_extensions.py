@@ -214,6 +214,35 @@ def test_openapi_only_approved_finding_code_and_target_differences():
     baseline["components"]["schemas"]["InteractionRequest"]["properties"][
         "target_id"
     ] = target
+    # Approved dashboard addition is isolated from the unchanged interaction API.
+    added_paths = set(actual["paths"]) - set(baseline["paths"])
+    assert added_paths == {
+        "/v1/reporting/summary",
+        "/v1/reporting/events",
+        "/v1/reporting/events/{interaction_id}",
+    }
+    for path in added_paths:
+        assert set(actual["paths"].pop(path)) == {"get"}
+    added_schemas = set(actual["components"]["schemas"]) - set(
+        baseline["components"]["schemas"]
+    )
+    assert added_schemas == {
+        "CompletionDTO",
+        "DetailResponse",
+        "EventDTO",
+        "EventViewDTO",
+        "EventsResponse",
+        "FindingDTO",
+        "FindingSummaryDTO",
+        "InvocationStatus",
+        "ReportingErrorDTO",
+        "SummaryDTO",
+        "SummaryResponse",
+        "TimingDTO",
+        "WindowDTO",
+    }
+    for name in added_schemas:
+        actual["components"]["schemas"].pop(name)
     assert actual == baseline
 
 

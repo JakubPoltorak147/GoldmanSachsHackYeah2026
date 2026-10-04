@@ -23,6 +23,8 @@ from app.control_layer.domain import Action, Interaction
 from app.control_layer.policy import load_policy
 from app.control_layer.registry import ControlRegistry
 from app.control_layer.reporting import ReportingProjection
+from app.control_layer.reporting_api import reporting_error
+from app.control_layer.reporting_api import router as reporting_router
 from app.control_layer.reporting_store import PersistentAuditSink, ReportingStore
 from app.control_layer.service import InteractionService
 from app.control_layer.targets import TargetRegistry
@@ -125,6 +127,17 @@ def create_app(
                 store.close()
 
     application = FastAPI(lifespan=lifespan)
+    application.include_router(reporting_router)
+
+    @application.middleware("http")
+    async def reporting_slash_guard(request: Request, call_next):
+        # Router redirects reflect the entire URL before route validation.
+        # Reject noncanonical reporting paths without changing interaction routing.
+        if request.url.path.startswith("/v1/reporting/") and request.url.path.endswith(
+            "/"
+        ):
+            return reporting_error(404, "not_found")
+        return await call_next(request)
 
     @application.exception_handler(RequestValidationError)
     async def invalid_request(_request: Request, _exception: RequestValidationError):
@@ -132,6 +145,14 @@ def create_app(
 
     @application.exception_handler(HTTPException)
     async def http_failure(_request: Request, exception: HTTPException):
+        if _request.url.path == "/v1/reporting" or _request.url.path.startswith(
+            "/v1/reporting/"
+        ):
+            if exception.status_code == 404:
+                return reporting_error(404, "not_found")
+            if exception.status_code == 405:
+                return reporting_error(405, "method_not_allowed")
+            return reporting_error(503, "reporting_unavailable")
         # Starlette reports invalid UTF-8 JSON bodies as HTTP 400.
         if exception.status_code in (400, 422):
             return _error(422, "invalid_request")

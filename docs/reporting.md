@@ -55,7 +55,7 @@ Completion-write failure preserves the obtained 200/502 target outcome, never
 retries the target and closes later dispatch gates. `store.health` returns
 `healthy` or fixed `reporting_write_failed`. A committed outcome remains
 authoritative even if its acknowledgement fails; absent completion stays unknown.
-There is no public health/reporting HTTP endpoint.
+The read-only HTTP reporting summary exposes fixed write-gate health; see the reporting boundary below.
 
 Evaluation milliseconds run from service entry through decision construction,
 excluding persistence and invocation. Invocation milliseconds cover adapter call
@@ -112,8 +112,8 @@ administrators or disk loss. Disk exhaustion and write lock failures close the
 required gate. Operators manage file growth and backups. Exports, export manifests,
 operator CLI, model/policy/control/day groupings, control/code filters, exhaustive
 acknowledgement fault matrices and platform permission auditing are deferred.
-There is no dashboard, output inspection, budget governance or
-cryptographic audit integrity in this capability. Automated verification uses
+The read-only HTTP API is described below. Output inspection, budget governance and
+cryptographic audit integrity remain outside this capability. Automated verification uses
 temporary files, local detector inputs and fake targets; Ollama is not required.
 
 ## Semantic attempt evidence and schema version 2
@@ -142,3 +142,56 @@ roll back schema/version/data without deleting evidence. Back up history before
 upgrading. An older binary rejects v2; use a prior backup or compatible binary
 for code rollback. Explicitly disabling semantic policy retains history and
 independent deterministic enforcement.
+
+## Read-only reporting HTTP API
+
+Routes, all using `Cache-Control: no-store`:
+
+- `GET /v1/reporting/summary`: `{api_version:1, window, generated_at,
+  reporting_health, overall}`. `overall` contains interaction_total, named actions
+  and invocations count maps (all enum keys), operational_failure_total, findings
+  (producer/code/occurrences/affected_interactions), and evaluation/semantic/
+  invocation/total timing objects (samples/sum_ms/min_ms/max_ms/mean_ms).
+- `GET /v1/reporting/events`: `{api_version:1, window, items,
+  next_before_sequence}`. Each item is an explicit schema-v2 EventView projection:
+  sequence, schema_version, safe event, invocation_status and optional completion
+  including its fixed target error code. Newest-first, default 50, maximum 100.
+- `GET /v1/reporting/events/{interaction_id}`: `{api_version:1, item}` or fixed 404.
+  Requires a canonical hyphenated UUID and accepts no query parameters.
+
+Summary/events accept paired `from_time`/`to_time` as ISO UTC timestamps with `T`,
+seconds, optional 1–6 fractional digits and `Z`/`+00:00`. Range is half-open,
+increasing and at most 31 days. Omit both for the server's last 24 hours.
+Optional filters: action ALLOW/REDACT/BLOCK, symbolic target_id (historical valid
+IDs can have no results), invocation_status succeeded/failed/unknown/not_invoked.
+Events also accept canonical positive integer limit (1–100) and before_sequence
+(1–9223372036854775807). The next cursor is the last sequence on a full page; a
+final empty page is permitted. No grouping, export or control/code filters are
+exposed. Unknown/repeated query keys, invalid bounds, enums and identifiers are
+rejected without reflection.
+
+```bash
+curl -s 'http://127.0.0.1:8000/v1/reporting/summary?action=BLOCK'
+curl -s 'http://127.0.0.1:8000/v1/reporting/events?limit=10&invocation_status=failed'
+```
+
+Fixed reporting errors contain only `{error_code}`: 422 invalid_reporting_query,
+404 not_found, 405 method_not_allowed, 503 reporting_unavailable. These envelopes
+are separate from unchanged interaction responses. Reporting health is existing
+write-gate health (`healthy`/`reporting_write_failed`), independent of read
+availability and target outcomes. GETs neither mutate evidence nor invoke controls
+or targets. No query reaches SQLite from the browser; routes delegate to typed
+store methods. The new in-process `list_recent_events(filters, limit=100,
+before_sequence=None)` retains typed bounds 1–1000 and signed-64-bit exclusive
+cursors. Existing ascending `list_events` is unchanged.
+
+Trailing-slash reporting paths return fixed 404 with no-store rather than redirect;
+no query text is reflected in a Location header. Interaction routing is unchanged.
+
+The local deployment has no authentication platform or permissive CORS. Keep its
+loopback binding and trusted operator context. API schemas are explicit allowlists:
+no raw/transformed prompts, output, semantic responses/scores, credentials, PII,
+URLs, arbitrary metadata or exception text. Strings render as text. Target model
+selection is startup identity only, not a guarantee of the returned model version.
+Historical details cannot reconstruct content. There is no model dependency for
+viewing evidence and no fabricated seed data in the application.

@@ -1,15 +1,15 @@
 # Tasks
 
-Approval: NOT GRANTED. The user instruction dated 2026-10-04 authorizes EXPLORE and creation of exactly two changes and explicitly says not to implement. Before task 1.1, record a new explicit apply approval here, including its instruction and exact scope. No implementation checkbox is complete.
+Approval: GRANTED on 2026-10-04 by the user instruction “Explicitly APPROVE and APPLY: `add-interactive-security-dashboard-mvp`” and “Implement the approved proposal/design/tasks as written.” Scope is this dashboard MVP only, including focused/full verification, fixes and fresh correctness/security reviews. The user explicitly excludes workbench implementation and archive. Implementation owner: primary apply agent.
 
 Owner: primary apply agent. Dependency: existing archived reporting/semantic foundations only; independently ship before `add-demo-scenario-workbench`. Scope/ownership and acceptance criteria are in design.md. Shared `api.py` and reporting query changes are serially owned; no overlapping implementation with change 2. Each implementation group gets one Conventional Commit only after its required checks pass; never push.
 
 ## 1. Safe reporting boundary
 
-- [ ] 1.1 Add bounded typed `list_recent_events` in `reporting_store.py`, preserving ascending queries; verify newest-first/filter/cursor/multi-page/concurrent-insert and late-completion tests in `tests/unit/test_reporting.py` with `poetry run pytest tests/unit/test_reporting.py`.
-- [ ] 1.2 Implement `reporting_api.py` explicit DTOs, three GET routes, paired/default UTC filters, 100-row cap, signed-64-bit cursors, no-store responses and fixed errors; wire router in `api.py` and verify `tests/integration/test_dashboard_reporting.py` covers defaults/bounds/duplicate/unknown params/detail/errors/methods, zero mutation/calls and existing schema compatibility.
-- [ ] 1.3 Add response canary, distinct-count/sample/status, poisoned-health and failed-read tests using existing mixed evidence and fake transports; verify reporting replies contain no forbidden data and failed reads never become zero/empty with `poetry run pytest tests/unit/test_reporting.py tests/integration/test_reporting_http.py tests/integration/test_dashboard_reporting.py`.
-- [ ] 1.4 Update `docs/reporting.md` with implemented route/DTO/query/error/timing contracts and local-only boundary; verify examples against the integration fixture and record group verification in `docs/worklog.md`.
+- [x] 1.1 Add bounded typed `list_recent_events` in `reporting_store.py`, preserving ascending queries; verify newest-first/filter/cursor/multi-page/concurrent-insert and late-completion tests in `tests/unit/test_reporting.py` with `poetry run pytest tests/unit/test_reporting.py`.
+- [x] 1.2 Implement `reporting_api.py` explicit DTOs, three GET routes, paired/default UTC filters, 100-row cap, signed-64-bit cursors, no-store responses and fixed errors; wire router in `api.py` and verify `tests/integration/test_dashboard_reporting.py` covers defaults/bounds/duplicate/unknown params/detail/errors/methods, zero mutation/calls and existing schema compatibility.
+- [x] 1.3 Add response canary, distinct-count/sample/status, poisoned-health and failed-read tests using existing mixed evidence and fake transports; verify reporting replies contain no forbidden data and failed reads never become zero/empty with `poetry run pytest tests/unit/test_reporting.py tests/integration/test_reporting_http.py tests/integration/test_dashboard_reporting.py`.
+- [x] 1.4 Update `docs/reporting.md` with implemented route/DTO/query/error/timing contracts and local-only boundary; verify examples against the integration fixture and record group verification in `docs/worklog.md`.
 
 ## 2. Polished read-only dashboard
 
@@ -24,4 +24,4 @@ Owner: primary apply agent. Dependency: existing archived reporting/semantic fou
 - [ ] 3.2 Delegate fresh implementation specification/correctness and security/bypass reviews to agents that did not implement; verify both return PASS with concrete file/scenario evidence, fix confirmed findings with regression tests first and request fresh reviews after fixes. Record worklog review links here.
 - [ ] 3.3 Verify all design acceptance criteria, docs and evidence links; declare complete only after required verification/reviews PASS, keep archive as a separately authorized action and preserve reporting/interaction extension contracts for change 2.
 
-Evidence: implementation pending. [Planning validation/review](evidence/planning-review.md) is PASS, recorded in [worklog](../../../docs/worklog.md); it does not satisfy implementation review or grant apply approval. READY FOR APPLY APPROVAL.
+Evidence: reporting boundary checks pass; see docs/worklog.md. Final integrated implementation has also passed fresh correctness/security reviews. UI and integrated-verification groups are committed separately.

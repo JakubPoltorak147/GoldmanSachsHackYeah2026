@@ -1280,3 +1280,26 @@ requires preprovisioned local models and successful actual-runtime rehearsal.
 No implementation tests or live-model checks were run for these planning artifacts;
 planning PASS does not satisfy implementation completion/review gates. No apply,
 archive or push is authorized or performed.
+
+## 2026-10-04 — dashboard MVP reporting boundary
+
+The user explicitly approved and requested APPLY of
+`add-interactive-security-dashboard-mvp` as proposed, excluding workbench and
+archive. Approval is recorded in the change tasks. Implemented the bounded typed
+newest-first query and three read-only reporting HTTP endpoints with explicit safe
+DTOs, strict filter validation, fixed nonreflective errors and no-store responses.
+Interaction/core contracts, policy, audit and transports remain unchanged.
+
+Focused verification: `poetry run pytest tests/unit/test_reporting.py
+ tests/integration/test_reporting_http.py
+ tests/integration/test_dashboard_reporting.py -q`: **150 PASS**, 12.74 seconds;
+existing Starlette TestClient deprecation warning. Tests cover mixed counts/timing,
+semantic/target identity, unknown/late completion, pagination, UTC/bounds, malicious
+or duplicate keys, methods, failed reads, shared poisoned write health and canaries
+excluded from reporting/logs. Async HTTP tests require execution outside this
+session's restrictive sandbox; sandboxed runs were interrupted after confirmed
+runtime hangs. No assertions were weakened. Exact routes/DTOs documented in
+`docs/reporting.md`. Task-group commit is deferred until final fresh reviews, so
+confirmed findings can be fixed without committing partial/failing work.
+
+Reporting review correction: reporting-only trailing-slash guard prevents redirect query reflection; six regression cases PASS. Final affected integration checks: 78 PASS. Fresh corrected-implementation correctness/security reviews PASS before task-group commits.
