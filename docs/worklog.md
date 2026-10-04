@@ -1436,3 +1436,18 @@ Fresh final correctness and security reviews PASS; security independently ran
 68 focused tests. Full evidence will be committed with console integration.
 Live semantic acceptance remains incomplete; no download/archive/push.
 Commit subject: feat(demo): add immutable scenarios and startup profiles.
+
+## 2026-10-04 — workbench governed API verification (group 2)
+
+Server integration regressions cover all eleven outcomes, exact redaction and
+audit-before-once dispatch, profile/custom concurrency isolation, poisoned audit
+gates, safe metadata, strict request shapes, same-origin validation, Unicode
+bounds and sensitive canaries. Fixtures use real controls/adapters with local
+deterministic transport; tests do not install or require Ollama models.
+
+Verification: 57 new API integration tests PASS within focused 68 PASS and
+full backend 1606 PASS; Ruff check/format and strict OpenSpec PASS. Fresh
+correctness and security reviews PASS; independent security ran all 68 focused
+tests. Live installed-model semantic outcomes failed closed and remain pending
+acceptance. No core/reporting schema changes, archive or push.
+Commit subject: test(demo): verify governed interaction boundaries.
