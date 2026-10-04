@@ -19,7 +19,7 @@ The system SHALL expose `local-ollama` alongside `local-echo`, using one operato
 
 #### Scenario: Closed dispatch gates
 - **WHEN** policy selects BLOCK or evaluation or required audit emission fails
-- **THEN** there are zero local runtime requests, including probes or generation requests
+- **THEN** there are zero target-generation runtime requests, including target probes; a separately enabled semantic evaluator can already have made its bounded classification request during evaluation, without invoking this target adapter
 
 ### Requirement: Explicit bounded runtime settings
 Runtime settings SHALL be validated and frozen at startup outside security policy: loopback base origin, single model, connection/read timeouts, response byte cap and output character cap. Invalid settings MUST fail startup with fixed sanitized configuration error, without fallback. Callers MUST NOT set runtime/model/limits through interaction requests.
@@ -45,7 +45,7 @@ Normal startup and required tests MUST NOT require an installed/running runtime 
 
 #### Scenario: Runtime not installed or stopped
 - **WHEN** valid application configuration starts without Ollama installed or running
-- **THEN** startup succeeds without network probes, local echo succeeds, and an eligible model request returns sanitized target_failed after its decision audit
+- **THEN** startup succeeds without network probes, local echo succeeds when semantic evaluation is explicitly disabled, and an otherwise eligible model request returns sanitized target_failed after its decision audit; enabled semantic unavailability instead returns evaluation_failed before target dispatch
 
 #### Scenario: Model absent
 - **WHEN** the configured model does not exist and generation returns a missing-model status
@@ -113,7 +113,7 @@ Local-model dispatch SHALL preserve retained registration-derived audit identity
 - **THEN** application audit/errors/default logs contain neither raw content nor snippets/hashes/spans or client exception text; successful returned text is not claimed safe
 
 ### Requirement: No output inspection or model governance claim
-Documentation SHALL explicitly state that generated output is not security-inspected and local-model input approval does not certify output safety. One fixed operator model SHALL be a deployment restriction only; centralized allowed-model policy governance, semantic guardrails and resource budgets remain future capabilities. Security reporting SHALL be covered by the security-reporting capability and MUST NOT imply those governance or output-inspection capabilities.
+Documentation SHALL explicitly state that generated output is not security-inspected and local-model input approval does not certify output safety. One fixed operator model SHALL be a deployment restriction only; centralized allowed-model policy governance and resource budgets remain future capabilities; input semantic detection is separately defined by semantic-security-detection and does not inspect generated output. Security reporting SHALL be covered by the security-reporting capability and MUST NOT imply those governance or output-inspection capabilities.
 
 #### Scenario: Generated unsafe text
 - **WHEN** a valid bounded model response contains sensitive or unsafe text

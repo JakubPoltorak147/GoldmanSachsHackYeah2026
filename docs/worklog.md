@@ -1222,3 +1222,31 @@ configuration. All completion gates now PASS, task 4.1 is complete and OpenSpec
 tracks 15/15 tasks complete. No blocker remains. No archive or push is authorized
 or performed. The previously deferred task-group commits may now be created under
 the existing AGENTS.md/task instructions.
+
+## 2026-10-04 — semantic change archived
+
+User instruction “Ok so now archive it and do a commit” authorizes finalization
+of `add-semantic-security-control`. All 15 tasks, exact verification checks and
+fresh independent correctness/specification and security/bypass reviews had PASS
+before this archive operation.
+
+Synced the six approved delta capabilities into current specs: decision-audit,
+interaction-gateway, local-model-target, policy-decisions, security-reporting and
+new semantic-security-detection. Preserved established titles/purposes, untouched
+requirements and scenarios; verified every delta statement/scenario after merging.
+`openspec validate --specs --strict`: 10 PASS, 0 FAIL. The active change also
+passed strict validation immediately before its move.
+
+Archived the complete change, including its metadata and planning evidence, to
+`openspec/changes/archive/2026-10-04-add-semantic-security-control/`. Verified moved
+file hashes; then corrected worklog links for the additional archive directory
+level and recorded the user's archive authorization. No implementation behavior
+changed. Prior pre-existing untracked local-model archive remains preserved and
+outside this commit. No push was requested.
+
+Post-archive checks: `openspec validate --all --strict` **10 PASS**;
+`openspec validate --archived --strict` **7 PASS**; `openspec list --json` reports
+no active changes; `poetry run ruff check .`, exact
+`poetry run ruff format --check .` (50 files) and `git diff --check` all **PASS**.
+No test rerun was needed for this spec/documentation-only finalization; the final
+1473-test PASS and both fresh review PASS results remain the implementation evidence.
