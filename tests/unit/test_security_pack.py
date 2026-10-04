@@ -61,9 +61,12 @@ def policy_file(tmp_path, mutate=None):
 
 def test_default_registration_ownership_capabilities_policy_and_targets():
     registry = default_controls()
-    assert [r.definition.id for r in registry.registrations] == list(EXPECTED)
+    assert [r.definition.id for r in registry.registrations] == [
+        *EXPECTED,
+        "semantic-security",
+    ]
     codes = []
-    for r in registry.registrations:
+    for r in registry.registrations[:-1]:
         assert tuple(f.code for f in r.definition.findings) == EXPECTED[r.definition.id]
         for f in r.definition.findings:
             assert f.span_required is True
@@ -73,7 +76,9 @@ def test_default_registration_ownership_capabilities_policy_and_targets():
             codes.append(f.code)
     assert len(codes) == len(set(codes)) == 10
     bound = load_policy(DEFAULT_POLICY, registry)
-    assert all(e.enabled for e in bound.entries)
+    assert all(e.enabled for e in bound.entries[:-1])
+    assert bound.entries[-1].control_id == "semantic-security"
+    assert not bound.entries[-1].enabled
     for entry in bound.entries:
         assert entry.registration is registry.resolve(entry.control_id)
         for code, action in entry.mappings:
@@ -131,7 +136,11 @@ def test_email_only_policy_requires_explicit_disabled_migration(tmp_path):
         load_policy(path, registry)
     raw = yaml.safe_load(path.read_text())
     raw["controls"].update(
-        {id: {"enabled": False} for id in EXPECTED if id != "email-address"}
+        {
+            id: {"enabled": False}
+            for id in (*EXPECTED, "semantic-security")
+            if id != "email-address"
+        }
     )
     path.write_text(yaml.safe_dump(raw))
     bound = load_policy(path, registry)
@@ -240,7 +249,7 @@ def test_each_finding_supported_policy_actions_and_audit_privacy(
     assert value not in stream.getvalue()
     record = json.loads(stream.getvalue())
     assert record["finding_counts"] == {code: 1}
-    assert set(record["control_status"]) == set(EXPECTED)
+    assert set(record["control_status"]) == {*EXPECTED, "semantic-security"}
     assert (
         not {
             "content",
@@ -324,6 +333,8 @@ def test_registration_finding_and_yaml_order_cannot_weaken_policy(
     interaction = Interaction.create("local-echo", ALL_TEXT)
     findings = []
     for entry in bound.entries:
+        if not entry.enabled:
+            continue
         findings.extend(
             validate_findings(
                 entry.registration.evaluator.evaluate(interaction),
@@ -334,7 +345,10 @@ def test_registration_finding_and_yaml_order_cannot_weaken_policy(
     if reverse_findings:
         findings.reverse()
     decision = decide(
-        interaction, tuple(findings), tuple(e.control_id for e in bound.entries), bound
+        interaction,
+        tuple(findings),
+        tuple(e.control_id for e in bound.entries if e.enabled),
+        bound,
     )
     assert decision.action.value == action
     forwarded = forwarded_interaction(interaction, decision)

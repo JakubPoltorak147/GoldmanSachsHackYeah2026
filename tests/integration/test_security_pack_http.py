@@ -128,7 +128,9 @@ def test_complete_default_registered_pack_end_to_end(tmp_path, action, status):
     assert body["finding_codes"] == CODES
     record = json.loads(stream.getvalue())
     assert record["evaluated_controls"] == IDS
-    assert record["control_status"] == dict.fromkeys(IDS, True)
+    assert record["control_status"] == dict.fromkeys(IDS, True) | {
+        "semantic-security": False
+    }
     assert record["finding_counts"] == dict.fromkeys(CODES, 1)
     for value in [
         "alice@example.com",
@@ -189,7 +191,9 @@ def test_explicit_disabled_migration_skips_new_controls(tmp_path):
     assert PAT in target.calls[0].content
     record = json.loads(stream.getvalue())
     assert record["evaluated_controls"] == ["email-address"]
-    assert record["control_status"] == {id: id == "email-address" for id in IDS}
+    assert record["control_status"] == {id: id == "email-address" for id in IDS} | {
+        "semantic-security": False
+    }
 
 
 @pytest.mark.parametrize(

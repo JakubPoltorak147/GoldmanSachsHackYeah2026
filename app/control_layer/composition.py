@@ -1,5 +1,7 @@
 """Explicit deterministic production control pack and unchanged local echo."""
 
+from dataclasses import replace
+
 from app.control_layer.attack_signatures import (
     ATTACK_CONTROL_ID,
     KnownAttackSignaturesControl,
@@ -11,19 +13,30 @@ from app.control_layer.bearer_control import (
     BearerCredentialControl,
 )
 from app.control_layer.controls import EMAIL_CODE, EMAIL_CONTROL_ID, EmailAddressControl
+from app.control_layer.domain import PolicyError
 from app.control_layer.github_control import (
     GITHUB_CONTROL_ID,
     GITHUB_OAUTH_CODE,
     GITHUB_PAT_CODE,
     GitHubTokenControl,
 )
+from app.control_layer.ollama_semantic import (
+    OllamaSemanticRuntime,
+    load_semantic_settings,
+)
 from app.control_layer.ollama_target import OllamaTextTarget, load_ollama_settings
 from app.control_layer.pem_control import PEM_CODE, PEM_CONTROL_ID, PemPrivateKeyControl
+from app.control_layer.policy import BoundPolicy
 from app.control_layer.registry import (
     ControlDefinition,
     ControlRegistration,
     ControlRegistry,
     FindingDefinition,
+)
+from app.control_layer.semantic_control import (
+    CODES,
+    SEMANTIC_ID,
+    SemanticSecurityControl,
 )
 from app.control_layer.ssn_control import SSN_CODE, SSN_CONTROL_ID, UsSsnControl
 from app.control_layer.targets import (
@@ -36,6 +49,7 @@ from app.control_layer.targets import (
 
 def default_controls() -> ControlRegistry:
     attacks = KnownAttackSignaturesControl(load_attack_catalog())
+    settings = load_semantic_settings()
     return ControlRegistry(
         (
             ControlRegistration(
@@ -82,6 +96,14 @@ def default_controls() -> ControlRegistry:
                 ),
                 attacks,
             ),
+            ControlRegistration(
+                ControlDefinition(
+                    SEMANTIC_ID,
+                    tuple(FindingDefinition(code, False, False) for code in CODES),
+                    model_id=settings.model,
+                ),
+                SemanticSecurityControl(OllamaSemanticRuntime(settings)),
+            ),
         )
     )
 
@@ -97,3 +119,33 @@ def default_targets() -> TargetRegistry:
             ),
         )
     )
+
+
+def bind_semantic_policy(policy: BoundPolicy) -> BoundPolicy:
+    """Finalize even injected semantic controls through the same startup path."""
+    entries = []
+    for entry in policy.entries:
+        if entry.control_id == SEMANTIC_ID:
+            definition = entry.registration.definition
+            evaluator = entry.registration.evaluator
+            if (
+                type(evaluator) is not SemanticSecurityControl
+                or tuple(
+                    (f.code, f.span_required, f.supports_redaction)
+                    for f in definition.findings
+                )
+                != tuple((code, False, False) for code in CODES)
+                or definition.model_id is None
+            ):
+                raise PolicyError()
+            if (
+                type(evaluator.runtime) is OllamaSemanticRuntime
+                and evaluator.runtime.settings.model != definition.model_id
+            ):
+                raise PolicyError()
+            evaluator = replace(evaluator, threshold=entry.semantic_threshold)
+            entry = replace(
+                entry, registration=ControlRegistration(definition, evaluator)
+            )
+        entries.append(entry)
+    return replace(policy, entries=tuple(entries))

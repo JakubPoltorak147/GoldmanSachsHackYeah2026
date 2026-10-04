@@ -31,11 +31,20 @@ class FindingDefinition:
 class ControlDefinition:
     id: str
     findings: tuple[FindingDefinition, ...]
+    model_id: str | None = None
 
     def __post_init__(self):
         findings = tuple(self.findings)
         if (
             not machine_id(self.id)
+            or (
+                self.model_id is not None
+                and (
+                    type(self.model_id) is not str
+                    or re.fullmatch(r"[a-z0-9][a-z0-9._:-]{0,127}", self.model_id)
+                    is None
+                )
+            )
             or not findings
             or any(type(f) is not FindingDefinition for f in findings)
             or len({f.code for f in findings}) != len(findings)

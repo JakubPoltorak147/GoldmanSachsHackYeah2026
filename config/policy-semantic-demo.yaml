@@ -31,5 +31,9 @@ controls:
       attack.python_exec_base64: BLOCK
 
   semantic-security:
-    enabled: false
-    findings: {}
+    enabled: true
+    threshold: 0.75
+    findings:
+      semantic.prompt_injection: BLOCK
+      semantic.instruction_override: BLOCK
+      semantic.exfiltration_intent: BLOCK

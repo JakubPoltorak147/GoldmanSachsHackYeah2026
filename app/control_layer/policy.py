@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import math
 import re
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -26,6 +27,7 @@ class ControlPolicy:
     control_id: str
     enabled: bool
     mappings: tuple[tuple[str, Action], ...]
+    semantic_threshold: float | None = None
 
 
 @dataclass(frozen=True)
@@ -40,6 +42,7 @@ class ControlPlanEntry:
     registration: ControlRegistration
     enabled: bool
     mappings: tuple[tuple[str, Action], ...]
+    semantic_threshold: float | None = None
 
     @property
     def control_id(self) -> str:
@@ -109,7 +112,25 @@ def load_policy(path: str | Path, registry: ControlRegistry) -> BoundPolicy:
         canonical_controls = {}
         for registration in registry.registrations:
             definition = registration.definition
-            config = _keys(controls[definition.id], {"enabled"}, {"findings"})
+            config = _keys(
+                controls[definition.id],
+                {"enabled"},
+                {"findings", "threshold"}
+                if definition.id == "semantic-security"
+                else {"findings"},
+            )
+            threshold = config.get("threshold")
+            if definition.id == "semantic-security":
+                if "threshold" in config:
+                    if (
+                        type(threshold) not in (int, float)
+                        or not math.isfinite(threshold)
+                        or not 0 < threshold <= 1
+                    ):
+                        raise PolicyError()
+                    threshold = float(threshold)
+                elif config["enabled"]:
+                    raise PolicyError()
             if type(config["enabled"]) is not bool:
                 raise PolicyError()
             codes = {f.code: f for f in definition.findings}
@@ -125,11 +146,15 @@ def load_policy(path: str | Path, registry: ControlRegistry) -> BoundPolicy:
                     raise PolicyError()
                 mappings.append((code, action))
             mappings = tuple(mappings)
-            entries.append(ControlPlanEntry(registration, config["enabled"], mappings))
+            entries.append(
+                ControlPlanEntry(registration, config["enabled"], mappings, threshold)
+            )
             canonical_controls[definition.id] = {
                 "enabled": config["enabled"],
                 "findings": dict(mappings),
             }
+            if "threshold" in config:
+                canonical_controls[definition.id]["threshold"] = threshold
         canonical = {
             "version": 1,
             "policy_id": policy_id,
@@ -141,7 +166,10 @@ def load_policy(path: str | Path, registry: ControlRegistry) -> BoundPolicy:
         snapshot = Policy(
             policy_id,
             digest,
-            tuple(ControlPolicy(e.control_id, e.enabled, e.mappings) for e in entries),
+            tuple(
+                ControlPolicy(e.control_id, e.enabled, e.mappings, e.semantic_threshold)
+                for e in entries
+            ),
         )
         return BoundPolicy(snapshot, tuple(entries))
     except Exception:
@@ -228,7 +256,8 @@ def decide(
                 raise EvaluationError()
             configs[entry.control_id] = (entry, mappings)
         expected_snapshot = tuple(
-            ControlPolicy(e.control_id, e.enabled, e.mappings) for e in policy.entries
+            ControlPolicy(e.control_id, e.enabled, e.mappings, e.semantic_threshold)
+            for e in policy.entries
         )
         if policy.snapshot.controls != expected_snapshot:
             raise EvaluationError()

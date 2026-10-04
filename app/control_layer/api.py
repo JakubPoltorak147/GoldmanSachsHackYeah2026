@@ -14,7 +14,11 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator
 from starlette.exceptions import HTTPException
 
 from app.control_layer.audit import AuditSink, JsonLinesAuditSink
-from app.control_layer.composition import default_controls, default_targets
+from app.control_layer.composition import (
+    bind_semantic_policy,
+    default_controls,
+    default_targets,
+)
 from app.control_layer.domain import Action, Interaction
 from app.control_layer.policy import load_policy
 from app.control_layer.registry import ControlRegistry
@@ -92,6 +96,7 @@ def create_app(
             else os.environ.get("CONTROL_LAYER_POLICY", "config/policy.yaml"),
             default_controls() if control_registry is None else control_registry,
         )
+        policy = bind_semantic_policy(policy)
         targets = default_targets() if target_registry is None else target_registry
         if type(targets) is not TargetRegistry:
             raise ValueError("invalid_composition")
