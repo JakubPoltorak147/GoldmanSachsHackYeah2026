@@ -87,12 +87,13 @@ def default_controls() -> ControlRegistry:
 
 
 def default_targets() -> TargetRegistry:
+    settings = load_ollama_settings()
     return TargetRegistry(
         (
             RegisteredTarget(TargetDefinition("local-echo"), LocalEchoTarget()),
             RegisteredTarget(
-                TargetDefinition("local-ollama"),
-                OllamaTextTarget(load_ollama_settings()),
+                TargetDefinition("local-ollama", model_id=settings.model),
+                OllamaTextTarget(settings),
             ),
         )
     )

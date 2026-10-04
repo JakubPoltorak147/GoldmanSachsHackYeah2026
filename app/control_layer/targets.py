@@ -1,5 +1,6 @@
 """Target boundary and the only production target: local echo."""
 
+import re
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -24,9 +25,21 @@ class LocalEchoTarget:
 @dataclass(frozen=True)
 class TargetDefinition:
     target_id: str
+    model_id: str | None = None
 
     def __post_init__(self):
-        if not machine_id(self.target_id) or self.target_id == "unresolved":
+        if (
+            not machine_id(self.target_id)
+            or self.target_id == "unresolved"
+            or (
+                self.model_id is not None
+                and (
+                    type(self.model_id) is not str
+                    or re.fullmatch(r"[a-z0-9][a-z0-9._:-]{0,127}", self.model_id)
+                    is None
+                )
+            )
+        ):
             raise ValueError("invalid_registration")
 
 

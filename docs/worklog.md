@@ -933,3 +933,94 @@ One completed integration/evidence commit: `chore: record local model verificati
 resolve its hash from the commit containing this entry. No archive, spec synchronization,
 installation/model download, push or new change. Implementation PASS, ready for later
 user-authorized archive.
+
+## 2026-10-04 — Security reporting foundation implementation verification
+
+Change: `add-security-reporting-foundation`. The user's 2026-10-04 instruction
+explicitly approved APPLY after a focused scope reduction. Proposal/design/delta
+specs/tasks were revised before implementation and strict validation passed.
+Exports/manifest/snapshot work, operator CLI, exhaustive filters/groupings,
+platform permission auditing and extensive acknowledgement fault matrices were
+deferred. The typed reporting boundary and core security guarantees remain.
+
+Implemented closed content-free reporting DTOs and startup-bound projection;
+trusted optional configured model metadata; file-backed schema-v1 SQLite event,
+control/finding and separate outcome records; typed list/detail/basic summaries;
+required JSONL-flush then durable-commit gate; monotonic evaluation/invocation/total
+timings; completion-write poisoning with preserved original target outcome; default
+startup/storage shutdown and caller-owned injection. HTTP DTOs and policy config
+are unchanged. README, reporting documentation, architecture and system summary
+record implemented behavior and limits. Current specs remain unsynchronized and
+the change is unarchived.
+
+Verification:
+
+- `poetry run pytest tests/unit/test_reporting.py tests/integration/test_reporting_http.py tests/unit/test_service.py tests/unit/test_targets.py tests/unit/test_routing.py tests/integration/test_api.py tests/integration/test_local_model_target.py -q -o faulthandler_timeout=30`: **224 PASS** (outside sandbox).
+- Initial full run: 1203 PASS, one compatibility regression for invalid injected
+  target-registry startup error type. Existing ValueError behavior restored.
+- `poetry run pytest tests/integration/test_extensions.py tests/unit/test_reporting.py tests/integration/test_reporting_http.py -q`: **104 PASS** after fix (outside sandbox).
+- Final `poetry run pytest -q`: **1204 PASS**, one pre-existing Starlette/httpx
+  deprecation warning, 27.52 seconds (outside sandbox).
+- `poetry run ruff check .`: checks PASS, with a traversal warning for the
+  pre-existing missing `openspec/changes/archive/2026-10-03-add-local-model-target`
+  directory. `poetry run ruff format --check .`: 44 files formatted but traversal
+  exits nonzero for that same missing directory. Existing staged archival work
+  was preserved, not repaired or included in this change.
+- `poetry run ruff check . --extend-exclude openspec/changes/archive/2026-10-03-add-local-model-target`: **PASS**.
+- `poetry run ruff format --check . --extend-exclude openspec/changes/archive/2026-10-03-add-local-model-target`: **PASS**, 44 files already formatted.
+- `openspec validate add-security-reporting-foundation --strict`: **PASS**.
+- `git diff --check`: **PASS**.
+- Real Ollama smoke: **NOT RUN**; deterministic verification requires no Ollama.
+
+Sandboxed HTTP tests stalled with asyncio selector/worker waits; reruns outside
+the sandbox passed. The new tests cover all actions, safe operational failures,
+target success/exception/invalid result, pre-dispatch committed evidence, latency,
+unknown completion, restart, distinct aggregate totals/finding multiplicities,
+pagination/time bounds, invalid identities/query inputs, sensitive input/output
+non-leakage, concurrency, duplicate/orphan/ineligible outcomes, rollback, required
+write-lock failure, completion failure, and committed-then-raised acknowledgement.
+
+Independent review is a separate required gate. Fresh correctness reviewer
+`/root/reporting_correctness_review` failed to start because the agent service
+reported a usage limit; no review verdict was produced. Security reviewer
+`/root/reporting_security_review` was requested separately. Review verdicts and
+remaining gate status are recorded below when available. This verification entry
+does not declare the change complete and does not authorize archival.
+
+Fresh independent security review `/root/reporting_security_review`: **PASS**, no
+concrete findings. Independently ran reporting 71 PASS and reporting/service
+101 PASS; checked trusted projection, dual gate, completion poisoning, privacy,
+parameterized queries and restart semantics. No files modified by reviewer.
+
+Fresh independent correctness review `/root/reporting_correctness_review` resumed
+after the initial service limit and returned **FAIL** with one confirmed medium
+finding: schema version 1 plus expected table names with wrong columns was accepted
+at startup. Reviewer reproduced it and independently ran reporting/service/targets
+115 PASS. Before fixing, added three regression variants (wrong columns, omitted
+count constraint, missing eligible-outcome trigger): **3 FAIL** as expected. Fixed
+startup to compare the actual schema objects against versioned DDL, including
+columns, keys/checks/FKs/index and eligibility trigger, before enabling WAL. Invalid
+stores are rejected with fixed invalid_reporting_configuration without destructive
+recovery. Unit reporting after fix: **74 PASS**. Affected integration and fresh
+reviews were requested; final results follow.
+
+Final review/verification after schema fix:
+
+- `poetry run pytest tests/unit/test_reporting.py tests/integration/test_reporting_http.py tests/integration/test_extensions.py -q`: **107 PASS** (outside sandbox).
+- Fresh correctness rereview `/root/reporting_correctness_review`: **PASS**, no
+  remaining findings. Independently ran reporting/service/targets **118 PASS**.
+- Fresh security rereview `/root/reporting_security_review`: **PASS**, no remaining
+  bypass or privacy findings. Independently ran reporting/service **104 PASS**,
+  including schema regressions; confirmed existing incompatible data is preserved.
+- Full pytest, final lint/format, strict validation and whitespace results are
+  recorded below. Challenge traceability was updated only after both fresh review
+  gates passed. No output, budget, dashboard or cryptographic integrity claims.
+
+- Final `poetry run pytest -q` after confirmed review fix: **1207 PASS**, one
+  pre-existing Starlette/httpx deprecation warning, 25.05 seconds.
+- Final Ruff lint/format with the pre-existing missing archive path excluded:
+  **PASS**, 44 files formatted. Strict change validation and whitespace: **PASS**.
+- Required correctness and security review gates: **PASS**. No remaining product
+  blocker. The broad unexcluded formatter still encounters the unrelated missing
+  archive path; its files/staged state remain preserved. One reporting task-group
+  commit is required; no push, spec synchronization or archival is performed.

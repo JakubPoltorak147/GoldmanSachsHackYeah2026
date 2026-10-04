@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Provide durable, privacy-safe security and operational evidence with accurate invocation accounting, bounded local queries and portable audit exports for security teams and management.
+Provide durable, privacy-safe security and operational evidence with accurate invocation accounting, bounded local queries for security teams and management.
 
 ## ADDED Requirements
 
@@ -26,11 +26,11 @@ The system SHALL persist each successfully audited decision or operational evalu
 - **THEN** startup fails with a fixed sanitized reporting error and preserves existing data without permissive fallback
 
 ### Requirement: Closed content-free reporting schema
-Reporting SHALL store and export only schema-versioned allowlisted identities, timestamps, actions, fixed reason/error codes, enablement, finding counts, invocation status and finite nonnegative durations. It MUST exclude prompts, redacted content, output, matched values, spans, snippets, content hashes, credentials, URLs, raw exceptions and arbitrary metadata. There SHALL be no content-capture option in this capability.
+Reporting SHALL store only schema-versioned allowlisted identities, timestamps, actions, fixed reason/error codes, enablement, finding counts, invocation status and finite nonnegative durations. It MUST exclude prompts, redacted content, output, matched values, spans, snippets, content hashes, credentials, URLs, raw exceptions and arbitrary metadata. There SHALL be no content-capture option in this capability.
 
 #### Scenario: Sensitive data under every action
 - **WHEN** real detectors evaluate credentials, email, SSN and attack content under ALLOW, REDACT and BLOCK mappings
-- **THEN** database rows, reporting logs and exports contain only the allowlisted metadata and none of the submitted values or derived content
+- **THEN** database rows, reporting logs and queries contain only the allowlisted metadata and none of the submitted values or derived content
 
 #### Scenario: Output and exception canaries
 - **WHEN** target output, adapter/control exceptions or provider metadata contain sensitive canaries
@@ -72,7 +72,7 @@ Reporting SHALL distinguish succeeded, failed, unknown and not_invoked independe
 
 #### Scenario: Interrupted execution
 - **WHEN** execution stops after a durable eligible decision but before a durable completion
-- **THEN** queries/export report unknown, never succeeded, failed or certainly invoked, and restart performs no replay
+- **THEN** queries report unknown, never succeeded, failed or certainly invoked, and restart performs no replay
 
 ### Requirement: Reporting failures preserve enforcement
 Required reporting failure before dispatch MUST return sanitized audit failure and make zero target calls. Completion persistence failure MUST preserve the original target outcome without retry, mark reporting unhealthy and close later dispatch gates in that process. Failed queries MUST return sanitized errors instead of fabricated empty data or totals. No reporting failure SHALL become a security finding or policy BLOCK.
@@ -98,57 +98,44 @@ Required reporting failure before dispatch MUST return sanitized audit failure a
 - **THEN** no target is invoked, existing permanent sink poisoning remains effective and no reporting row claims successful required auditing
 
 ### Requirement: Bounded local reporting queries
-The system SHALL provide an operator-local typed API for paginated event history, interaction lookup and summaries filtered by time, action, target/model, policy, control/finding, invocation status and operational error. Inputs MUST be strictly validated and SQL values parameterized. No reporting HTTP endpoint SHALL be exposed. Lists SHALL cap at 1000 records; summaries SHALL require a half-open UTC range of at most 31 days and cap grouped results at 1000.
+The system SHALL provide a typed in-process API for ascending sequence-paginated
+event listing, UUID detail lookup and summaries. Filters SHALL support paired UTC
+half-open time ranges, action, target and invocation status. Exact input types and
+bounds MUST be validated and SQL values parameterized. Lists SHALL cap at 1000;
+summaries SHALL require a range at most 31 days. No reporting HTTP endpoint,
+operator CLI or export SHALL be introduced by this change.
 
-#### Scenario: Filtered pagination and detail
-- **WHEN** an operator filters by BLOCK, target and finding code, then advances the sequence cursor
-- **THEN** only matching records are returned in ascending sequence without duplicate records; detail lookup returns the same safe evidence
+#### Scenario: Pagination and validation
+- **WHEN** callers list filtered events and advance a sequence cursor
+- **THEN** matching safe records return without duplicates; invalid types, ranges, enums, cursors or SQL-like target IDs yield fixed errors without reflection
 
-#### Scenario: Query validation and injection
-- **WHEN** callers submit malformed ranges/cursors, unsupported grouping, over-limit pages, unknown options or SQL-like identifier strings
-- **THEN** queries return fixed validation errors without reflecting the input or executing caller-selected SQL
-
-#### Scenario: Historical identifier without matches
-- **WHEN** a syntactically valid historical identifier has no rows in the selected range
-- **THEN** a successful query returns an empty result distinctly from reporting_unavailable
+#### Scenario: Detail and no matches
+- **WHEN** a valid UUID or historical target has no matching event
+- **THEN** detail returns None or listing returns empty distinctly from storage failure
 
 ### Requirement: Accurate security and management summaries
-Summaries SHALL report interaction totals, per-action decision counts, operational failures, invocation status counts, finding occurrences/distinct affected interactions and duration sample statistics. Supported grouping SHALL be action, target/model, policy, control, finding code or UTC day. Joins MUST NOT multiply interaction totals. Operational failures MUST NOT count as BLOCK; unknown completion MUST NOT count as success/failure.
+Summaries SHALL report distinct interaction totals, per-action counts, operational
+failure totals, invocation status counts, per-producer/code finding occurrence and
+affected-interaction counts, and timing sample counts/sums/min/max/means. Optional
+grouping SHALL support action and target_id with a 1000-group cap. Child joins MUST
+NOT multiply totals; unknown/not_invoked SHALL NOT supply invocation timings.
 
-#### Scenario: Known multi-finding fixture
-- **WHEN** a fixture contains ALLOW/REDACT/BLOCK, repeated findings, multiple producers, disabled controls, operational failure, successful/failed invocation and unknown completion
-- **THEN** filtered and grouped counts exactly match the known distinct interactions and finding multiplicities; completed-only invocation timing samples exclude unknown and not_invoked
+#### Scenario: Multi-finding fixture
+- **WHEN** a fixture includes all actions, repeated/multiple findings, operational failure and succeeded/failed/unknown/not_invoked outcomes
+- **THEN** totals match distinct events and finding multiplicity, operational failures are not BLOCK, and invocation samples count only completed calls
 
-#### Scenario: Control and finding filter semantics
-- **WHEN** control/finding filters and grouping are applied
-- **THEN** control selection uses explicit plan-status membership including disabled controls, finding selection requires a matching occurrence, combined control/code filters require the same producer, and occurrence totals include only matching findings; decision/outcome totals use distinct selected interactions and detail/export retains complete safe evidence
+#### Scenario: Empty range
+- **WHEN** a valid range selects no events
+- **THEN** counts are zero and timing extrema/means are null
 
-#### Scenario: Null model and empty range
-- **WHEN** a summary includes echo events without model IDs or a valid range with no events
-- **THEN** missing identity uses a null bucket, empty counts are zero, and absent timing samples have null means/min/max rather than fabricated durations
+### Requirement: Safe local storage lifecycle
+Default startup SHALL require writable file-backed SQLite storage, create new
+storage with private local defaults and close owned resources at shutdown.
+In-memory/URI destinations, symlink database destinations and incompatible schemas
+MUST be rejected. Operators SHALL administer existing directory permissions and
+backups. Runtime database/sidecar files MUST be excluded from Git. No retention,
+deletion, historical import or exhaustive platform hardening is required.
 
-#### Scenario: Group limit
-- **WHEN** a query would exceed 1000 groups
-- **THEN** it returns reporting_limit_exceeded rather than incomplete totals
-
-### Requirement: Safe consistent audit export
-The system SHALL export selected safe records as schema-versioned JSONL from one consistent snapshot, with a completion manifest and record count. Export MUST require a UTC range of at most 31 days, use bounded batches and owner-only local files, refuse overwrite, and publish only complete output. Storage/export diagnostics MUST exclude rejected values and exception details.
-
-#### Scenario: Export during concurrent activity
-- **WHEN** new events or completions arrive during export
-- **THEN** the published export contains a consistent snapshot, a high-water sequence and complete manifest whose count matches exported records
-
-#### Scenario: Failed or existing destination
-- **WHEN** output writing fails or the destination already exists
-- **THEN** export returns a fixed nonzero error, leaves the existing destination intact and publishes no apparently complete partial export
-
-### Requirement: Private storage lifecycle
-Default startup SHALL require private writable file-backed storage. Unsafe storage permissions MUST be rejected on supported platforms. Query/export CLI SHALL open existing storage read-only without creating it. Database, sidecars and exports MUST be excluded from Git and documented as operator-controlled security metadata. No automatic retention/deletion or historical import SHALL occur.
-
-#### Scenario: Private files and shutdown
-- **WHEN** the application initializes a new store and later shuts down
-- **THEN** the database and sidecars are privately accessible and owned resources close without logging content or paths
-
-#### Scenario: Read-only CLI and missing database
-- **WHEN** an operator runs queries against an absent database
-- **THEN** the CLI fails safely without creating a database or modifying runtime state
+#### Scenario: Startup and shutdown
+- **WHEN** a new store is opened and later closed and reopened
+- **THEN** committed safe history survives with no replay, and unavailable storage fails startup with sanitized errors

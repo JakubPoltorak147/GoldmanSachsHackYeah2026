@@ -39,14 +39,14 @@ repository.
 | Allowed model restrictions | NOT IMPLEMENTED | One operator-fixed model is a deployment restriction outside policy, not centralized allowed-model governance. |
 | Tool and resource restrictions | NOT IMPLEMENTED | Tool and resource authorization policy is not currently implemented. |
 | Authentication / authorization | NOT IMPLEMENTED | The foundation intentionally has no verified caller identity or authorization system. |
-| Decision auditing | PARTIAL | Safe decision and operational events are emitted and flushed before eligible dispatch. Retention, querying, completion telemetry, and management reporting are not implemented. |
-| Performance telemetry | PARTIAL | Evaluation duration is recorded in audit events, but there is no aggregate performance reporting. |
-| Security metrics | PARTIAL | Individual audit records contain useful security metadata, but there is no metrics aggregation or reporting API. |
+| Decision auditing | PARTIAL | Content-free decision/operational events flush to stdout and commit to SQLite before eligible dispatch. Durable history, trusted identities, separate succeeded/failed/unknown/not_invoked completion accounting, typed listing/detail and basic summaries are verified with fresh correctness/security PASS. Exports and dashboard remain deferred. |
+| Performance telemetry | PARTIAL | Evaluation/invocation/total latency and completed-sample summary statistics are recorded and aggregated. Token/cost/resource telemetry remains deferred. |
+| Security metrics | PARTIAL | Typed in-process reporting exposes distinct event/action/outcome totals, producer/code occurrence and affected-interaction counts, and basic action/target groups. No reporting HTTP routes, output telemetry or dashboard. |
 | Interactive dashboard | NOT IMPLEMENTED | No UI exists. |
 | Sample configuration | PARTIAL | A strict policy file exists, but it does not yet demonstrate the full challenge configuration surface such as semantic thresholds and budget rules. |
 | Runtime policy changes | PARTIAL | Policy is administrator-selected and strictly validated, but it is fixed until process restart. |
 | Automated positive and negative tests | PARTIAL | Deterministic local unit/integration tests cover the implemented foundation, extension contracts and security pack, including adversarial near misses, multi-control policy/redaction, audit privacy/failures, migration and concurrency. Transport doubles and a threaded fake runtime verify model dispatch, limits, failures, privacy and concurrency without Ollama. Future budgets/semantic controls lack coverage. |
-| Commercial-service independence | IMPLEMENTED | The current foundation runs without an external model, provider, database, or paid commercial service. |
+| Commercial-service independence | IMPLEMENTED | The current foundation runs without an external model, provider, database server, or paid commercial service. |
 | Ad-hoc control-layer demonstration | PARTIAL | The HTTP endpoint demonstrates six deterministic controls and configurable enforcement with local echo. A fixed local model now receives centrally approved content; semantic security and remote targets remain deferred. |
 
 ## Stable evidence
@@ -93,9 +93,20 @@ task list.
 Local-model integration preserves unchanged deterministic enforcement and policy
 digest, required eligibility audit and centrally redacted-only submission. Its
 transport/output caps are adapter defenses, not token/compute budget governance.
-Generated output is uninspected; reporting, semantic controls, authorization and
-budgets remain absent. README records settings, trusted cloud-disabled loopback
+Generated output is uninspected; semantic controls, authorization and
+budgets remain absent. Durable safe reporting is now verified as described below. README records settings, trusted cloud-disabled loopback
 runtime preparation, synchronous thread/latency limits and optional real smoke.
 Final acceptance is supported by fresh independent correctness/security PASS and
 1001 unit/122 integration tests; exact evidence is in worklog. The optional real
 Ollama smoke was NOT RUN because runtime prerequisites were absent.
+
+
+The security reporting foundation has passed focused and full deterministic
+verification and fresh independent correctness/security review (see worklog).
+SQLite persistence survives restart, runs at the required pre-dispatch audit
+boundary and fails closed before invocation. Separate completion writes preserve
+obtained target outcomes on storage failure and close later gates. Typed queries
+and summaries support later dashboard work without direct SQLite reads. This is
+partial challenge reporting coverage: budget/resource consumption, broader
+management visualizations and the interactive dashboard remain unimplemented.
+The reporting OpenSpec change remains unarchived at the user's request.

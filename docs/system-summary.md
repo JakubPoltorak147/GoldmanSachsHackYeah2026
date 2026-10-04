@@ -2,7 +2,7 @@
 
 This document summarizes the implemented `establish-control-layer-foundation`,
 `generalize-control-layer-extension-points` and
-`add-deterministic-security-controls` and `add-local-model-target` behavior. It explains the current
+`add-deterministic-security-controls` and `add-local-model-target` plus `add-security-reporting-foundation` behavior. It explains the current
 application and its relationship to the approved assumptions and original product goals. Required behavior remains defined by
 OpenSpec; implementation details are recorded in [architecture.md](architecture.md).
 
@@ -11,7 +11,7 @@ OpenSpec; implementation details are recorded in [architecture.md](architecture.
 The application accepts text, checks it using six independently registered
 deterministic controls, applies central policy, records a safe audit event, and forwards eligible text to a local
 echo or fixed local Ollama text target. This establishes a working control-layer boundary that can be tested
-without an external model, provider, database, or commercial API.
+without an external model, provider, database server, or commercial API.
 
 Local echo returns received text unchanged. Local Ollama submits approved text
 to one operator-configured loopback model; generated output is uninspected.
@@ -35,13 +35,15 @@ to one operator-configured loopback model; generated output is uninspected.
 4. **Resolve central policy.** Policy maps findings to `ALLOW`, `REDACT`, or
    `BLOCK`. Precedence is `BLOCK > REDACT > ALLOW`; no findings yields `ALLOW`.
    The decision records safe reasons and applied rule resolutions.
-5. **Emit the audit event.** A decision record is written and flushed before any
+5. **Persist the audit event.** A decision record is flushed to stdout and committed
+   to content-free SQLite reporting before any
    eligible target invocation. Evaluation or audit failure stops dispatch.
 6. **Apply the decision.** `ALLOW` forwards the original interaction exactly once.
    `REDACT` forwards a new interaction whose selected spans are replaced with
    `[REDACTED]`, exactly once. Overlapping or adjacent spans are merged using
    original offsets. `BLOCK` makes zero target calls.
-7. **Return the outcome.** Successful responses include the server ID, action,
+7. **Record completion and return the outcome.** Separate durable invocation
+   evidence records success/failure, leaving interrupted calls unknown. Successful responses include the server ID, action,
    safe reason and finding codes, and echo result. Error responses use fixed codes
    and exclude submitted text and internal exception details.
 
@@ -64,7 +66,7 @@ select policy. There is no permissive fallback.
 | --- | --- | --- |
 | HTTP response/status mapping | `200` for forwarded ALLOW/REDACT; `403` for policy BLOCK; `422` for invalid input; `503` for evaluation/audit failure; `502` for target failure. Responses expose safe structured fields. | An operational failure is distinct from a policy BLOCK and creates no synthetic security finding. Validation, evaluation, and audit failures make zero target calls. A target failure can occur after eligible dispatch. |
 | Deliberately bounded ASCII email detector | Whole supported candidates are detected, including plus tags, mixed case, and subdomains. Findings use original Python string offsets. Policy decides whether to allow, redact, or block them. | This is bounded email-address detection, not general email or PII protection. Unsupported forms can remain undetected and pass under an ALLOW decision. |
-| Flushed stdout audit is sufficient | Safe JSON decision records are written and flushed under a lock before eligible dispatch. Short writes, write exceptions, or flush failures permanently disable that sink and prevent subsequent dispatch. | Flush acceptance does not guarantee durable retention. Records describe decisions and forwarding eligibility, not successful target completion. Durable retention and target-completion records remain out of scope. |
+| Flushed stdout audit is sufficient | Safe JSON decision records are written and flushed under a lock before eligible dispatch. Short writes, write exceptions, or flush failures permanently disable that sink and prevent subsequent dispatch. | Flush acceptance does not guarantee durable retention. Records describe decisions and forwarding eligibility, not successful target completion. This original assumption is superseded by the reporting foundation: required SQLite persistence and separate completion records now supplement stdout. |
 
 ### Email detector coverage
 
@@ -173,7 +175,7 @@ Settings freeze outside policy until restart (defaults/ranges in README). One
 fixed model is deployment configuration, not full model authorization. Per-call
 clients/buffers isolate concurrent synchronous calls. I/O inactivity limits are
 not end-to-end deadlines or cancellation guarantees; model/hardware/queue latency
-can occupy threads. Output DLP, semantic security, budgets, reporting and runtime
+can occupy threads. Output DLP, semantic security, budgets and runtime
 attestation remain absent. Normal suites use deterministic doubles/fake runtime;
 real smoke is optional and separately invoked. Final evidence is in worklog.
 

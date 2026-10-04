@@ -2,13 +2,13 @@
 
 ## Context
 
-See proposal.md for motivation. There are no active changes in the CLI inventory. The working tree already contains staged local-model archival/spec/worklog edits; this change must not alter or commit those edits.
+See proposal.md for motivation. This is the selected active reporting change. The working tree already contains staged local-model archival/spec/worklog edits; this change must not alter or commit those edits.
 
 Direct integration points inspected: `audit.py` (explicit safe fields and poisoned JSONL sink), `service.py` (one retained binding, required audit then one invocation), `targets.py` (immutable target metadata), `composition.py`, `api.py` lifespan, and frozen `OllamaSettings`. Relevant current specs are decision-audit, interaction-gateway, policy-decisions and local-model-target. No detector redesign is needed.
 
 ## Goals / Non-Goals
 
-**Goals:** durable content-free evidence, separate enforcement and execution accounting, trusted identity attribution, bounded local queries and exports, deterministic verification without a model runtime.
+**Goals:** durable content-free evidence, separate enforcement and execution accounting, trusted identity attribution, bounded local queries, deterministic verification without a model runtime.
 
 **Non-Goals:** see proposal.md. In particular this is single-host storage, without an ingestion queue, general metadata dictionary, request-body capture toggle, token/cost estimation, reporting HTTP routes or new operator authentication scheme.
 
@@ -16,7 +16,7 @@ Direct integration points inspected: `audit.py` (explicit safe fields and poison
 
 ### 1. SQLite at the existing required audit boundary
 
-Use standard-library SQLite in new flat `reporting_store.py`; safe reporting DTOs/projection/query validation live in `reporting.py`, local command handling in `reporting_cli.py`. The store implements narrowly defined append/query operations, not a generic event repository. No ORM or external service is required.
+Use standard-library SQLite in new flat `reporting_store.py`; safe reporting DTOs/projection/query validation live in `reporting.py`. The store implements narrowly defined append/query operations, not a generic event repository. No ORM or external service is required.
 
 Default composition wraps the existing JSONL sink with a required persistent audit sink. For each audit event: validate a safe projection; emit and flush the existing sink; then commit the complete reporting event and children atomically. Return from `emit` only after both succeed. Thus a persisted decision proves successful JSONL emission, and invocation still follows successful required audit. Stdout and SQLite cannot be atomic together: a line can exist without a database row if persistence fails, but no target is called in that case. Do not retry emission or invocation.
 
@@ -53,7 +53,7 @@ An eligible persisted decision starts with derived invocation status `unknown`; 
 
 Completion-write failure cannot undo a target call: preserve the original 200/502 response and original result semantics, do not retry, poison the gate and set in-memory reporting health to fixed `reporting_write_failed`. No stderr exception dump or recursive database error event. Future eligible dispatch attempts fail with existing `audit_failed`/503; evaluation failures retain `evaluation_failed`. A local health method reports healthy/unhealthy and a fixed code; after restart, unknown rows expose gaps, without claiming recovery of lost outcomes. Existing stdout AuditEvent shape and number of events remain unchanged; invocation records are database-only.
 
-A write can commit and then raise before acknowledging success. Poison the gate on any reported write failure and never retry or delete evidence to simulate rollback. A gate commit followed by an error makes zero invocations for that request; any retained eligible decision stays unknown. For completion commit followed by an error, an existing durable outcome remains authoritative; unknown applies only when no completion is present. Atomicity guarantees complete committed records or no uncommitted record, not certainty that every exception rolled back. Failure tests must cover both pre-commit rollback and committed-then-error ambiguity.
+A write can commit and then raise before acknowledging success. Poison the gate on any reported write failure and never retry or delete evidence to simulate rollback. A gate commit followed by an error makes zero invocations for that request; any retained eligible decision stays unknown. For completion commit followed by an error, an existing durable outcome remains authoritative; unknown applies only when no completion is present. Atomicity guarantees complete committed records or no uncommitted record, not certainty that every exception rolled back. Include a core committed-then-raised regression; defer the exhaustive acknowledgement matrix.
 
 Alternative: a mutable single request row obscures immutable decision evidence. Returning a new 503 after successful target execution invites caller retries and confuses target status. Transactional exactly-once execution across SQLite and arbitrary adapters is out of scope.
 
@@ -76,31 +76,44 @@ Add optional `model_id=None` to frozen TargetDefinition. Accept only a strict st
 
 Trusted metadata is an administrative trust boundary: registration/configuration authors must use non-sensitive IDs; syntax alone is not a content sanitizer. Runtime requests, returned model names and exception strings cannot populate it. Historical events retain their recorded identities even if the next deployment changes registries; reads do not reclassify historical data using today's catalogue.
 
-No prompts (including redacted prompts), model output, matched values, snippets, source spans, content hashes, credentials, request headers, principal assertions, URLs, arbitrary error messages or provider metadata can enter storage, export or reporting diagnostics. Numeric token/cost/resource fields are omitted because no validated source currently exists. Durations are observed using a monotonic clock; timestamps use UTC. Evaluation duration retains its current meaning, excluding persistence and inference; invocation duration includes adapter invocation and result validation; total duration runs from service entry to adapter completion, before completion persistence. These are observed timings, not timeouts or output-safety assertions.
+No prompts (including redacted prompts), model output, matched values, snippets, source spans, content hashes, credentials, request headers, principal assertions, URLs, arbitrary error messages or provider metadata can enter storage, queries or reporting diagnostics. Numeric token/cost/resource fields are omitted because no validated source currently exists. Durations are observed using a monotonic clock; timestamps use UTC. Evaluation duration retains its current meaning, excluding persistence and inference; invocation duration includes adapter invocation and result validation; total duration runs from service entry to adapter completion, before completion persistence. These are observed timings, not timeouts or output-safety assertions.
 
 ### 4. Persistence lifecycle and access
 
 `CONTROL_LAYER_REPORTING_DB` selects a local file, default `var/security-reporting.sqlite3`. Empty paths, in-memory/URI destinations and unsupported schema versions are rejected with a fixed startup code `invalid_reporting_configuration`; open/schema initialization failure is `reporting_unavailable`. No fallback to memory or stdout-only production. The application owns startup initialization and shutdown close; create_app gains explicit store injection through the same validated gate for tests. Sink injection continues to be the upstream audit sink, without bypassing persistence. Tests use temporary file-backed stores.
 
-Create default parent/file with owner-only permissions on supported deployment platforms; existing storage/parent permissions must be checked and unsafe exposure rejected. Document an operator-owned private directory, filesystem permissions on DB/WAL/SHM/exports and disk backups; never show configured paths in errors. Store runtime artifacts outside Git (including WAL/SHM); reuse existing ignore patterns or add only the relevant runtime directory pattern during apply. CLI query/export opens an existing database read-only and cannot create/reset it. Local filesystem access is the authorization boundary; callers of `/v1/interactions` gain no reporting access.
+Create new parent directories with mode 0700 and database files with mode 0600
+on POSIX; use WAL, FULL synchronous mode and a bounded busy timeout. Reject
+symlink database destinations and non-file destinations. Operators own existing
+parent-directory permissions and backups. Defer exhaustive ancestor, platform,
+sidecar and permission auditing. Tests use private temporary file-backed stores.
+Local filesystem access is the authorization boundary; no reporting HTTP routes.
+Runtime files are ignored by Git. No CLI is implemented in this change.
 
-No automatic deletion, retention schedule or import. Document manual operator backup/removal only while stopped. Durability follows SQLite/filesystem guarantees, not protection against malicious administrators, disk loss or disabled fsync. Backups/exports contain operational security metadata and need the same access controls.
+No automatic deletion, retention schedule or import. Document manual operator backup/removal only while stopped. Durability follows SQLite/filesystem guarantees, not protection against malicious administrators, disk loss or disabled fsync. Backups contain operational security metadata and need the same access controls.
 
-### 5. Query, aggregation and export contract
+### 5. Basic typed query boundary
 
-Provide typed in-process methods and CLI equivalents:
+Frozen typed query inputs and outputs remain in-process for a future dashboard;
+consumers do not read SQLite directly. Provide list_events with ascending sequence
+pagination (limit 1–1000), UUID detail lookup, and summarize. Filters are optional
+paired UTC half-open timestamps, action, target_id and invocation_status. Summary
+requires a range of at most 31 days. Validate exact types, enums and finite UTC
+bounds, and parameterize SQL. Each call runs under the store lock and a consistent
+read transaction. Read failures return fixed reporting_unavailable without poisoning
+writes or returning fabricated zeros.
 
-- `list_events(filters, limit=100, after_sequence=None)` returns safe audit records with derived invocation state, sequence and schema_version, ascending sequence. Limit 1–1000; keyset cursor is an exact positive integer. Filtered detail lookup accepts a UUID interaction_id, with not-found distinct from query failure.
-- `summarize(filters, group_by=None)` returns interaction_total, decision counts ALLOW/REDACT/BLOCK, operational_failure_total, invocation counts succeeded/failed/unknown/not_invoked, finding occurrence counts, affected-interaction counts, and duration sample counts/sums/min/max/means. Group-by is one of action, target_id, model_id, policy_digest, control_id, finding_code or UTC day. Null identities get an explicit null bucket. Invocation averages use completed samples only; evaluation averages use audit events. Operational rows never count as BLOCK. Per-control/finding affected counts use distinct interaction IDs, preventing multi-finding joins from multiplying decision/outcome totals; occurrence totals retain multiplicity. Grouped distinct counts across different findings need not sum to overall interaction count.
-- `export_events(filters, output_path)` writes schema-versioned JSONL with the same allowlisted projection and derived invocation state. Export all matching records through bounded batches from a single consistent read transaction; append a final manifest with export UTC time, schema_version, record_count, high_water_sequence and `complete: true`. Publish an owner-only destination atomically only after success; refuse overwrite. Failure discards the temporary output, returns a fixed nonzero code and never presents a partial file as a complete export.
+Summary returns distinct interaction totals, action and operational counts,
+invocation counts, finding occurrence and affected-interaction counts by trusted
+producer/code, evaluation and completed invocation/total timing sample statistics.
+Grouping is limited to action and target_id (maximum 1000 groups). Null action is
+the operational bucket; absent timing samples have null extrema/means. Parent
+selection precedes child aggregation so joins cannot multiply event totals.
+Historical identities retain their original values without today's registry lookup.
 
-Filters are UTC half-open time range `[from,to)`, action, target_id, model_id, policy_digest, control_id, finding_code, invocation_status and operational error_code. Require both time bounds for summary/export, at most 31 days; list permits omitted times. Validate strict types, finite timestamps/order, identifier syntax, enumerations and reject unknown arguments. Historical well-formed IDs without matches return empty results; arbitrary SQL, provider metadata and raw request text are not filter inputs. SQL values are parameterized; grouping/sort expressions come from a closed internal enum. Page/summary group results cap at 1000; group overflow returns `reporting_limit_exceeded` rather than truncated totals. Summary returns overall totals and optionally groups; filtered sets are deduplicated before joins.
-
-Filters combine with AND. Time selection uses audit-event timestamp, not completion time. control_id selects events containing that control's explicit plan-status row, including disabled/not-evaluated rows; finding_code selects events containing that finding. If both are supplied, they must identify the same producer/code relationship to match. Summary decision/outcome/timing totals use the distinct selected event set. Finding occurrence/affected totals include only finding rows satisfying any control/code filter; other filters select their parent events. control_id grouping attributes each event to each plan-status control, with enabled/evaluated counts and only that producer's findings; finding_code grouping uses only matching finding rows and excludes no-finding events from groups while retaining them in overall totals. Full history/detail/export preserve the complete safe evidence for each selected event rather than dropping non-matching findings. Queries with only one time bound are rejected; from must be strictly before to. No timing mean/min/max is returned for zero samples (null instead).
-
-Each list/summary call uses its own consistent read snapshot. Export captures a high-water sequence in its single snapshot, so new events and completions cannot change that export. Long exports can retain WAL history; bound them to 31 days and document local operational cost. CLI validates without reflecting rejected values. Query failure yields `reporting_unavailable` with no fabricated zeros; query errors do not poison healthy dispatch writes unless an actual write failure occurs. Report health includes only fixed status/code; no new public endpoint.
-
-Alternative: HTTP queries would require an operator authorization contract that the current gateway lacks. CSV creates spreadsheet formula risks and loses nested attribution; JSONL directly preserves typed safe data.
+Defer export, CLI, per-model/policy/control/day grouping, control/code filters,
+complex combined filter semantics and snapshot manifests. No database-facing HTTP
+endpoint or dashboard is introduced.
 
 ## Risks / Trade-offs
 
@@ -108,9 +121,9 @@ Alternative: HTTP queries would require an operator authorization contract that 
 - Split stdout/database commit -> emit stdout first; no dispatch until durable commit; document stdout-only attempts and absence of cross-sink atomicity.
 - Crash or completion-write failure leaves unknown outcomes -> explicit unknown accounting, no replay/retry or false success.
 - Administrators can choose sensitive-looking model/registration IDs -> documented non-sensitive metadata contract, source provenance and validation; never derive identifiers from payloads.
-- Database history grows -> private operator-managed storage and bounded reads/exports; no speculative retention subsystem.
+- Database history grows -> private operator-managed storage and bounded reads; no speculative retention subsystem.
 - Filesystem reader can see metadata -> local operator-only API and file permissions, no unauthenticated HTTP reporting.
-- Read snapshots can retain WAL -> bounded export window and documented disk monitoring; disk failure closes the dispatch gate.
+- Read snapshots can retain WAL -> short bounded queries and documented disk monitoring; disk failure closes the dispatch gate.
 
 ## Migration Plan
 
@@ -118,4 +131,16 @@ After explicit APPLY approval, implement and verify through tasks.md. No histori
 
 ## Open Questions
 
-None requiring a product decision. Choices above are proposed scope for review/APPLY, not authorization to implement.
+None requiring a product decision. The user explicitly approved this reduced scope for APPLY on 2026-10-04.
+
+## Approved ownership and scope
+
+Primary agent owns implementation, integration and verification; fresh read-only
+agents own final correctness and security reviews. Files: reporting.py,
+reporting_store.py, service.py, api.py, targets.py, composition.py, reporting tests
+and relevant docs/ignore patterns. Do not modify controls, policy configuration,
+interaction HTTP DTOs or staged local-model archive/spec edits. Existing local-model
+and extension contracts are prerequisites already implemented. One integrated task
+group/commit keeps this small cross-cutting foundation reviewable. Approval is the
+2026-10-04 user instruction: “This message is my explicit APPLY approval”, including
+artifact reduction then immediate implementation without another approval.

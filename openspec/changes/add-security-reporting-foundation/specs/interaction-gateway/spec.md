@@ -18,7 +18,7 @@ Immutable target metadata SHALL accept an optional non-sensitive administrator-o
 - **THEN** its reporting model ID is null without introspection or discovery
 
 ### Requirement: Reporting lifecycle at the gateway
-Default startup SHALL initialize required durable reporting storage and close owned resources at shutdown. Injected stores and sinks MUST retain the same validation and audit gate. Unavailable/unsafe storage SHALL fail startup with sanitized codes without exposing paths. Existing interaction response fields, statuses, input validation and public target selection SHALL remain unchanged.
+Default startup SHALL initialize required durable reporting storage and close owned resources at shutdown. Injected stores and sinks MUST retain the same validation and audit gate. Unavailable or unsupported storage SHALL fail startup with sanitized codes without exposing paths. Existing interaction response fields, statuses, input validation and public target selection SHALL remain unchanged.
 
 #### Scenario: Unwritable storage
 - **WHEN** the configured reporting location cannot be initialized
