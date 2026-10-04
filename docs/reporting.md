@@ -251,5 +251,16 @@ workspace; prompts, transformed input and model/echo output never enter reportin
 Only UUID-correlated safe event detail supplies recorded pipeline stages/timings.
 Missing detail leaves the immediate outcome intact and labels recorded stages
 unavailable; unknown completion never proves invocation or triggers retry.
+Shared display labels explain controls, findings and policy actions while
+retaining technical IDs/codes as supporting text. These labels do not add
+findings, change enforcement or imply verified credential/identity validity.
+Unknown extension identities remain neutral, visible text.
+
+The workspace explains actual reasons only from its immediate response and
+UUID-matched detail. Expected scenario prose is kept separate. An allowed action
+with failed target completion is not full scenario success, and absent detail
+or unknown completion yields an unverifiable expectation. Counts, mapped actions,
+audit persistence and historical completion are never inferred from the scenario
+definition. No new reporting fields or stored explanatory payloads are added.
 See [Interaction workspace](demo.md) for startup flags, privacy, origin validation,
 scenario profiles, model prerequisites and separate live-rehearsal requirements.

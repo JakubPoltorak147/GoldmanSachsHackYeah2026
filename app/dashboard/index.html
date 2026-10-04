@@ -56,6 +56,7 @@
           <aside class="scenario-column" aria-labelledby="scenarios-heading"><h2 id="scenarios-heading">Prepared scenarios</h2><p class="muted">Synthetic fixtures · fixed server profiles</p><div id="scenario-list"></div></aside>
           <section class="composer panel" aria-labelledby="composer-heading">
             <div class="panel-heading"><div><h2 id="composer-heading">Custom interaction</h2><p>Uses the application policy</p></div></div>
+            <div class="interaction-guide"><p>Local echo returns approved text after the checks. Local model generates a response from approved text. Changing the target does not change which checks run.</p><p id="custom-guidance">Current checks are unavailable until configuration loads.</p><p><strong>ALLOW</strong> permits forwarding under the configured checks; it is not a guarantee of safety. <strong>REDACT</strong> removes detected sensitive values before forwarding. <strong>BLOCK</strong> stops the request before the target is called.</p></div>
             <form id="custom-form" class="composer-body">
               <label for="custom-target">Target</label><select id="custom-target" disabled aria-describedby="target-description"></select><p class="muted" id="target-description"></p>
               <label for="custom-content">Interaction text</label><textarea id="custom-content" rows="10" placeholder="Type an interaction to evaluate…" spellcheck="false" autocomplete="off" aria-describedby="input-count input-validation"></textarea>
@@ -64,7 +65,7 @@
             </form>
             <div class="configuration"><h3>Application controls</h3><div id="custom-controls"></div><p class="muted" id="custom-policy"></p></div>
           </section>
-          <section class="result-panel panel" aria-labelledby="result-heading"><div class="panel-heading"><div><h2 id="result-heading">Result</h2><p id="run-context">Select a scenario or enter custom text.</p></div></div><div class="result-body"><p id="run-status" role="status" aria-live="polite">No interaction submitted.</p><div id="scenario-selection"></div><div id="run-result"></div><div id="run-pipeline"></div><div id="run-evidence"></div></div></section>
+          <section class="result-panel panel" aria-labelledby="result-heading"><div class="panel-heading"><div><h2 id="result-heading" tabindex="-1">Result</h2><p id="run-context">Select a scenario or enter custom text.</p></div></div><div class="result-body"><p id="run-status" role="status" aria-live="polite">No interaction submitted.</p><div id="scenario-selection"></div><div id="run-explanation"></div><div id="run-result"></div><div id="run-pipeline"></div><div id="run-evidence"></div></div></section>
         </div>
       </section>
     </main>

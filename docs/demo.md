@@ -151,6 +151,36 @@ not-reached, failed, unknown and unavailable labels retain reporting meanings.
 Missing reporting cannot erase an immediate result or trigger execution retry.
 The matching audit-event button opens safe detail; the overview refreshes on return.
 
+Before running a prepared case, read **What this tests**, the expected outcome
+and **Before you run** prerequisites. Disabled cards can be selected to read
+their explanation; Run remains disabled. Technical expectation details retain
+profile and finding identifiers without displaying the hidden synthetic input.
+
+After a run, **What happened**, **Why** and **What happens next** explain the
+actual response and UUID-matched evidence. Readable names accompany the original
+control/finding codes in the workspace, overview and audit detail. Unknown codes
+remain visible with neutral labels; strings are rendered as text.
+
+An allowed policy decision is separate from successful generation. Normal
+ALLOW/REDACT scenarios only fully match when a successful immediate result and
+durable target completion are present. BLOCK requires the expected findings and
+recorded not-invoked status. Fault simulations require their expected failure
+and corresponding recorded evaluation/target outcome. Missing detail or unknown
+completion displays **Cannot verify full expectation**, even if the immediate
+response contains generated text. Extra valid semantic categories are shown and
+do not invalidate an otherwise satisfied expectation.
+
+| Outcome | Meaning | Suggested next step |
+| --- | --- | --- |
+| ALLOW | Configured checks permitted forwarding, without guaranteeing safety | Read the labelled result and inspect the checks |
+| REDACT | Policy removed detected values before eligible forwarding | Review echo or model result; no forwarded-text preview is reconstructed |
+| BLOCK | Policy stopped the request; target was not invoked | Remove the described restricted material before a new explicit submission |
+| evaluation_failed | A check could not finish; no decision or generation call | Operator checks configured evaluator/runtime; the code alone does not identify the cause |
+| audit_failed | Required auditing failed; target was not invoked | Operator checks audit/reporting health |
+| target_failed | Target execution failed after eligibility | Operator checks generation runtime/model; recorded action remains separate |
+| invalid_request | Gateway rejected the request | Check input/workspace configuration |
+| Disconnected or unknown completion | Immediate or historical outcome cannot be confirmed | Inspect available evidence; do not assume cancellation or retry |
+
 Required tests use real controls and existing adapters with deterministic HTTP
 doubles; no Ollama is required:
 

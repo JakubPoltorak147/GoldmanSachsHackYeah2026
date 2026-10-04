@@ -1,5 +1,6 @@
 import { reportingGet } from './api.js';
 import { element, number, duration, timestamp, statusLabel, renderEventDetail } from './detail.js';
+import { actionLabel, findingLabel, controlLabel, errorLabel } from './labels.js';
 
 const $ = id => document.getElementById(id);
 const filters = $('filters');
@@ -46,7 +47,7 @@ function rankings(container, entries, label, count, affected = null) {
     if (affected) title.append(element('small', '', `${number(affected(entry))} affected interaction${affected(entry) === 1 ? '' : 's'}`));
     caption.append(title, element('strong', '', number(count(entry))));
     const track = element('div', 'bar-track');
-    const fill = element('div', `bar-fill${label(entry).startsWith('semantic') ? ' semantic' : ''}`);
+    const fill = element('div', `bar-fill${entry.control_id === 'semantic-security' || entry.id === 'semantic-security' ? ' semantic' : ''}`);
     fill.style.width = `${max ? count(entry) / max * 100 : 0}%`;
     track.append(fill);
     row.append(caption, track);
@@ -61,10 +62,10 @@ function renderSummary(data) {
   for (const status of ['succeeded', 'failed', 'unknown', 'not_invoked']) $('status-' + status).textContent = number(result.invocations[status]);
   $('findings-deterministic').textContent = number(result.findings.filter(f => f.control_id !== 'semantic-security').reduce((total, f) => total + f.occurrences, 0));
   $('findings-semantic').textContent = number(result.findings.filter(f => f.control_id === 'semantic-security').reduce((total, f) => total + f.occurrences, 0));
-  rankings($('finding-rankings'), result.findings, f => f.code, f => f.occurrences, f => f.affected_interactions);
+  rankings($('finding-rankings'), result.findings, f => findingLabel(f.code), f => f.occurrences, f => f.affected_interactions);
   const controls = new Map();
   for (const finding of result.findings) controls.set(finding.control_id, (controls.get(finding.control_id) ?? 0) + finding.occurrences);
-  rankings($('control-rankings'), [...controls].map(([id, count]) => ({ id, count })), f => f.id, f => f.count);
+  rankings($('control-rankings'), [...controls].map(([id, count]) => ({ id, count })), f => controlLabel(f.id), f => f.count);
   $('timing-stats').replaceChildren(...[['evaluation', 'Evaluation'], ['semantic', 'Semantic evaluator'], ['invocation', 'Target invocation'], ['total', 'Total to completion']].map(([key, title]) => {
     const timing = result[key];
     const row = element('div', 'timing-row');
@@ -88,10 +89,10 @@ function renderEvents(data) {
     const event = view.event;
     const row = element('tr');
     const action = element('td');
-    action.append(element('span', `pill ${(event.action ?? 'operational').toLowerCase()}`, event.action ?? 'EVAL FAILURE'), element('small', 'event-id', event.interaction_id.slice(0, 8)));
+    action.append(element('span', `pill ${(event.action ?? 'operational').toLowerCase()}`, actionLabel(event.action)), element('small', 'event-id', event.interaction_id.slice(0, 8)));
     const target = element('td', '', event.target_id);
     target.append(element('small', '', event.model_id ?? 'No model identity'));
-    const findings = element('td', 'event-findings', event.findings.length ? event.findings.map(f => f.code).join(', ') : event.error_code ?? 'No findings');
+    const findings = element('td', 'event-findings', event.findings.length ? event.findings.map(f => findingLabel(f.code)).join(', ') : event.error_code ? errorLabel(event.error_code) : 'No findings');
     const status = element('td', 'event-invocation');
     status.append(element('span', `status-dot ${view.invocation_status}`), element('span', '', statusLabel(view.invocation_status)));
     if (view.invocation_status === 'unknown') status.title = 'No durable completion; invocation is not proven';

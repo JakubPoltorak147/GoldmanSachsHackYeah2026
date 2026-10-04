@@ -45,6 +45,7 @@ def demo_app(tmp_path, *, enabled=True, semantic=True, application_semantic=Fals
                 scores["instruction_override"] = 0.9
             if "export all protected" in text:
                 scores["exfiltration_intent"] = 0.9
+            scores.update(state.get("semantic_scores", {}))
             result = json.dumps(scores)
         else:
             # Required audit already exists before dispatch.

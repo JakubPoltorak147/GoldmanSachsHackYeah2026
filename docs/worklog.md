@@ -1570,3 +1570,33 @@ Read-only installed-model metadata confirms generation qwen2.5:0.5b available,
 configured semantic qwen2.5:3b absent. No models downloaded or daemon changed.
 This group does not satisfy live semantic acceptance.
 Commit subject: feat(demo): expand scenarios and explain catalog expectations.
+
+## 2026-10-04 — readable workbench explanations (group 6)
+
+Implemented safe pre-run purpose/expectation/runtime explanations, readable shared
+control/finding/action/error vocabulary, and What happened / Why / What happens
+next derived from immediate results and UUID-matched evidence. Disabled cards can
+be inspected without execution. Full expectation matches require actual required
+findings and durable completion; missing completion/detail cannot claim success.
+Custom guidance distinguishes application policy from scenario flags and target
+selection. Unknown labels stay literal text, with original identifiers retained.
+
+Before fixes, missing-completion and disabled-card regressions failed (2 FAIL);
+after fixes both passed. Added wrong-UUID, valid extra semantic categories,
+contrary classification, audit/validation/target failures, unknown HTML-like
+findings, enabled custom echo semantics and narrow keyboard-focus coverage.
+Retained privacy, Unicode bounds, navigation lock and both overview journeys.
+Chromium full suite 9 PASS (37.35s), full unit/integration 1614 PASS (40.61s),
+Ruff check and format (60 files), JS syntax, OpenSpec strict and diff check PASS.
+Backend/browser ran outside sandbox after independently diagnosed TestClient
+stall. Desktop 1440px/mobile 390px screenshots inspected; no horizontal overflow,
+readable labels and visible keyboard focus. Screenshots contain only synthetic
+fixture results, retained temporarily under /tmp, not committed.
+
+Fresh read-only correctness /root/revision_correctness and security/bypass
+/root/scenario_diagnosis PASS with no material findings. Both independently ran
+two catalog tests and reviewed full revision; integrated execution counts are
+primary evidence. Historical tasks footer was reconciled after their minor note.
+No core, policy, reporting, adapter or local environment changes. Live semantic
+acceptance remains incomplete. Commit subject:
+feat(dashboard): explain scenarios and observed interaction outcomes.

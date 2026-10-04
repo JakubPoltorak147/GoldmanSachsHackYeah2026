@@ -1,3 +1,5 @@
+import { actionLabel, controlLabel, findingLabel, findingMeaning, errorLabel } from './labels.js';
+
 // All reporting values are inserted as text, including administrative identities.
 export function element(tag, className = '', text = null) {
   const node = document.createElement(tag);
@@ -26,22 +28,22 @@ export function renderEventDetail(container, view) {
   const summary = section('Decision & identity');
   details(summary, [
     ['Interaction ID', event.interaction_id], ['Recorded at', timestamp(event.timestamp)],
-    ['Decision', event.action ?? 'No policy action'], ['Event type', event.event_type],
-    ['Reason / error', event.reason_code ?? event.error_code],
+    ['Decision', actionLabel(event.action)], ['Event type', event.event_type],
+    ['Reason / error', event.error_code ? errorLabel(event.error_code) : event.reason_code === 'no_findings' ? 'No findings from configured checks (no_findings)' : event.reason_code === 'policy_resolved' ? 'Policy resolved the recorded findings (policy_resolved)' : 'Not recorded'],
     ['Target', event.target_id], ['Target model', event.model_id],
-    ['Invocation', statusLabel(view.invocation_status)], ['Target error', view.completion?.error_code ?? 'None recorded'],
+    ['Invocation', statusLabel(view.invocation_status)], ['Target error', view.completion?.error_code ? errorLabel(view.completion.error_code) : 'None recorded'],
   ]);
   if (view.invocation_status === 'unknown') summary.append(element('p', 'muted', 'Eligible decision with no durable completion. This does not prove the target was invoked.'));
   const controls = section('Controls & security findings');
   for (const [id, enabled] of event.control_status) {
     const row = element('div', 'detail-control');
-    row.append(element('span', '', id), element('span', '', !enabled ? 'Disabled' : event.evaluated_controls.includes(id) ? 'Evaluated' : 'Not completed'));
+    row.append(element('span', '', controlLabel(id)), element('span', '', !enabled ? 'Disabled' : event.evaluated_controls.includes(id) ? 'Evaluated' : 'Not completed'));
     controls.append(row);
   }
   if (!event.findings.length) controls.append(element('p', 'muted', event.action === null ? 'No findings recorded for operational failures.' : 'No security findings.'));
   for (const finding of event.findings) {
-    const row = element('div', 'detail-finding', finding.code);
-    row.append(element('small', '', `${finding.control_id} · ${number(finding.count)} occurrence${finding.count === 1 ? '' : 's'} · mapped to ${finding.action}`));
+    const row = element('div', 'detail-finding', findingLabel(finding.code));
+    row.append(element('p', '', findingMeaning(finding.code)), element('small', '', `${controlLabel(finding.control_id)} · ${number(finding.count)} occurrence${finding.count === 1 ? '' : 's'} · mapped to ${actionLabel(finding.action)}`));
     controls.append(row);
   }
   const semantic = section('Semantic evaluator');

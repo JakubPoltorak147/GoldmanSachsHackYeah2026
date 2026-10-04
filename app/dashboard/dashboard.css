@@ -112,6 +112,18 @@
 .audit-link { display:block; margin:14px 0; }
 .simulation-label { color:var(--amber); }
 .result-body h3 { margin-top:16px; }
+.interaction-guide { padding:16px 20px; border-bottom:1px solid var(--line); background:#f8faf7; }
+.interaction-guide p+p { margin-top:10px; }
+.technical-detail { margin:12px 0; color:var(--muted); overflow-wrap:anywhere; }
+.technical-detail summary { cursor:pointer; }
+.expectation-comparison { margin:16px 0; padding:12px; border:1px solid var(--line); background:#f8faf7; }
+.expectation-comparison h3 { margin-top:0; }
+.expectation-comparison p { margin-top:8px; }
+#run-explanation p { margin:8px 0; overflow-wrap:anywhere; }
+.finding-reasons { padding-left:20px; }
+.finding-reasons li { margin:10px 0; overflow-wrap:anywhere; }
+.control-row>span:first-child { overflow-wrap:anywhere; }
+.scenario-item small { overflow-wrap:anywhere; }
 @media(max-width:1100px) { main { padding:24px; }
 .console-header { padding:12px 24px; gap:20px; }
 .local-label { display:none; }
