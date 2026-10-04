@@ -7,10 +7,11 @@ neutral console with top navigation, readable tables and labelled outcomes.
 
 ## Run locally
 
-From the repository root, start the application with Demo enabled:
+From the repository root, start the application with Demo and semantic scenarios
+enabled:
 
 ```bash
-CONTROL_LAYER_DEMO_ENABLED=true poetry run uvicorn app.control_layer.api:create_app --factory --host 127.0.0.1 --port 8000 --no-access-log --no-proxy-headers
+CONTROL_LAYER_DEMO_ENABLED=true CONTROL_LAYER_DEMO_SEMANTIC_ENABLED=true poetry run uvicorn app.control_layer.api:create_app --factory --host 127.0.0.1 --port 8000 --no-access-log --no-proxy-headers
 ```
 
 Open `http://127.0.0.1:8000/dashboard` and select **Interactions**. Under the
@@ -21,12 +22,9 @@ that demonstrates REDACT. The immediate echo result is labelled explicitly.
 
 The flags `CONTROL_LAYER_DEMO_ENABLED` and
 `CONTROL_LAYER_DEMO_SEMANTIC_ENABLED` accept exactly `true` or `false`; both
-are false by default. Invalid values prevent startup. Enable semantic scenarios
-with the second flag, after provisioning a trusted local evaluator:
-
-```bash
-CONTROL_LAYER_DEMO_ENABLED=true CONTROL_LAYER_DEMO_SEMANTIC_ENABLED=true poetry run uvicorn app.control_layer.api:create_app --factory --host 127.0.0.1 --port 8000 --no-access-log --no-proxy-headers
-```
+are false by default. Invalid values prevent startup. Omit the second flag for
+deterministic-only scenarios. Both settings are read at startup, so restart the
+server after changing them.
 
 Generation and evaluation use the existing configured local runtimes; generation
 defaults to `qwen2.5:0.5b` and semantic evaluation defaults to `qwen2.5:3b`.
