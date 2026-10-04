@@ -68,7 +68,7 @@ def test_synthetic_catalog_is_bounded_immutable_and_public_projection_is_safe():
         findings = tuple(
             f
             for r in controls.registrations
-            if r.definition.id != "semantic-security"
+            if r.definition.id not in ("semantic-security", "usage-budget")
             for f in r.evaluator.evaluate(
                 Interaction.create("local-ollama", scenario.content)
             )
@@ -86,7 +86,7 @@ def test_synthetic_catalog_is_bounded_immutable_and_public_projection_is_safe():
     assert covered == {
         f.code
         for r in controls.registrations
-        if r.definition.id != "semantic-security"
+        if r.definition.id not in ("semantic-security", "usage-budget")
         for f in r.definition.findings
     }
     private = next(s for s in SCENARIOS if s.id == "private-key")

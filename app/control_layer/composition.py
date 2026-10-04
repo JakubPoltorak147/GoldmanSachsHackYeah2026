@@ -45,6 +45,14 @@ from app.control_layer.targets import (
     TargetDefinition,
     TargetRegistry,
 )
+from app.control_layer.usage_control import (
+    CODES as USAGE_CODES,
+)
+from app.control_layer.usage_control import (
+    USAGE_ID,
+    UsageBudgetControl,
+    UsageMeter,
+)
 
 
 def default_controls() -> ControlRegistry:
@@ -95,6 +103,15 @@ def default_controls() -> ControlRegistry:
                     ),
                 ),
                 attacks,
+            ),
+            ControlRegistration(
+                ControlDefinition(
+                    USAGE_ID,
+                    tuple(
+                        FindingDefinition(code, False, False) for code in USAGE_CODES
+                    ),
+                ),
+                UsageBudgetControl(UsageMeter()),
             ),
             ControlRegistration(
                 ControlDefinition(
@@ -149,3 +166,34 @@ def bind_semantic_policy(policy: BoundPolicy) -> BoundPolicy:
             )
         entries.append(entry)
     return replace(policy, entries=tuple(entries))
+
+
+def bind_usage_policy(policy: BoundPolicy) -> BoundPolicy:
+    """Give each bound policy its own meter and its validated policy limits."""
+    entries = []
+    for entry in policy.entries:
+        if entry.control_id == USAGE_ID:
+            definition = entry.registration.definition
+            evaluator = entry.registration.evaluator
+            if (
+                type(evaluator) is not UsageBudgetControl
+                or type(evaluator.meter) is not UsageMeter
+                or tuple(
+                    (f.code, f.span_required, f.supports_redaction)
+                    for f in definition.findings
+                )
+                != tuple((code, False, False) for code in USAGE_CODES)
+                or (entry.enabled and entry.limits is None)
+            ):
+                raise PolicyError()
+            evaluator = UsageBudgetControl(evaluator.meter.fresh(), entry.limits)
+            entry = replace(
+                entry, registration=ControlRegistration(definition, evaluator)
+            )
+        entries.append(entry)
+    return replace(policy, entries=tuple(entries))
+
+
+def bind_policy(policy: BoundPolicy) -> BoundPolicy:
+    """Startup binding shared by the application and every demo profile."""
+    return bind_usage_policy(bind_semantic_policy(policy))

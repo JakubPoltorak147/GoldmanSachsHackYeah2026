@@ -42,6 +42,11 @@
         <div class="status-count"><span class="status-dot not_invoked"></span><strong id="status-not_invoked">—</strong> Not invoked</div>
         <div class="operational-count"><strong id="metric-operational">—</strong><span>Evaluation failures<small>Operational · no policy action</small></span></div>
       </section>
+      <section class="panel usage-panel" aria-labelledby="usage-heading">
+        <div class="panel-heading"><div><h2 id="usage-heading">Usage and budget</h2><p>Current budget window · independent of the filters above</p></div><span id="usage-state" class="usage-state" role="status">Loading…</span></div>
+        <div id="usage-body" class="usage-body"><p class="muted">Waiting for usage data…</p></div>
+        <p class="panel-footnote">Tokens are estimated as characters ÷ 4, rounded up. Counters are process-wide and reset on restart; reading them never consumes budget.</p>
+      </section>
       <section class="insight-grid" aria-label="Findings and latency">
         <article class="panel finding-panel"><div class="panel-heading"><div><h2>Security findings</h2><p>Top categories by occurrence</p></div></div><div class="finding-totals"><span>Deterministic <strong id="findings-deterministic">—</strong></span><span>Semantic <strong id="findings-semantic">—</strong></span></div><div id="finding-rankings" class="rankings"><p class="muted">Waiting for evidence…</p></div></article>
         <article class="panel"><div class="panel-heading"><div><h2>Control activity</h2><p>Top controls with findings</p></div></div><div id="control-rankings" class="rankings"><p class="muted">Waiting for evidence…</p></div><p class="panel-footnote">Finding occurrences · not distinct interactions</p></article>

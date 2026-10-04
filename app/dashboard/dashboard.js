@@ -1,4 +1,4 @@
-import { reportingGet } from './api.js';
+import { reportingGet, usageGet } from './api.js';
 import { element, number, duration, timestamp, statusLabel, renderEventDetail } from './detail.js';
 import { actionLabel, findingLabel, controlLabel, errorLabel } from './labels.js';
 
@@ -11,6 +11,7 @@ let busy = false;
 let queued = false;
 let selected = null;
 let snapshot = null;
+let usageSnapshot = null;
 let detailSnapshot = null;
 let historyPage = null;
 let nextCursor = null;
@@ -80,6 +81,61 @@ function renderSummary(data) {
   $('health-label').textContent = data.reporting_health === 'healthy' ? 'Write-gate health: healthy' : 'Write-gate health: reporting_write_failed';
   $('health-label').style.color = data.reporting_health === 'healthy' ? '' : 'var(--amber)';
   $('window-label').textContent = `Evidence window: ${timestamp(data.window.from_time)} – ${timestamp(data.window.to_time)}`;
+}
+function meter(title, counter, unit) {
+  const ratio = counter.limit ? counter.used / counter.limit : 0;
+  const state = counter.used >= counter.limit ? 'over' : ratio >= 0.8 ? 'near' : 'ok';
+  const row = element('div', `usage-meter ${state}`);
+  const caption = element('div', 'rank-caption');
+  caption.append(
+    element('span', 'category', title),
+    element('strong', '', `${number(counter.used)} of ${number(counter.limit)} ${unit}`),
+  );
+  const track = element('div', 'bar-track');
+  track.setAttribute('role', 'meter');
+  track.setAttribute('aria-label', title);
+  track.setAttribute('aria-valuemin', '0');
+  track.setAttribute('aria-valuemax', String(counter.limit));
+  track.setAttribute('aria-valuenow', String(Math.min(counter.used, counter.limit)));
+  const fill = element('div', 'bar-fill');
+  fill.style.width = `${Math.min(100, ratio * 100)}%`;
+  track.append(fill);
+  const remaining = Math.max(0, counter.limit - counter.used);
+  const note = state === 'over' ? 'Limit reached' : state === 'near' ? 'Near limit' : 'Within budget';
+  row.append(caption, track, element('small', 'usage-note', `${note} · ${number(remaining)} ${unit} remaining`));
+  return row;
+}
+function renderUsage(usage, stale = false) {
+  const body = $('usage-body');
+  const state = $('usage-state');
+  state.classList.toggle('stale', stale);
+  if (!usage) {
+    state.textContent = 'Unavailable';
+    body.replaceChildren(element('p', 'muted', 'Usage data unavailable. No budget state is inferred.'));
+    return;
+  }
+  if (!usage.enabled) {
+    state.textContent = 'Disabled';
+    body.replaceChildren(element('p', 'muted', 'The usage budget control is disabled in the active policy, so requests are not metered.'));
+    return;
+  }
+  state.textContent = stale ? 'Stale · last successful read' : `Resets in ${number(usage.resets_in_seconds)}s`;
+  const facts = element('div', 'usage-facts');
+  const breaches = usage.breaches;
+  for (const [label, value] of [
+    ['Window', `${number(usage.window_seconds)} s`],
+    ['Per-request limit', `${number(usage.max_request_tokens)} est. tokens`],
+    ['Breaches since start', `${number(breaches.request_limit)} request · ${number(breaches.token_limit)} token · ${number(breaches.request_size)} size`],
+  ]) {
+    const item = element('span', '', label);
+    item.append(element('strong', '', value));
+    facts.append(item);
+  }
+  body.replaceChildren(
+    meter('Requests in window', usage.requests, 'requests'),
+    meter('Estimated tokens in window', usage.estimated_tokens, 'tokens'),
+    facts,
+  );
 }
 function renderEvents(data) {
   const focusId = document.activeElement?.dataset?.interaction;
@@ -158,9 +214,16 @@ async function refresh() {
     const results = await Promise.allSettled([
       reportingGet('summary', params, signal),
       reportingGet('events', { ...params, limit: '50' }, signal),
+      usageGet(signal),
       ...(id ? [reportingGet(`events/${id}`, {}, signal)] : []),
     ]);
     if (token !== generation) return;
+    if (results[2].status === 'fulfilled') {
+      usageSnapshot = results[2].value;
+      renderUsage(usageSnapshot);
+    } else {
+      renderUsage(usageSnapshot, true);
+    }
     if (results[0].status === 'fulfilled' && results[1].status === 'fulfilled') {
       snapshot = { summary: results[0].value, events: results[1].value, params };
       renderSummary(snapshot.summary);
@@ -172,8 +235,8 @@ async function refresh() {
       availability(snapshot ? 'Reporting unavailable · displayed evidence is stale. Last successful update is shown below.' : 'Reporting unavailable · no evidence loaded. Retrying in 3 seconds.', true);
     }
     if (id && id === selected && dialog.open) {
-      if (results[2].status === 'fulfilled') {
-        detailSnapshot = { id, view: results[2].value.item };
+      if (results[3].status === 'fulfilled') {
+        detailSnapshot = { id, view: results[3].value.item };
         renderEventDetail($('detail-content'), detailSnapshot.view);
       } else {
         if (detailSnapshot?.id === id) renderEventDetail($('detail-content'), detailSnapshot.view);

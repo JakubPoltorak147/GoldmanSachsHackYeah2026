@@ -20,6 +20,7 @@ from app.control_layer.domain import (
     Span,
 )
 from app.control_layer.registry import ControlRegistration, ControlRegistry
+from app.control_layer.usage_control import USAGE_ID, UsageLimits, parse_limits
 
 
 @dataclass(frozen=True)
@@ -28,6 +29,7 @@ class ControlPolicy:
     enabled: bool
     mappings: tuple[tuple[str, Action], ...]
     semantic_threshold: float | None = None
+    limits: UsageLimits | None = None
 
 
 @dataclass(frozen=True)
@@ -43,6 +45,7 @@ class ControlPlanEntry:
     enabled: bool
     mappings: tuple[tuple[str, Action], ...]
     semantic_threshold: float | None = None
+    limits: UsageLimits | None = None
 
     @property
     def control_id(self) -> str:
@@ -117,9 +120,17 @@ def load_policy(path: str | Path, registry: ControlRegistry) -> BoundPolicy:
                 {"enabled"},
                 {"findings", "threshold"}
                 if definition.id == "semantic-security"
+                else {"findings", "limits"}
+                if definition.id == USAGE_ID
                 else {"findings"},
             )
             threshold = config.get("threshold")
+            limits = None
+            if definition.id == USAGE_ID:
+                if "limits" in config:
+                    limits = parse_limits(config["limits"])
+                elif config["enabled"] is True:
+                    raise PolicyError()
             if definition.id == "semantic-security":
                 if "threshold" in config:
                     if (
@@ -147,7 +158,9 @@ def load_policy(path: str | Path, registry: ControlRegistry) -> BoundPolicy:
                 mappings.append((code, action))
             mappings = tuple(mappings)
             entries.append(
-                ControlPlanEntry(registration, config["enabled"], mappings, threshold)
+                ControlPlanEntry(
+                    registration, config["enabled"], mappings, threshold, limits
+                )
             )
             canonical_controls[definition.id] = {
                 "enabled": config["enabled"],
@@ -155,6 +168,8 @@ def load_policy(path: str | Path, registry: ControlRegistry) -> BoundPolicy:
             }
             if "threshold" in config:
                 canonical_controls[definition.id]["threshold"] = threshold
+            if limits is not None:
+                canonical_controls[definition.id]["limits"] = dict(limits.as_pairs())
         canonical = {
             "version": 1,
             "policy_id": policy_id,
@@ -167,7 +182,13 @@ def load_policy(path: str | Path, registry: ControlRegistry) -> BoundPolicy:
             policy_id,
             digest,
             tuple(
-                ControlPolicy(e.control_id, e.enabled, e.mappings, e.semantic_threshold)
+                ControlPolicy(
+                    e.control_id,
+                    e.enabled,
+                    e.mappings,
+                    e.semantic_threshold,
+                    e.limits,
+                )
                 for e in entries
             ),
         )
@@ -256,7 +277,13 @@ def decide(
                 raise EvaluationError()
             configs[entry.control_id] = (entry, mappings)
         expected_snapshot = tuple(
-            ControlPolicy(e.control_id, e.enabled, e.mappings, e.semantic_threshold)
+            ControlPolicy(
+                e.control_id,
+                e.enabled,
+                e.mappings,
+                e.semantic_threshold,
+                e.limits,
+            )
             for e in policy.entries
         )
         if policy.snapshot.controls != expected_snapshot:

@@ -223,6 +223,7 @@ def test_openapi_only_approved_finding_code_and_target_differences():
         "/v1/reporting/events/{interaction_id}",
         "/v1/demo/scenarios",
         "/v1/demo/workspace",
+        "/v1/usage",
     }
     for path in added_paths:
         assert set(actual["paths"].pop(path)) == {"get"}

@@ -10,7 +10,7 @@ from typing import Literal
 import httpx
 from pydantic import BaseModel, ConfigDict
 
-from app.control_layer.composition import bind_semantic_policy
+from app.control_layer.composition import bind_policy
 from app.control_layer.ollama_semantic import OllamaSemanticRuntime
 from app.control_layer.ollama_target import OllamaTextTarget
 from app.control_layer.policy import load_policy
@@ -420,7 +420,7 @@ def build_demo(
             raise ValueError()
         target = ordinary.targets.resolve("local-ollama")
         profiles = {}
-        live_policy = bind_semantic_policy(load_policy("config/policy.yaml", controls))
+        live_policy = bind_policy(load_policy("config/policy.yaml", controls))
         live_targets = TargetRegistry((target,))
 
         def service(policy, targets):
@@ -446,7 +446,7 @@ def build_demo(
             live_policy, TargetRegistry((fault_target,))
         )
         if settings.semantic_enabled:
-            semantic_policy = bind_semantic_policy(
+            semantic_policy = bind_policy(
                 load_policy("config/policy-semantic-demo.yaml", controls)
             )
             profiles["semantic-live"] = service(semantic_policy, live_targets)
@@ -468,7 +468,7 @@ def build_demo(
                         ),
                     )
                 fault_controls.append(registration)
-            fault_policy = bind_semantic_policy(
+            fault_policy = bind_policy(
                 load_policy(
                     "config/policy-semantic-demo.yaml",
                     ControlRegistry(tuple(fault_controls)),

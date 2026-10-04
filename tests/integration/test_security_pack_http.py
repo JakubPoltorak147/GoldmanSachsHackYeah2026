@@ -83,7 +83,9 @@ def app_setup(tmp_path, action=None, mutate=None, registry=None, sink=None):
     if action or mutate:
         raw = yaml.safe_load(path.read_text())
         if action:
-            for config in raw["controls"].values():
+            for control_id, config in raw["controls"].items():
+                if control_id == "usage-budget":
+                    continue  # budget codes support only ALLOW/BLOCK
                 for code in config["findings"]:
                     config["findings"][code] = (
                         "ALLOW"
@@ -127,9 +129,10 @@ def test_complete_default_registered_pack_end_to_end(tmp_path, action, status):
     assert body["action"] == (action or "BLOCK")
     assert body["finding_codes"] == CODES
     record = json.loads(stream.getvalue())
-    assert record["evaluated_controls"] == IDS
+    assert record["evaluated_controls"] == [*IDS, "usage-budget"]
     assert record["control_status"] == dict.fromkeys(IDS, True) | {
-        "semantic-security": False
+        "usage-budget": True,
+        "semantic-security": False,
     }
     assert record["finding_counts"] == dict.fromkeys(CODES, 1)
     for value in [
@@ -180,7 +183,7 @@ def test_default_email_echo_multiplicity_and_public_target_compatibility(tmp_pat
 
 def test_explicit_disabled_migration_skips_new_controls(tmp_path):
     def mutate(raw):
-        for id in IDS[1:]:
+        for id in (*IDS[1:], "usage-budget"):
             raw["controls"][id] = {"enabled": False}
 
     app, target, stream = app_setup(tmp_path, mutate=mutate)
@@ -192,7 +195,8 @@ def test_explicit_disabled_migration_skips_new_controls(tmp_path):
     record = json.loads(stream.getvalue())
     assert record["evaluated_controls"] == ["email-address"]
     assert record["control_status"] == {id: id == "email-address" for id in IDS} | {
-        "semantic-security": False
+        "usage-budget": False,
+        "semantic-security": False,
     }
 
 

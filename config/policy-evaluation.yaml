@@ -1,5 +1,9 @@
+# Evaluation profile: every control enabled, small usage limits that are easy to exceed.
+# Semantic inspection needs a provisioned local Ollama evaluator (see README); for a
+# model-free run use config/policy-evaluation-offline.yaml, which differs only in that
+# semantic-security is disabled.
 version: 1
-policy_id: deterministic-security-default
+policy_id: evaluation-strict
 controls:
   email-address:
     enabled: true
@@ -30,13 +34,15 @@ controls:
       attack.python_os_system: BLOCK
       attack.python_exec_base64: BLOCK
 
+  # 20 requests or 2,000 estimated tokens per minute; a single request over 400 estimated
+  # tokens (about 1,600 characters) is rejected. Change `BLOCK` to `ALLOW` for observe-only.
   usage-budget:
     enabled: true
     limits:
       window_seconds: 60
-      max_requests: 120
-      max_estimated_tokens: 60000
-      max_request_tokens: 4096
+      max_requests: 20
+      max_estimated_tokens: 2000
+      max_request_tokens: 400
     findings:
       budget.request_limit: BLOCK
       budget.token_limit: BLOCK

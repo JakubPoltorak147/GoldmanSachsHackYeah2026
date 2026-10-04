@@ -58,7 +58,9 @@ class Target:
 def build(tmp_path, store, action="ALLOW", fail=False):
     # Use the real production pack with centrally mapped actions.
     config = yaml.safe_load(open("config/policy.yaml"))
-    for control in config["controls"].values():
+    for control_id, control in config["controls"].items():
+        if control_id == "usage-budget":
+            continue  # budget codes support only ALLOW/BLOCK
         control["findings"] = {code: action for code in control["findings"]}
     # Spanless attack definitions do not support REDACT.
     if action == "REDACT":

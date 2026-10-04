@@ -290,7 +290,7 @@ def test_governed_dispatch_and_audit_privacy(
         response = post(client, content)
     assert response.status_code == status
     assert response.json()["action"] == action
-    assert len(sink.events) == 1 and len(sink.events[0]["evaluated_controls"]) == 6
+    assert len(sink.events) == 1 and len(sink.events[0]["evaluated_controls"]) == 7
     assert sink.events[0]["target_id"] == "local-ollama"
     assert sink.events[0]["forwarding_eligible"] is (forwarded is not None)
     assert len(runtime.calls) == (forwarded is not None)

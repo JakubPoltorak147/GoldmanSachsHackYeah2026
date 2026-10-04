@@ -18,7 +18,7 @@ from starlette.exceptions import HTTPException
 
 from app.control_layer.audit import AuditSink, JsonLinesAuditSink
 from app.control_layer.composition import (
-    bind_semantic_policy,
+    bind_policy,
     default_controls,
     default_targets,
 )
@@ -32,6 +32,7 @@ from app.control_layer.reporting_api import router as reporting_router
 from app.control_layer.reporting_store import PersistentAuditSink, ReportingStore
 from app.control_layer.service import InteractionService
 from app.control_layer.targets import TargetRegistry
+from app.control_layer.usage_api import usage_response
 
 
 class InteractionRequest(BaseModel):
@@ -97,6 +98,11 @@ def demo_error(status: int, code: str) -> JSONResponse:
     return response
 
 
+def _no_store_path(path: str) -> bool:
+    """Read-only metadata routes share fixed no-store error envelopes."""
+    return path.startswith("/v1/demo/") or path in ("/v1/usage", "/v1/usage/")
+
+
 def _origin(value: str):
     if not value or re.search(r"[\s\\%?#]", value) or value.endswith(":"):
         raise ValueError()
@@ -157,7 +163,7 @@ def create_app(
             else os.environ.get("CONTROL_LAYER_POLICY", "config/policy.yaml"),
             controls,
         )
-        policy = bind_semantic_policy(policy)
+        policy = bind_policy(policy)
         targets = default_targets() if target_registry is None else target_registry
         if type(targets) is not TargetRegistry:
             raise ValueError("invalid_composition")
@@ -199,7 +205,7 @@ def create_app(
             "/"
         ):
             return reporting_error(404, "not_found")
-        if request.url.path.startswith("/v1/demo/") and request.url.path.endswith("/"):
+        if _no_store_path(request.url.path) and request.url.path.endswith("/"):
             return demo_error(404, "not_found")
         return await call_next(request)
 
@@ -216,13 +222,13 @@ def create_app(
 
     @application.exception_handler(RequestValidationError)
     async def invalid_request(_request: Request, _exception: RequestValidationError):
-        if _request.url.path.startswith("/v1/demo/"):
+        if _no_store_path(_request.url.path):
             return demo_error(422, "invalid_request")
         return _error(422, "invalid_request")
 
     @application.exception_handler(HTTPException)
     async def http_failure(_request: Request, exception: HTTPException):
-        if _request.url.path.startswith("/v1/demo/"):
+        if _no_store_path(_request.url.path):
             code = {404: "not_found", 405: "method_not_allowed"}.get(
                 exception.status_code, "service_unavailable"
             )
@@ -249,9 +255,19 @@ def create_app(
 
     @application.exception_handler(Exception)
     async def unexpected_failure(_request: Request, _exception: Exception):
-        if _request.url.path.startswith("/v1/demo/"):
+        if _no_store_path(_request.url.path):
             return demo_error(503, "service_unavailable")
         return _error(503, "service_unavailable")
+
+    @application.get("/v1/usage")
+    def usage(request: Request):
+        if request.query_params:
+            return demo_error(422, "invalid_request")
+        payload = usage_response(request.app.state.service.policy)
+        return JSONResponse(
+            payload.model_dump(mode="json", exclude_none=True),
+            headers={"Cache-Control": "no-store"},
+        )
 
     def demo_metadata(request: Request, kind: str):
         demo = request.app.state.demo

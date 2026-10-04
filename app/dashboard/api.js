@@ -8,6 +8,12 @@ export async function reportingGet(path, params = {}, signal) {
   return response.json();
 }
 
+export async function usageGet(signal) {
+  const response = await fetch('/v1/usage', { signal, cache: 'no-store', headers: { Accept: 'application/json' } });
+  if (!response.ok) throw new Error('usage_unavailable');
+  return response.json();
+}
+
 export async function demoGet(path) {
   const response = await fetch(`/v1/demo/${path}`, { cache: 'no-store', headers: { Accept: 'application/json' } });
   if (!response.ok) { const error = new Error('workspace_unavailable'); error.status = response.status; throw error; }

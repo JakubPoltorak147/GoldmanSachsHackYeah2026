@@ -1,5 +1,7 @@
+# Same as policy-evaluation.yaml but with semantic-security disabled, so the whole
+# evaluation (including budgets) runs with the echo target and no model runtime.
 version: 1
-policy_id: deterministic-security-default
+policy_id: evaluation-offline
 controls:
   email-address:
     enabled: true
@@ -34,18 +36,14 @@ controls:
     enabled: true
     limits:
       window_seconds: 60
-      max_requests: 120
-      max_estimated_tokens: 60000
-      max_request_tokens: 4096
+      max_requests: 20
+      max_estimated_tokens: 2000
+      max_request_tokens: 400
     findings:
       budget.request_limit: BLOCK
       budget.token_limit: BLOCK
       budget.request_size: BLOCK
 
   semantic-security:
-    enabled: true
-    threshold: 0.75
-    findings:
-      semantic.prompt_injection: BLOCK
-      semantic.instruction_override: BLOCK
-      semantic.exfiltration_intent: BLOCK
+    enabled: false
+    findings: {}

@@ -30,6 +30,20 @@ controls:
       attack.python_os_system: BLOCK
       attack.python_exec_base64: BLOCK
 
+  # Usage budget: fixed window, process-wide, token estimate = ceil(characters / 4).
+  # Generous defaults; see config/policy-evaluation.yaml for limits that are easy to exceed.
+  usage-budget:
+    enabled: true
+    limits:
+      window_seconds: 60
+      max_requests: 120
+      max_estimated_tokens: 60000
+      max_request_tokens: 4096
+    findings:
+      budget.request_limit: BLOCK
+      budget.token_limit: BLOCK
+      budget.request_size: BLOCK
+
   semantic-security:
     enabled: false
     findings: {}

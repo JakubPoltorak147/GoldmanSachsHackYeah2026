@@ -10,7 +10,7 @@ from fastapi.testclient import TestClient
 
 from app.control_layer.api import create_app
 from app.control_layer.audit import JsonLinesAuditSink
-from app.control_layer.composition import bind_semantic_policy, default_controls
+from app.control_layer.composition import bind_policy, default_controls
 from app.control_layer.domain import Action, Interaction, PolicyError
 from app.control_layer.policy import load_policy
 from app.control_layer.registry import ControlRegistration, ControlRegistry
@@ -49,7 +49,7 @@ def setup(tmp_path, runtime=lambda _: HIGH, mapping="BLOCK", enabled=True, mutat
         mutate(raw)
     path = tmp_path / "policy.yaml"
     path.write_text(yaml.safe_dump(raw))
-    policy = bind_semantic_policy(load_policy(path, controls))
+    policy = bind_policy(load_policy(path, controls))
     stream = io.StringIO()
     calls = []
 
@@ -384,7 +384,7 @@ def test_injected_binding_rejects_wrong_catalog_and_model(tmp_path):
     )
     registration = ControlRegistration(entry.registration.definition, evaluator)
     with pytest.raises(PolicyError):
-        bind_semantic_policy(
+        bind_policy(
             replace(
                 service.policy,
                 entries=(

@@ -101,6 +101,7 @@ def test_production_preserves_email_first_in_expanded_pack():
         "github-token",
         "us-ssn",
         "known-attack-signatures",
+        "usage-budget",
         "semantic-security",
     ]
     assert registry.registrations[0].definition.findings == (

@@ -12,7 +12,11 @@ from app.control_layer.attack_signatures import (
     KnownAttackSignaturesControl,
 )
 from app.control_layer.audit import JsonLinesAuditSink
-from app.control_layer.composition import default_controls, default_targets
+from app.control_layer.composition import (
+    bind_usage_policy,
+    default_controls,
+    default_targets,
+)
 from app.control_layer.domain import Action, Finding, Interaction, PolicyError, Span
 from app.control_layer.policy import (
     decide,
@@ -63,10 +67,11 @@ def test_default_registration_ownership_capabilities_policy_and_targets():
     registry = default_controls()
     assert [r.definition.id for r in registry.registrations] == [
         *EXPECTED,
+        "usage-budget",
         "semantic-security",
     ]
     codes = []
-    for r in registry.registrations[:-1]:
+    for r in registry.registrations[: len(EXPECTED)]:
         assert tuple(f.code for f in r.definition.findings) == EXPECTED[r.definition.id]
         for f in r.definition.findings:
             assert f.span_required is True
@@ -138,7 +143,7 @@ def test_email_only_policy_requires_explicit_disabled_migration(tmp_path):
     raw["controls"].update(
         {
             id: {"enabled": False}
-            for id in (*EXPECTED, "semantic-security")
+            for id in (*EXPECTED, "usage-budget", "semantic-security")
             if id != "email-address"
         }
     )
@@ -186,7 +191,9 @@ ALL_TEXT = "\n".join(
 
 def mapped_policy(tmp_path, action="ALLOW", *, changes=None, registry=None):
     def mutate(raw):
-        for config in raw["controls"].values():
+        for control_id, config in raw["controls"].items():
+            if control_id == "usage-budget":
+                continue  # budget codes support only ALLOW/BLOCK; covered separately
             for code in config["findings"]:
                 config["findings"][code] = (
                     "ALLOW"
@@ -196,7 +203,9 @@ def mapped_policy(tmp_path, action="ALLOW", *, changes=None, registry=None):
         if changes:
             changes(raw)
 
-    return load_policy(policy_file(tmp_path, mutate), registry or default_controls())
+    return bind_usage_policy(
+        load_policy(policy_file(tmp_path, mutate), registry or default_controls())
+    )
 
 
 class AuditCheckingTarget:
@@ -249,7 +258,11 @@ def test_each_finding_supported_policy_actions_and_audit_privacy(
     assert value not in stream.getvalue()
     record = json.loads(stream.getvalue())
     assert record["finding_counts"] == {code: 1}
-    assert set(record["control_status"]) == {*EXPECTED, "semantic-security"}
+    assert set(record["control_status"]) == {
+        *EXPECTED,
+        "usage-budget",
+        "semantic-security",
+    }
     assert (
         not {
             "content",
@@ -307,7 +320,7 @@ def test_disabled_real_control_skipped_and_audited(tmp_path, disabled):
     ],
 )
 def test_real_cross_control_default_policy(tmp_path, content, expected):
-    bound = load_policy(DEFAULT_POLICY, default_controls())
+    bound = bind_usage_policy(load_policy(DEFAULT_POLICY, default_controls()))
     service, target, _ = service_for(bound)
     outcome = service.evaluate(Interaction.create("local-echo", content))
     assert outcome.error_code is None

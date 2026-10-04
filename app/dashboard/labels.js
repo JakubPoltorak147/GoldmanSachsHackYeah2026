@@ -6,6 +6,7 @@ const controls = Object.freeze({
   'github-token': 'GitHub token detection',
   'us-ssn': 'US Social Security number detection',
   'known-attack-signatures': 'Known attack indicators',
+  'usage-budget': 'Usage budget',
   'semantic-security': 'Semantic attack inspection',
 });
 const findings = Object.freeze({
@@ -19,6 +20,9 @@ const findings = Object.freeze({
   'attack.pickle_posix_system': ['Pickle POSIX execution indicator', 'An exact configured serialization execution indicator was detected as inert text.'],
   'attack.python_os_system': ['Python execution indicator', 'An exact configured execution indicator was detected; no code was executed.'],
   'attack.python_exec_base64': ['Encoded execution indicator', 'An exact configured encoded-execution indicator was detected; nothing was decoded for execution.'],
+  'budget.request_limit': ['Request limit reached', 'The number of requests in the current budget window exceeded the configured limit.'],
+  'budget.token_limit': ['Token budget exhausted', 'Estimated tokens in the current budget window exceeded the configured limit.'],
+  'budget.request_size': ['Request too large', 'The estimated tokens of this single request exceeded the configured per-request limit.'],
   'semantic.prompt_injection': ['Prompt injection', 'Semantic inspection identified an attempt to redirect instructions.'],
   'semantic.instruction_override': ['Instruction override', 'Semantic inspection identified an attempt to replace governing rules.'],
   'semantic.exfiltration_intent': ['Protected-data disclosure attempt', 'Semantic inspection identified an instruction attack seeking protected data.'],
