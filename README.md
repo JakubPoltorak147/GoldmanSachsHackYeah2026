@@ -34,6 +34,17 @@ CONTROL_LAYER_POLICY=/absolute/path/policy.yaml poetry run uvicorn app.control_l
 Policy edits require restart. Invalid/unreadable policy prevents startup. There is
 no permissive fallback or request-selectable policy. The schema is:
 
+The prepared interaction scenarios are an explicit opt-in demo surface. Start the
+dashboard with deterministic scenarios enabled:
+
+```sh
+CONTROL_LAYER_DEMO_ENABLED=true poetry run uvicorn app.control_layer.api:create_app --factory --host 127.0.0.1 --port 8000 --no-access-log --no-proxy-headers
+```
+
+Add `CONTROL_LAYER_DEMO_SEMANTIC_ENABLED=true` only after a supported local
+semantic evaluator is configured. Without these flags the dashboard remains the
+read-only security overview, so no scenario cards or run controls are exposed.
+
 ```yaml
 version: 1
 policy_id: deterministic-security-default

@@ -121,7 +121,13 @@ async function loadWorkspace() {
   if (token !== metadataGeneration) return;
   const disabled = results.every(r => r.status === 'rejected' && r.reason.status === 404);
   $('nav-interactions').hidden = disabled;
-  if (disabled) { if (active) view(false); return; }
+  if (disabled) {
+    $('demo-notice').hidden = false;
+    $('demo-notice').textContent = 'Prepared scenarios are disabled for this startup. Restart with CONTROL_LAYER_DEMO_ENABLED=true to run deterministic scenarios; add CONTROL_LAYER_DEMO_SEMANTIC_ENABLED=true for semantic scenarios with a configured evaluator.';
+    if (active) view(false);
+    return;
+  }
+  $('demo-notice').hidden = true;
   if (results.some(r => r.status !== 'fulfilled')) {
     $('workspace-availability').textContent = 'Workspace configuration unavailable. Run is disabled. Reload configuration to try again.';
     updateControls(); return;
