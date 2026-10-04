@@ -219,13 +219,13 @@ svg.wave, svg.sine, svg.draw { overflow: visible; }
 .sp-list li { display: flex; gap: 12px; font-weight: 500; font-size: 15.5px; line-height: 1.45; }
 .sp-list i { font-size: 20px; color: var(--gold); margin-top: 1px; }
 .sp-list b { color: var(--gold); font-weight: 800; }
-.tbl { left: 96px; top: 252px; width: 700px; }
-.tbl .hd, .tbl .row { display: grid; grid-template-columns: 290px 150px 1fr; align-items: center; }
+.tbl { left: 96px; top: 220px; width: 1088px; }
+.tbl .hd, .tbl .row { display: grid; grid-template-columns: 380px 190px 1fr; align-items: center; }
 .tbl .hd { height: 30px; font-weight: 800; font-size: 12px; letter-spacing: .16em; color: rgba(47, 75, 62, .5); }
-.tbl .row { height: 66px; border-top: 2px dashed var(--line); }
+.tbl .row { height: 70px; border-top: 2px dashed var(--line); }
 .tbl .row b { display: block; font-weight: 800; font-size: 17px; }
 .tbl .row code { display: block; margin-top: 4px; font: 600 12.5px/1 var(--mono); color: rgba(47, 75, 62, .6); }
-.tbl .row .bd { font-weight: 500; font-size: 15px; }
+.tbl .row .bd { font-weight: 500; font-size: 16px; }
 .tbl .chip { font-size: 12.5px; padding: 7px 13px 7px 9px; }
 .tbl .chip i { font-size: 14px; }
 
@@ -624,7 +624,7 @@ svg.wave, svg.sine, svg.draw { overflow: visible; }
     <div class="bcard">
       <span class="dot-i" style="background:var(--sage);"><i data-i="plug"></i></span>
       <h3>What we sell</h3>
-      <div class="tier t-open"><b>Open core <em>free</em></b><span>Gateway, orchestrator, deterministic controls, audit and dashboard. Anyone can inspect it, which security buyers expect.</span></div>
+      <div class="tier t-open"><b>Open core <em>free</em></b><span>Gateway, orchestrator, deterministic controls, usage budgets, audit and dashboard. Anyone can inspect it, which security buyers expect.</span></div>
       <div class="tier t-ent"><b>Enterprise <em>paid · roadmap</em></b><span>Identity and SSO, shared policy distribution, premium control packs (national IDs, IBAN, industry DLP), managed semantic evaluator, audit retention with SIEM export, compliance reports.</span></div>
     </div>
     <div class="bcard">
@@ -698,7 +698,7 @@ svg.wave, svg.sine, svg.draw { overflow: visible; }
     </div>
     <div class="reg">
       <div class="reg-head"><i data-i="plug"></i>Control registry<span class="script">plug in what to detect</span></div>
-      <div class="reg-chips"><span>email</span><span>bearer</span><span>PEM key</span><span>GitHub token</span><span>labelled SSN</span><span>known attacks</span><span class="opt">semantic (opt-in)</span><span class="add">+ your control</span></div>
+      <div class="reg-chips"><span>email</span><span>bearer</span><span>PEM key</span><span>GitHub token</span><span>labelled SSN</span><span>known attacks</span><span>usage budget</span><span class="opt">semantic (opt-in)</span><span class="add">+ your control</span></div>
     </div>
     <div class="reg">
       <div class="reg-head"><i data-i="plug"></i>Target registry<span class="script">plug in where it goes</span></div>
@@ -736,7 +736,7 @@ svg.wave, svg.sine, svg.draw { overflow: visible; }
   <div class="abs plug">
     <div class="head"><span class="kick c-gold" style="font-size:13px;">Adding control #9</span><span class="script">no core changes</span></div>
     <div class="flow">
-      <div class="chips"><span>email</span><span>bearer</span><span>PEM</span><span>GitHub</span><span>SSN</span><span>attacks</span><span>semantic</span><span class="add">+ new control</span></div>
+      <div class="chips"><span>email</span><span>bearer</span><span>PEM</span><span>GitHub</span><span>SSN</span><span>attacks</span><span>budget</span><span>semantic</span><span class="add">+ new control</span></div>
       <span class="arr">›</span>
       <div class="orch"><b>Orchestrator</b><span>service.py<br>evaluate · decide · audit · dispatch<br>unchanged</span></div>
       <span class="arr">›</span>
@@ -776,26 +776,17 @@ svg.wave, svg.sine, svg.draw { overflow: visible; }
 <!-- 08 · Coverage -->
 <section class="slide bg-cream">
   <h2 class="abs title" style="left:96px; top:54px;">Coverage</h2>
-  <p class="abs lead" style="left:96px; top:140px; width:700px;">The pack recognizes precise supported shapes and keeps its claims narrow: precise, explainable and safe to extend.</p>
+  <p class="abs lead" style="left:96px; top:140px; width:900px;">Eight registered controls. Each one returns findings; central policy maps them to an action.</p>
   <div class="abs tbl">
-    <div class="hd"><span>CONTROL</span><span>DEFAULT</span><span>BOUNDARY</span></div>
+    <div class="hd"><span>CONTROL</span><span>DEFAULT</span><span>DETECTS</span></div>
     <div class="row"><div><b>Email address</b><code>pii.email</code></div><span><span class="chip redact"><i data-i="redact"></i>REDACT</span></span><span class="bd">bounded ASCII dot-atom</span></div>
     <div class="row"><div><b>Labelled US SSN</b><code>pii.us_ssn</code></div><span><span class="chip redact"><i data-i="redact"></i>REDACT</span></span><span class="bd">labelled, fictional syntax</span></div>
     <div class="row"><div><b>Bearer / PEM / GitHub</b><code>secret.*</code></div><span><span class="chip block"><i data-i="ban"></i>BLOCK</span></span><span class="bd">supported token / key shapes</span></div>
     <div class="row"><div><b>Known attack literals</b><code>attack.*</code></div><span><span class="chip block"><i data-i="ban"></i>BLOCK</span></span><span class="bd">5 exact inert signatures</span></div>
-    <div class="row"><div><b>Semantic security</b><code>semantic.*</code></div><span><span class="chip block"><i data-i="ban"></i>BLOCK</span></span><span class="bd">optional local evaluator</span></div>
+    <div class="row"><div><b>Usage budget</b><code>budget.*</code></div><span><span class="chip block"><i data-i="ban"></i>BLOCK</span></span><span class="bd">requests, estimated tokens and request size per window</span></div>
+    <div class="row"><div><b>Semantic security</b><code>semantic.*</code></div><span><span class="chip block"><i data-i="ban"></i>BLOCK</span></span><span class="bd">injection, override, exfiltration (local evaluator)</span></div>
   </div>
-  <div class="abs panel">
-    <h2>Current<br>limits</h2>
-    <ul class="sp-list">
-      <li><i data-i="spark"></i><span><b>Output inspection</b> is not part of today's build.</span></li>
-      <li><i data-i="spark"></i><span><b>Auth and budgets</b> are not enforced yet.</span></li>
-      <li><i data-i="spark"></i><span><b>Policy reload</b> is not available; policy is fixed until restart.</span></li>
-      <li><i data-i="spark"></i><span><b>Remote providers</b> are not integrated yet.</span></li>
-      <li><i data-i="spark"></i><span><b>General secret and jailbreak detection</b> is not claimed.</span></li>
-    </ul>
-  </div>
-  <span class="pnum on-dark"></span>
+  <span class="pnum"></span>
 </section>
 
 
@@ -839,7 +830,7 @@ svg.wave, svg.sine, svg.draw { overflow: visible; }
   <p class="abs lead" style="left:98px; top:268px; width:700px; font-size:19px; color:rgba(255,248,239,.85);">Every AI interaction checked, decided and audited before it reaches a target. Provider-independent, explainable and ready to extend.</p>
 
   <div class="abs proofrow narrow">
-    <div><b class="c-coral">7</b><span>registered controls</span></div>
+    <div><b class="c-coral">8</b><span>registered controls</span></div>
     <div><b class="c-gold">3</b><span>central actions</span></div>
     <div><b class="c-sage">2</b><span>target adapters</span></div>
     <div><b class="c-peach">0</b><span>target calls after BLOCK</span></div>
