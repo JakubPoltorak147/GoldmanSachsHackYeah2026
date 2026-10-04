@@ -331,3 +331,19 @@ def test_completion_write_failure_preserves_result_and_unknown(evidence, monkeyp
         == "reporting_write_failed"
     )
     assert store.get_event(UUID(response.json()["interaction_id"])) is not None
+
+
+def test_local_dashboard_assets_and_no_execution_surface(evidence):
+    client, store, calls, _, _ = evidence
+    before = len(calls)
+    page = client.get("/dashboard")
+    assert page.status_code == 200
+    assert page.headers["content-type"].startswith("text/html")
+    for asset in ("dashboard.css", "dashboard.js", "api.js", "detail.js"):
+        assert client.get(f"/dashboard/assets/{asset}").status_code == 200
+    assert "/v1/interactions" not in client.get("/dashboard/assets/dashboard.js").text
+    assert "/v1/reporting/" in client.get("/dashboard/assets/api.js").text
+    assert "sqlite" not in page.text.lower()
+    assert "Attack Lab" not in page.text
+    assert "WebSocket" not in client.get("/dashboard/assets/dashboard.js").text
+    assert len(calls) == before and len(store.list_events()) == 7

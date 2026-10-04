@@ -55,7 +55,7 @@ Completion-write failure preserves the obtained 200/502 target outcome, never
 retries the target and closes later dispatch gates. `store.health` returns
 `healthy` or fixed `reporting_write_failed`. A committed outcome remains
 authoritative even if its acknowledgement fails; absent completion stays unknown.
-The read-only HTTP reporting summary exposes fixed write-gate health; see the reporting boundary below.
+The read-only HTTP reporting summary exposes fixed write-gate health; see the dashboard boundary below.
 
 Evaluation milliseconds run from service entry through decision construction,
 excluding persistence and invocation. Invocation milliseconds cover adapter call
@@ -112,7 +112,7 @@ administrators or disk loss. Disk exhaustion and write lock failures close the
 required gate. Operators manage file growth and backups. Exports, export manifests,
 operator CLI, model/policy/control/day groupings, control/code filters, exhaustive
 acknowledgement fault matrices and platform permission auditing are deferred.
-The read-only HTTP API is described below. Output inspection, budget governance and
+The read-only dashboard is described below. Output inspection, budget governance and
 cryptographic audit integrity remain outside this capability. Automated verification uses
 temporary files, local detector inputs and fake targets; Ollama is not required.
 
@@ -143,7 +143,33 @@ upgrading. An older binary rejects v2; use a prior backup or compatible binary
 for code rollback. Explicitly disabling semantic policy retains history and
 independent deterministic enforcement.
 
-## Read-only reporting HTTP API
+## Read-only dashboard and reporting HTTP API
+
+The application now serves `/dashboard` using local HTML/CSS/ES modules. Start it
+on loopback with access logs disabled (query strings and interaction requests must
+not become content-bearing access logs):
+
+```bash
+poetry run uvicorn app.control_layer.api:create_app --factory --host 127.0.0.1 --port 8000 --no-access-log
+```
+
+Open `http://127.0.0.1:8000/dashboard`. The default view is last 24 hours; choose
+last hour/last 7 days and filter by decision, target or invocation status. Cards
+show distinct interactions and separate actions/operational evaluation failures.
+Target statuses describe completion evidence, not model availability. Unknown
+means an eligible decision has no durable completion; it does not prove a call ran.
+Finding rankings distinguish occurrence count from affected-interaction count;
+control rankings sum occurrences only. Timings show means, extrema and sample
+counts, with an em dash for unavailable measurements. Event detail retains original
+historical target/evaluator identities, control enablement/evaluation, finding
+producer/code/count/mapping, reasons, policy digest and safe timings.
+
+The UI polls every three seconds while visible, re-reading existing rows and open
+detail so late completion becomes visible. Reads are individually consistent, not
+one cross-route snapshot. Failed reads retain prior evidence with a stale label;
+initial errors display no totals, never invented zeros. Older pages are separate
+from the live first-page cache. Reset filters or return to live events as needed.
+Reporting is read-only: no policy editor, scenario execution or target probe.
 
 Routes, all using `Cache-Control: no-store`:
 
@@ -195,3 +221,17 @@ URLs, arbitrary metadata or exception text. Strings render as text. Target model
 selection is startup identity only, not a guarantee of the returned model version.
 Historical details cannot reconstruct content. There is no model dependency for
 viewing evidence and no fabricated seed data in the application.
+
+Browser verification adds development-only Playwright/pytest-playwright:
+
+```bash
+poetry install
+poetry run playwright install chromium
+poetry run pytest tests/browser/test_security_dashboard.py --browser chromium
+```
+
+These two journeys launch an isolated loopback test app with a temporary store
+and deterministic targets/evaluator; they never need Ollama. Chromium requires its
+normal system libraries. An alternative writable browser/cache directory can be
+selected with `PLAYWRIGHT_BROWSERS_PATH`; use the same path for installation and
+verification. Screenshots are temporary artifacts, not reporting history.

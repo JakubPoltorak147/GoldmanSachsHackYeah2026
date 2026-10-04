@@ -1302,4 +1302,51 @@ runtime hangs. No assertions were weakened. Exact routes/DTOs documented in
 `docs/reporting.md`. Task-group commit is deferred until final fresh reviews, so
 confirmed findings can be fixed without committing partial/failing work.
 
-Reporting review correction: reporting-only trailing-slash guard prevents redirect query reflection; six regression cases PASS. Final affected integration checks: 78 PASS. Fresh corrected-implementation correctness/security reviews PASS before task-group commits.
+## 2026-10-04 — dashboard MVP UI and integrated verification
+
+Implemented local `/dashboard` HTML/CSS/ES modules: metric/status cards,
+deterministic/semantic finding totals and rankings, control occurrence rankings,
+latency/sample cards, time/action/target/invocation filters, newest-first timeline
+and a keyboard-accessible safe detail dialog. Three-second polling refreshes
+existing outcomes/detail, pauses while hidden, rejects obsolete filter generations
+and preserves visibly stale evidence on read errors. Older pagination is separate
+from the live cache. No content, model response or scenario execution surface exists.
+
+Development-only Playwright dependencies are locked. Downloads used writable
+`/tmp` cache/browser directories; the container's restricted default cache caused
+permission failures, without any dependency substitution. Isolated Chromium tests
+use a small process footprint and a persistent test context to fit the shared
+512-process ceiling and close the browser reliably. No existing unrelated
+processes were modified. The mobile journey first demonstrated overflow from an
+absolutely positioned accessible table label; the scrolling container now owns its
+positioning. The regression asserts no document overflow at 390px. Mobile View
+buttons remain visible beside the horizontally scrolling table.
+
+Integrated verification:
+
+- `poetry run pytest tests/unit tests/integration -q`: **1532 PASS**, 38.73 seconds.
+- `PLAYWRIGHT_BROWSERS_PATH=/tmp/dashboard-playwright poetry run pytest tests/browser/test_security_dashboard.py --browser chromium -x -vv -o faulthandler_timeout=30`: **2 PASS**, 19.27 seconds.
+- `poetry run ruff check app tests`: **PASS**.
+- `poetry run ruff format --check app tests`: **PASS**, 53 files formatted.
+- `node --check` for dashboard.js/detail.js/api.js: **PASS**.
+- `openspec validate add-interactive-security-dashboard-mvp --strict`: **PASS**.
+- `git diff --check`: **PASS**.
+
+The full suite initially identified the historical OpenAPI equality assertion;
+it now permits exactly the approved reporting routes/DTOs while continuing the
+unchanged interaction contract comparison. Affected extension/reporting checks:
+**72 PASS**. No wire compatibility assertion was removed.
+
+Manually inspected actual Playwright desktop (1280px) and mobile (390px) rendered
+screenshots, including safe detail. Cards, rankings, timing samples, table and
+drawer are legible and usable; browser journey also verifies focus restoration,
+empty states, stale/recovery, late completion without new sequence, filter race
+and no injected output execution. Temporary screenshots:
+`/tmp/security-dashboard-desktop.png`, `/tmp/security-dashboard-mobile.png`,
+`/tmp/security-dashboard-mobile-detail.png`. Documented loopback Uvicorn factory
+launch and curl summary example were exercised against an isolated `/tmp` store;
+startup, read-only empty history and shutdown all succeeded without Ollama.
+
+Final corrected implementation verification and both fresh independent reviews
+PASS; detailed final review/acceptance evidence is recorded with group 3. No workbench,
+archive, current-spec sync or push has occurred.

@@ -82,7 +82,7 @@ evaluation/audit failure to 503, and target failure to 502.
 The synchronous endpoint runs through FastAPI's thread pool. A shared sink lock
 keeps per-request records complete under concurrency without promising request
 ordering. Uvicorn is documented with access logs disabled. There is no response
-inspection, remote target, verified identity, reload, UI. SQLite reporting is described below.
+inspection, remote target, verified identity or reload. The read-only dashboard is described below. SQLite reporting is described below.
 Integration tests use httpx at the HTTP boundary; security logic remains covered
 by deterministic unit tests. README contains installation, policy and run commands.
 
@@ -225,8 +225,7 @@ existing directory permissions. Runtime history is not committed to Git.
 The in-process typed boundary offers sequence pagination, UUID detail, time/action/
 target/status filtering and distinct totals with basic action/target grouping.
 Finding multiplicities and completed timing samples aggregate independently of
-event totals. Reads use consistent transactions. No CLI, export or reporting HTTP
-endpoint is implemented. Storage access requires trusted local filesystem access.
+event totals. Reads use consistent transactions. No CLI or export is implemented. The read-only reporting HTTP boundary is described below. Storage access requires trusted local filesystem access.
 See `docs/reporting.md` for deployment, query contracts and limitations.
 
 ## Semantic input control
@@ -260,3 +259,37 @@ rolls back without evidence reset. Fresh stores have the same v2 DDL. Modified o
 unknown schemas fail startup. Historical fields are null. Older binaries reject v2;
 code rollback requires a backup or compatible binary. Disabling semantic policy
 is the normal rollback. See README for evaluator bounds and trust limitations.
+
+## Read-only security dashboard
+
+`reporting_api.py` adds three synchronous GET endpoints under `/v1/reporting`:
+summary, newest-first event list and UUID event detail. They use the application's
+existing typed `ReportingStore`, explicit closed Pydantic output projections and
+fixed sanitized error envelopes, with no-store responses. Request parsing rejects
+unknown/repeated fields, validates bounded paired UTC windows and limits/cursors,
+and delegates parameterized selection to the store. Reporting reads never evaluate
+controls, dispatch targets or mutate evidence. `list_recent_events` adds descending
+exclusive sequence pagination alongside the unchanged ascending query.
+
+`api.py` serves `/dashboard` and mounts module-resolved local assets under
+`/dashboard/assets`. Plain HTML/CSS/ES modules need no build step or frontend
+framework. `api.js` is the shared read-only HTTP client; `detail.js` renders the
+safe EventView with text nodes; `dashboard.js` renders metrics, rankings, timing
+samples, filters and recent events. The shell has a navigation/content slot for
+future approved additions, but contains no workbench execution surface.
+
+Three-second polling pauses while hidden, prevents overlapping cycles and discards
+obsolete generations. It re-reads the latest page and selected UUID, including
+late completion of old events. Older pages remain separate; failed reads preserve
+last successful evidence labelled stale. Native dialog behavior provides keyboard
+focus containment, Escape dismissal and focus restoration. Layout adapts to narrow
+viewports, with horizontal scrolling confined to the events table.
+
+The frontend sees only content-free HTTP DTOs; it never opens SQLite. Recorded
+policy actions, operational failures, target completion and semantic attempt status
+stay distinct, with no output capture, scores, raw diagnostics or invented stage
+latency. The dashboard uses local assets and no CORS expansion/authentication
+platform. See `docs/reporting.md` for loopback operation and exact API contracts.
+Browser tests cover two operator journeys; core security assertions stay in unit/
+integration tests. Development Playwright dependencies do not enter the application
+runtime stack.

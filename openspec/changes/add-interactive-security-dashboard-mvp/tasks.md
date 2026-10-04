@@ -13,10 +13,10 @@ Owner: primary apply agent. Dependency: existing archived reporting/semantic fou
 
 ## 2. Polished read-only dashboard
 
-- [ ] 2.1 Add local `app/dashboard/` HTML/CSS/ES modules and FastAPI mounts with shared API client/navigation slot/detail renderer; implement cards/rankings/timeline/filter controls/null labels; verify `/dashboard` and assets serve and two-keyboard/viewport visual checks meet design acceptance.
-- [ ] 2.2 Implement three-second nonoverlapping polling, refresh now, filter-generation protection, completion/detail refresh and truthful empty/loading/stale/error UI; verify deterministic browser tests cover late completion, request race and unavailable-to-recovered reads without losing selected UUID.
-- [ ] 2.3 Add only development `playwright` and `pytest-playwright` dependencies plus Chromium setup documentation; place the two essential journeys in `tests/browser/test_security_dashboard.py`, using a temporary safe store and deterministic app server. Verify `poetry run pytest tests/browser/test_security_dashboard.py --browser chromium`, text-only rendering, keyboard close/focus and narrow viewport. No browser security-control tests or live Ollama.
-- [ ] 2.4 Document loopback launch, visible time windows, null/unknown semantics and implemented frontend composition in `docs/reporting.md`/`docs/architecture.md`; verify documented commands and record manual visual checks/group verification in `docs/worklog.md`.
+- [x] 2.1 Add local `app/dashboard/` HTML/CSS/ES modules and FastAPI mounts with shared API client/navigation slot/detail renderer; implement cards/rankings/timeline/filter controls/null labels; verify `/dashboard` and assets serve and two-keyboard/viewport visual checks meet design acceptance.
+- [x] 2.2 Implement three-second nonoverlapping polling, refresh now, filter-generation protection, completion/detail refresh and truthful empty/loading/stale/error UI; verify deterministic browser tests cover late completion, request race and unavailable-to-recovered reads without losing selected UUID.
+- [x] 2.3 Add only development `playwright` and `pytest-playwright` dependencies plus Chromium setup documentation; place the two essential journeys in `tests/browser/test_security_dashboard.py`, using a temporary safe store and deterministic app server. Verify `poetry run pytest tests/browser/test_security_dashboard.py --browser chromium`, text-only rendering, keyboard close/focus and narrow viewport. No browser security-control tests or live Ollama.
+- [x] 2.4 Document loopback launch, visible time windows, null/unknown semantics and implemented frontend composition in `docs/reporting.md`/`docs/architecture.md`; verify documented commands and record manual visual checks/group verification in `docs/worklog.md`.
 
 ## 3. Integrated verification and independent review
 
@@ -24,4 +24,4 @@ Owner: primary apply agent. Dependency: existing archived reporting/semantic fou
 - [ ] 3.2 Delegate fresh implementation specification/correctness and security/bypass reviews to agents that did not implement; verify both return PASS with concrete file/scenario evidence, fix confirmed findings with regression tests first and request fresh reviews after fixes. Record worklog review links here.
 - [ ] 3.3 Verify all design acceptance criteria, docs and evidence links; declare complete only after required verification/reviews PASS, keep archive as a separately authorized action and preserve reporting/interaction extension contracts for change 2.
 
-Evidence: reporting boundary checks pass; see docs/worklog.md. Final integrated implementation has also passed fresh correctness/security reviews. UI and integrated-verification groups are committed separately.
+Evidence: reporting boundary and UI groups verified; focused/full tests and both fresh implementation reviews PASS. Integrated review evidence is committed in group 3. See docs/worklog.md.

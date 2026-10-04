@@ -9,7 +9,8 @@ from uuid import UUID
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from starlette.exceptions import HTTPException
 
@@ -138,6 +139,17 @@ def create_app(
         ):
             return reporting_error(404, "not_found")
         return await call_next(request)
+
+    dashboard_root = Path(__file__).resolve().parents[1] / "dashboard"
+    application.mount(
+        "/dashboard/assets",
+        StaticFiles(directory=dashboard_root),
+        name="dashboard-assets",
+    )
+
+    @application.get("/dashboard", include_in_schema=False)
+    def dashboard():
+        return FileResponse(dashboard_root / "index.html")
 
     @application.exception_handler(RequestValidationError)
     async def invalid_request(_request: Request, _exception: RequestValidationError):
